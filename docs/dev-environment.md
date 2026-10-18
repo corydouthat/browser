@@ -17,6 +17,13 @@ Hatch is built on a **2 vCPU / 3.6 GB RAM Vultr VPS that also runs production co
 `:persona` must **not** request a JVM toolchain (`jvmToolchain(17)`): only JDK 21 is installed and there is no
 toolchain download repository. It runs on 21 and targets 17.
 
+### CI (GitHub Actions)
+
+`.github/workflows/check.yml` runs `make check` and then the APK/size/android-lint steps on a 16 GB
+GitHub-hosted runner. The repo `gradle.properties` caps still apply there, so the workflow writes a larger
+`org.gradle.jvmargs` into `~/.gradle/gradle.properties` (GRADLE_USER_HOME wins over the project file);
+`lintVitalAnalyzeRelease` OOMs under the 384 MB Metaspace cap otherwise. Never raise the project file.
+
 ### Remote build host (optional)
 
 `tool/build_apk.sh` runs Gradle on a remote host when `HATCH_BUILD_HOST` is set or the git-ignored file

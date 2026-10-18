@@ -40,6 +40,13 @@ jobs:
         with:
           packages: "platform-tools platforms;android-37.2 build-tools;36.0.0"
       - uses: gradle/actions/setup-gradle@v4
+      - name: Gradle memory for this runner
+        # gradle.properties in the repo carries the 3.6 GB VPS caps (-Xmx1400m, 384 MB Metaspace); lintVital
+        # and R8 OOM under them. GRADLE_USER_HOME properties take precedence, so the project file stays as is.
+        run: |
+          mkdir -p ~/.gradle
+          printf '%s\n' 'org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:ReservedCodeCacheSize=256m' \
+            'org.gradle.workers.max=3' >> ~/.gradle/gradle.properties
       - name: Cache headless Firefox + geckodriver
         uses: actions/cache@v4
         with:
@@ -82,6 +89,13 @@ jobs:
         with:
           packages: "platform-tools platforms;android-37.2 build-tools;36.0.0"
       - uses: gradle/actions/setup-gradle@v4
+      - name: Gradle memory for this runner
+        # gradle.properties in the repo carries the 3.6 GB VPS caps (-Xmx1400m, 384 MB Metaspace); lintVital
+        # and R8 OOM under them. GRADLE_USER_HOME properties take precedence, so the project file stays as is.
+        run: |
+          mkdir -p ~/.gradle
+          printf '%s\n' 'org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:ReservedCodeCacheSize=256m' \
+            'org.gradle.workers.max=3' >> ~/.gradle/gradle.properties
       - name: Debug APK (sideloadable)
         run: tool/build_apk.sh debug
       - name: Release APK + size budget
