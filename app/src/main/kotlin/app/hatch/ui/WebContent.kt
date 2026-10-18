@@ -2,9 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// Vendored from Android Components 158 (components/compose/engine/.../WebContent.kt) so Hatch does not pull
-// compose-engine. One change: the EngineView is created once by the Activity and handed in, so a single
-// EngineView lives for the whole Activity (keyed on the selected tab), never recreated on tab switches.
+// Vendored from Android Components 158 (components/compose/engine/.../WebContent.kt) and reduced for Hatch: the
+// EngineView is created once by the Activity and handed in; Compose only HOSTS the view. Rendering and releasing
+// the selected tab's EngineSession is the job of AC's SessionFeature (feature-session EngineViewPresenter:
+// observes the selected tab, dispatches CreateEngineSessionAction, releases on crash / no tab, stamps last-access).
+// M1 inventory risk 5: there is exactly one owner of render/release; the previous copy of this file also called
+// render()/release() from AndroidView.update and raced the presenter on tab close.
 
 package app.hatch.ui
 
@@ -12,55 +15,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
-import mozilla.components.browser.state.action.EngineAction
-import mozilla.components.browser.state.helper.Target
-import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.EngineView
 
-/**
- * Composes the given [engineView] and renders the web content of the [target] from the [store] on it.
- */
+/** Composes the given [engineView]. What it renders is driven by `SessionFeature` (MainActivity). */
 @Composable
 fun WebContent(
     engineView: EngineView,
-    store: BrowserStore,
-    target: Target,
     modifier: Modifier = Modifier,
 ) {
-    val selectedTab =
-        target.observeAsComposableStateFrom(
-            store = store,
-            observe = { tab ->
-                // Render if the tab itself changed or when the state of the linked engine session changes
-                arrayOf(
-                    tab?.id,
-                    tab?.engineState?.engineSession,
-                    tab?.engineState?.crashed,
-                    tab?.content?.firstContentfulPaint,
-                )
-            },
-        )
-
     AndroidView(
         modifier = modifier.fillMaxSize(),
         factory = { engineView.asView() },
-        update = { view ->
-            val ev = view as EngineView
-
-            val tab = selectedTab.value
-            if (tab == null) {
-                ev.release()
-            } else {
-                val session = tab.engineState.engineSession
-                if (session == null) {
-                    // This tab does not have an EngineSession that we can render yet. Let's dispatch an
-                    // action to request creating one. Once one was created and linked to this session, this
-                    // method will get invoked again.
-                    store.dispatch(EngineAction.CreateEngineSessionAction(tab.id))
-                } else {
-                    ev.render(session)
-                }
-            }
-        },
     )
 }

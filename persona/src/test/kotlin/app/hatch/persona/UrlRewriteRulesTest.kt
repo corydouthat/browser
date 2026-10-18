@@ -117,4 +117,36 @@ class UrlRewriteRulesTest {
         assertNull(UrlRewriteRules.extensionRewrite("m.me"))
         assertNull(UrlRewriteRules.extensionRewrite("www.mobile.de"))
     }
+
+    /**
+     * ENG-04: a host switched off in Settings (`HostRewriteFilter.effective` drops it from the table) must not be
+     * rewritten on the typed/pasted path either; the rest of the table, the Amazon path rule and the query rules
+     * keep applying.
+     */
+    @Test
+    fun `desktopUrl honours a filtered host table`() {
+        val all = UrlRewriteRules.extensionHostRewrites
+        val withoutYoutube = all.filterNot { it.from == "m.youtube.com" }
+        // Only the exact row is gone: the generic `m.` strip (last in the table) still catches the host, on this path
+        // exactly as in the extension's onBeforeRequest. Keeping the mobile host needs the generic rule off as well
+        // (Settings says so).
+        assertEquals("youtube.com", UrlRewriteRules.desktopHost("m.youtube.com", withoutYoutube))
+        val withoutYoutubeAndGeneric = withoutYoutube.filterNot { it.from == UrlRewriteRules.GENERIC_MOBILE_HOST_RULE }
+        assertNull(UrlRewriteRules.desktopHost("m.youtube.com", withoutYoutubeAndGeneric))
+        assertNull(UrlRewriteRules.desktopUrl("https://m.youtube.com/watch?v=x", withoutYoutubeAndGeneric))
+        // The query rule still applies on its own.
+        assertEquals("https://m.youtube.com/watch?v=x", UrlRewriteRules.desktopUrl("https://m.youtube.com/watch?v=x&app=m", withoutYoutubeAndGeneric))
+        // Other rows and the Wikimedia regex rule still work through the generic interpreter.
+        assertEquals("x.com", UrlRewriteRules.desktopHost("mobile.twitter.com", withoutYoutubeAndGeneric))
+        assertEquals("en.wikipedia.org", UrlRewriteRules.desktopHost("en.m.wikipedia.org", withoutYoutubeAndGeneric))
+        assertNull(UrlRewriteRules.desktopHost("m.example.com", withoutYoutubeAndGeneric), "generic strip is off")
+        assertEquals("example.com", UrlRewriteRules.desktopHost("m.example.com", withoutYoutube), "generic strip still on")
+        // An empty table rewrites no host at all, but the Amazon path rule is table-independent.
+        assertNull(UrlRewriteRules.desktopUrl("https://m.facebook.com/", emptyList()))
+        assertEquals("https://www.amazon.com/dp/B01N5IB20Q", UrlRewriteRules.desktopUrl("https://www.amazon.com/gp/aw/d/B01N5IB20Q", emptyList()))
+        // The full table through both paths agrees.
+        for (host in listOf("m.youtube.com", "en.m.wikipedia.org", "m.example.com", "www.example.com")) {
+            assertEquals(UrlRewriteRules.desktopHost(host), UrlRewriteRules.rewriteWith(host, all), host)
+        }
+    }
 }

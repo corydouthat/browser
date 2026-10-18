@@ -51,3 +51,31 @@ SOFTWARE.
   https://openclipart.org/detail/354586, released under CC0 1.0 (no attribution
   required; credited anyway). Screen recolor and the green prompt paths were
   added by hand; see `docs/icon.md`.
+
+## Fenix 158 tab-tray building blocks — MPL-2.0 (chrome)
+
+- Paths: `app/src/main/kotlin/app/hatch/ui/tabs/TabGridItem.kt`,
+  `app/src/main/kotlin/app/hatch/ui/tabs/ThumbnailImage.kt`,
+  `app/src/main/kotlin/app/hatch/ui/tabs/SwipeToDismiss.kt`,
+  `app/src/main/kotlin/app/hatch/ui/tabs/Favicon.kt`.
+- Source: Firefox for Android (Fenix) at tag `FIREFOX_158_0_RELEASE`,
+  `mobile/android/fenix/app/src/main/java/org/mozilla/fenix/tabstray/ui/tabitems/TabGridTabItem.kt`,
+  `.../fenix/compose/ThumbnailImage.kt`, `.../fenix/compose/SwipeToDismiss.kt`, `.../fenix/compose/Favicon.kt`.
+  Adapted (Hatch's Material 3 theme, `BrowserState` tabs, storage/icons passed in, previews and Fenix-only
+  state dropped); each file keeps the MPL-2.0 header and notes its origin. No Mozilla trademark artwork
+  (`ic_firefox`, `mozac_ic_logo_*`) is referenced.
+- License: Mozilla Public License 2.0, https://mozilla.org/MPL/2.0/
+
+## Mozilla Android Components `WebContent` (reduced) — MPL-2.0 (chrome)
+
+- `app/src/main/kotlin/app/hatch/ui/WebContent.kt` now only hosts the EngineView (render/release moved to
+  AC's `SessionFeature`); the MPL-2.0 header and the origin note are kept.
+
+## Fenix 158 backup rules — MPL-2.0 (fixer)
+
+- Path: `app/src/main/res/xml/data_extraction_rules.xml`.
+- Source: Firefox for Android (Fenix) at tag `FIREFOX_158_0_RELEASE`,
+  `mobile/android/fenix/app/src/main/res/xml/data_extraction_rules.xml` (copied verbatim, MPL-2.0 header kept;
+  wired through `android:dataExtractionRules` + `android:fullBackupContent="false"`, SEC-2).
+- License: Mozilla Public License 2.0, https://mozilla.org/MPL/2.0/
+

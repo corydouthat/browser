@@ -78,9 +78,17 @@ object UrlRewriteRules {
      * a regex rule only counts when its replacement changes the host). Null when unchanged. Used by the JVM test
      * to prove the extension table and [desktopHost] agree.
      */
-    fun extensionRewrite(host: String): String? {
+    fun extensionRewrite(host: String): String? = rewriteWith(host, extensionHostRewrites)
+
+    /**
+     * Applies a host table of the extension's shape ([HostRewrite] list, exact hosts or `/regex/` rules, first
+     * match wins) to [host]. This is the path a *filtered* table takes (ENG-04: `Settings → Host rewrites` switches
+     * a rule off app-side, `HostRewriteFilter.effective`), so a typed or pasted URL honours the same switches as a
+     * followed link. Null when unchanged.
+     */
+    fun rewriteWith(host: String, hostRewrites: List<HostRewrite>): String? {
         val lower = host.lowercase()
-        for (r in extensionHostRewrites) {
+        for (r in hostRewrites) {
             if (r.from.length > 2 && r.from.startsWith("/") && r.from.endsWith("/")) {
                 val re = Regex(r.from.substring(1, r.from.length - 1), RegexOption.IGNORE_CASE)
                 if (re.containsMatchIn(lower)) {
@@ -94,8 +102,13 @@ object UrlRewriteRules {
         return null
     }
 
-    /** Host-only rewrite (what the extension's exact table + generic strip do). Null when unchanged. */
-    fun desktopHost(host: String): String? {
+    /**
+     * Host-only rewrite (what the extension's exact table + generic strip do). Null when unchanged. With the full
+     * [extensionHostRewrites] table the hand-coded fast path runs (proven equal by `UrlRewriteRulesTest`); any
+     * other table (a user-filtered one) goes through [rewriteWith].
+     */
+    fun desktopHost(host: String, hostRewrites: List<HostRewrite> = extensionHostRewrites): String? {
+        if (hostRewrites !== extensionHostRewrites) return rewriteWith(host, hostRewrites)
         val lower = host.lowercase()
         hostMap[lower]?.let { return it }
         val labels = lower.split('.')
@@ -108,7 +121,12 @@ object UrlRewriteRules {
         return null
     }
 
-    fun desktopUrl(url: String): String? {
+    /**
+     * Mobile URL -> desktop URL for the app-side paths (address bar, clipboard load). [hostRewrites] is the host
+     * table to honour (ENG-04: the app passes `Components.effectiveHostRewrites()`, the table minus the hosts the
+     * user switched off); the Amazon path and query rules below are independent of it.
+     */
+    fun desktopUrl(url: String, hostRewrites: List<HostRewrite> = extensionHostRewrites): String? {
         val m = urlPattern.find(url.trim()) ?: return null
         val scheme = m.groupValues[1]
         val authority = m.groupValues[2]
@@ -126,7 +144,7 @@ object UrlRewriteRules {
 
         var changed = false
         var newHost = host
-        desktopHost(host)?.let { newHost = it; changed = true }
+        desktopHost(host, hostRewrites)?.let { newHost = it; changed = true }
 
         if (amazonHost.matches(newHost.lowercase()) && (path == "/gp/aw" || path.startsWith("/gp/aw/"))) {
             val product = amazonMobileProduct.find(path)

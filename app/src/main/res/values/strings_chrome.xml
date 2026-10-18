@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Browser chrome strings (toolbar action content descriptions need @StringRes for compose-browser-toolbar). -->
+<resources>
+    <string name="toolbar_search_hint">Search or enter address</string>
+    <string name="toolbar_site_info">Site information</string>
+    <string name="toolbar_reload">Reload</string>
+    <string name="toolbar_stop">Stop loading</string>
+    <string name="toolbar_desktop_on">Desktop persona on: tap for real device</string>
+    <string name="toolbar_desktop_off">Real device: tap to force desktop</string>
+    <string name="toolbar_tabs">Open tabs</string>
+    <string name="toolbar_menu">Menu</string>
+    <string name="toolbar_new_tab">New tab</string>
+    <string name="toolbar_close_tab">Close tab</string>
+    <string name="toolbar_clear">Clear</string>
+</resources>
