@@ -1,0 +1,21 @@
+# Build output (regenerated)
+**/build/
+.gradle/
+.kotlin/
+dist/
+*.iml
+/.idea/
+local.properties
+
+# Secrets — never commit
+key.properties
+*.jks
+*.keystore
+.env
+
+# Node
+node_modules/
+
+# Headless harness downloads/reports
+build/
+tool/headless/.cache/

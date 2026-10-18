@@ -1,0 +1,4 @@
+<resources>
+    <!-- Material3 parent: Android Components dialog fragments (prompts, context menu) inflate Material layouts. -->
+    <style name="Theme.Hatch" parent="Theme.Material3.DayNight.NoActionBar" />
+</resources>

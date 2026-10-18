@@ -1,0 +1,67 @@
+[versions]
+agp = "8.13.2"                 # already in ~/.gradle; needs Gradle >= 8.13 (wrapper is 8.14)
+kotlin = "2.4.20"              # exactly what Android Components 158 was built with (stdlib pin in its POMs)
+compose-bom = "2026.09.00"     # exactly AC 158's Compose BOM -> no skew with AC's compose-* artifacts
+mozilla = "158.0"              # AC release train; transitively pins geckoview-omni 158.0.20261007201254
+kotlinx-serialization = "1.11.0"
+kotlinx-coroutines = "1.11.0"
+activity-compose = "1.13.0"
+appcompat = "1.8.0"
+material = "1.14.0"
+lifecycle = "2.11.0"
+core-ktx = "1.19.1"
+junit-jupiter = "5.13.4"
+
+[libraries]
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
+compose-ui = { module = "androidx.compose.ui:ui" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+compose-foundation = { module = "androidx.compose.foundation:foundation" }
+compose-material3 = { module = "androidx.compose.material3:material3" }
+compose-material-icons = { module = "androidx.compose.material:material-icons-extended" }
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
+appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
+
+# --- Mozilla Android Components (all same version) ---
+mozilla-browser-engine-gecko = { module = "org.mozilla.components:browser-engine-gecko", version.ref = "mozilla" }
+mozilla-concept-engine = { module = "org.mozilla.components:concept-engine", version.ref = "mozilla" }
+mozilla-browser-state = { module = "org.mozilla.components:browser-state", version.ref = "mozilla" }
+mozilla-lib-state = { module = "org.mozilla.components:lib-state", version.ref = "mozilla" }
+mozilla-browser-session-storage = { module = "org.mozilla.components:browser-session-storage", version.ref = "mozilla" }
+mozilla-feature-session = { module = "org.mozilla.components:feature-session", version.ref = "mozilla" }
+mozilla-feature-tabs = { module = "org.mozilla.components:feature-tabs", version.ref = "mozilla" }
+mozilla-feature-downloads = { module = "org.mozilla.components:feature-downloads", version.ref = "mozilla" }
+mozilla-feature-prompts = { module = "org.mozilla.components:feature-prompts", version.ref = "mozilla" }
+mozilla-feature-contextmenu = { module = "org.mozilla.components:feature-contextmenu", version.ref = "mozilla" }
+mozilla-feature-sitepermissions = { module = "org.mozilla.components:feature-sitepermissions", version.ref = "mozilla" }
+mozilla-feature-app-links = { module = "org.mozilla.components:feature-app-links", version.ref = "mozilla" }
+mozilla-feature-intent = { module = "org.mozilla.components:feature-intent", version.ref = "mozilla" }
+mozilla-browser-errorpages = { module = "org.mozilla.components:browser-errorpages", version.ref = "mozilla" }
+mozilla-support-webextensions = { module = "org.mozilla.components:support-webextensions", version.ref = "mozilla" }
+mozilla-support-base = { module = "org.mozilla.components:support-base", version.ref = "mozilla" }
+mozilla-support-ktx = { module = "org.mozilla.components:support-ktx", version.ref = "mozilla" }
+mozilla-support-utils = { module = "org.mozilla.components:support-utils", version.ref = "mozilla" }
+
+[bundles]
+compose = ["compose-ui", "compose-ui-tooling-preview", "compose-foundation", "compose-material3", "compose-material-icons", "activity-compose", "lifecycle-runtime-compose", "lifecycle-viewmodel-compose"]
+mozilla-core = [
+  "mozilla-browser-engine-gecko", "mozilla-concept-engine", "mozilla-browser-state", "mozilla-lib-state",
+  "mozilla-browser-session-storage", "mozilla-feature-session", "mozilla-feature-tabs", "mozilla-feature-downloads",
+  "mozilla-feature-prompts", "mozilla-feature-contextmenu", "mozilla-feature-sitepermissions", "mozilla-feature-app-links",
+  "mozilla-feature-intent", "mozilla-browser-errorpages", "mozilla-support-webextensions", "mozilla-support-base",
+  "mozilla-support-ktx", "mozilla-support-utils",
+]
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
