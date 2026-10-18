@@ -244,7 +244,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun viewportFitChanged(mode: Int) {
-        window.attributes = window.attributes.apply { layoutInDisplayCutoutMode = mode }
+        // layoutInDisplayCutoutMode exists from API 28; minSdk is 26 (no cutouts to extend into below P).
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+            window.attributes = window.attributes.apply { layoutInDisplayCutoutMode = mode }
+        }
     }
 
     override fun onUserLeaveHint() {

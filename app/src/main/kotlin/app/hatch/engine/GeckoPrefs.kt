@@ -17,7 +17,9 @@ import org.mozilla.geckoview.GeckoPreferenceController.SetGeckoPreference
  *
  * If this API ever breaks, `geckoview-config.yaml` + restart ([GeckoRuntimeFactory]) is the full fallback.
  */
-@OptIn(ExperimentalGeckoViewApi::class)
+// ExperimentalGeckoViewApi is an androidx RequiresOptIn marker (Java), so Android lint only honours the
+// androidx OptIn annotation here; Kotlin's own @OptIn does not satisfy UnsafeOptInUsageError.
+@androidx.annotation.OptIn(ExperimentalGeckoViewApi::class)
 object GeckoPrefs {
     /** One readable row of the "Engine prefs" truth view. */
     data class PrefRow(val name: String, val value: String?, val userSet: Boolean, val type: String)
