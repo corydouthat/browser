@@ -9,6 +9,12 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# One remote build at a time, end to end: the rsync would otherwise rewrite the remote tree while another
+# caller's Gradle is still compiling it (the remote flock only covers Gradle). Re-exec under a local lock.
+if [ -z "${HATCH_REMOTE_LOCKED:-}" ]; then
+  HATCH_REMOTE_LOCKED=1 exec flock /tmp/hatch-remote.lock "$0" "$@"
+fi
+
 host="${HATCH_BUILD_HOST:-$(cat .buildhost 2>/dev/null || true)}"
 [ -n "$host" ] || { echo "remote_build: no build host (set HATCH_BUILD_HOST or .buildhost)" >&2; exit 2; }
 remote_dir="${HATCH_BUILD_DIR:-build/hatch}"
@@ -33,3 +39,5 @@ mkdir -p app/build persona/build
 rsync -az "$host:$remote_dir/app/build/outputs/" app/build/outputs/ 2>/dev/null || true
 rsync -az "$host:$remote_dir/persona/build/reports/" persona/build/reports/ 2>/dev/null || true
 rsync -az "$host:$remote_dir/persona/build/test-results/" persona/build/test-results/ 2>/dev/null || true
+rsync -az "$host:$remote_dir/app/build/reports/" app/build/reports/ 2>/dev/null || true
+rsync -az "$host:$remote_dir/app/build/test-results/" app/build/test-results/ 2>/dev/null || true
