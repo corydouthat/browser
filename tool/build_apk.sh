@@ -52,6 +52,9 @@ case "$mode" in
   release)
     run_gradle :app:assembleRelease ${extra[@]+"${extra[@]}"}
     apk=app/build/outputs/apk/release/app-arm64-v8a-release.apk
+    # Without key.properties AGP emits app-arm64-v8a-release-unsigned.apk (CI, fresh checkouts); a signed
+    # build emits app-arm64-v8a-release.apk. Accept either and say which one in the dist name.
+    if [ ! -f "$apk" ] && [ -f "${apk%.apk}-unsigned.apk" ]; then apk="${apk%.apk}-unsigned.apk"; mode="release-unsigned"; fi
     ;;
   *) echo "usage: tool/build_apk.sh [debug|release|install]" >&2; exit 1 ;;
 esac
