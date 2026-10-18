@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>redteam 11 font probes</title><script src="./_rt.js"></script></head>
+<body>
+<div id="fp" style="position:absolute;left:-9999px;top:0;white-space:nowrap"></div>
+<script>
+RT.run(async function () {
+  var exp = RT.expected();
+  var host = document.getElementById('fp');
+  var TEXT = 'mmmmmmmmmmlli0WQ@%—日本語';
+  function width(fontFamily) {
+    var s = document.createElement('span'); s.style.cssText = 'font-size:72px;font-family:' + fontFamily; s.textContent = TEXT; host.appendChild(s);
+    var w = s.getBoundingClientRect().width + 'x' + s.getBoundingClientRect().height; host.removeChild(s); return w;
+  }
+  var base = { monospace: width('monospace'), 'sans-serif': width('sans-serif'), serif: width('serif') };
+  function has(font) {
+    return Object.keys(base).some(function (b) { return width('"' + font + '", ' + b) !== base[b]; });
+  }
+  var sets = {
+    windows: ['Segoe UI', 'Calibri', 'Tahoma', 'Consolas', 'Cambria', 'Segoe UI Emoji', 'Microsoft Sans Serif', 'Verdana', 'Arial', 'Times New Roman'],
+    mac: ['Helvetica Neue', 'Menlo', 'Monaco', 'Apple Color Emoji', 'Lucida Grande', 'Geneva', 'Avenir', 'Helvetica', 'Arial', 'Times'],
+    linux: ['DejaVu Sans', 'Liberation Sans', 'Noto Sans', 'Ubuntu', 'Cantarell', 'FreeSans', 'Nimbus Sans', 'Bitstream Vera Sans'],
+    android: ['Roboto', 'Noto Color Emoji', 'Droid Sans Mono', 'Noto Sans CJK JP', 'Noto Serif', 'Cutive Mono', 'Dancing Script', 'Carrois Gothic SC', 'Coming Soon']
+  };
+  var found = {};
+  Object.keys(sets).forEach(function (k) { found[k] = sets[k].filter(has); });
+  RT.info('fonts', JSON.stringify(found));
+  var canvasFonts = (function () { try { var cv = document.createElement('canvas').getContext('2d'); var out = {}; ['Segoe UI', 'Roboto', 'Helvetica Neue', 'DejaVu Sans'].forEach(function (f) { cv.font = '40px "' + f + '", monospace'; var a = cv.measureText(TEXT).width; cv.font = '40px monospace'; out[f] = a !== cv.measureText(TEXT).width; }); return out; } catch (e) { return 'error:' + e.message; } })();
+  RT.info('fonts.canvas', JSON.stringify(canvasFonts));
+  if (exp.desktop && exp.platform !== 'device') {
+    var expectedSet = sets[exp.platform], present = found[exp.platform];
+    var core = { windows: ['Segoe UI', 'Calibri', 'Tahoma', 'Consolas'], mac: ['Helvetica Neue', 'Menlo', 'Monaco'], linux: ['DejaVu Sans', 'Liberation Sans', 'Noto Sans', 'Ubuntu', 'Cantarell'] }[exp.platform];
+    var corePresent = core.filter(has);
+    RT.check('fonts.platformCore', corePresent.length > 0, 'none of the fonts every ' + exp.platform + ' install ships (' + core.join(', ') + ') is available; found ' + present.length + '/' + expectedSet.length + ' of the wider ' + exp.platform + ' set');
+    var androidOnly = found.android.filter(function (f) { return ['Droid Sans Mono', 'Cutive Mono', 'Dancing Script', 'Carrois Gothic SC', 'Coming Soon', 'Noto Color Emoji'].indexOf(f) >= 0; });
+    RT.check('fonts.androidOnly', androidOnly.length === 0 || exp.platform === 'linux', 'Android-system fonts present on a ' + exp.platform + ' persona: ' + androidOnly.join(', '));
+  } else RT.info('fonts.persona', 'no desktop persona; nothing to judge');
+  var sysUi = width('system-ui'), seg = width('"Segoe UI", monospace'), rob = width('Roboto, monospace');
+  RT.info('fonts.systemUi', 'system-ui=' + sysUi + ' Segoe=' + seg + ' Roboto=' + rob + ' (system-ui resolves to the OS UI font: Segoe UI on Windows, Roboto on Android)');
+});
+</script>
+</body></html>

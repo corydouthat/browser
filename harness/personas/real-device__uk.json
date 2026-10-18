@@ -1,0 +1,38 @@
+{
+  "id": "real-device__uk",
+  "identity": "real-device",
+  "region": "uk",
+  "name": "Real device (no spoofing) / United Kingdom (London)",
+  "desktop": false,
+  "touch": true,
+  "chromeLike": false,
+  "tzShim": false,
+  "userAgent": null,
+  "platform": null,
+  "oscpu": null,
+  "appVersion": null,
+  "maxTouchPoints": null,
+  "hasTouchEvent": true,
+  "pointerFine": false,
+  "hoverHover": false,
+  "minLayoutWidth": null,
+  "screen": null,
+  "dpr": null,
+  "hardwareConcurrency": null,
+  "languages": [
+    "en-GB",
+    "en"
+  ],
+  "acceptLanguage": "en-GB,en;q=0.9",
+  "timeZone": "Europe/London",
+  "geolocation": {
+    "latitude": 51.5074,
+    "longitude": -0.1278,
+    "accuracyMeters": 50
+  },
+  "webgl": null,
+  "userAgentData": false,
+  "uaData": null,
+  "locale": "en-GB",
+  "librariesMobile": null
+}

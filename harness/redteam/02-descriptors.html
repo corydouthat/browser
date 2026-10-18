@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>redteam 02 descriptors</title><script src="./_rt.js"></script></head>
+<body>
+<script>
+RT.run(async function () {
+  var w = window, n = navigator, NP = Navigator.prototype, SP = Screen.prototype;
+  var exp = RT.expected();
+  RT.section('1. markers: own symbols / properties a page can enumerate');
+  var winSyms = Object.getOwnPropertySymbols(w).map(String);
+  var hatchSyms = winSyms.filter(function (s) { return /hatch/i.test(s); });
+  RT.check('marker.windowSymbols', hatchSyms.length === 0, 'Object.getOwnPropertySymbols(window) lists ' + hatchSyms.join(','), winSyms.length + ' own symbols, none hatch-like');
+  RT.check('marker.symbolFor', !(Symbol.for('hatch.persona') in w), 'Symbol.for("hatch.persona") in window === true');
+  var navSyms = Object.getOwnPropertySymbols(n).map(String), scrSyms = Object.getOwnPropertySymbols(screen).map(String);
+  RT.check('marker.navigatorSymbols', navSyms.length === 0 && scrSyms.length === 0, 'own symbols on navigator/screen: ' + navSyms.concat(scrSyms).join(','));
+  var winNames = Object.getOwnPropertyNames(w).filter(function (k) { return /hatch|persona|shim/i.test(k) && k !== 'personalbar' && k !== '__hatchCrossOrigin' && k !== '__hatchPageDone'; });
+  RT.check('marker.windowNames', winNames.length === 0, 'window own names look like the shim: ' + winNames.join(','));
+
+  RT.section('2. own vs prototype: instances must carry no own data/accessor properties');
+  var navOwn = Object.getOwnPropertyNames(n), scrOwn = Object.getOwnPropertyNames(screen);
+  RT.check('own.navigator', navOwn.length === 0, 'navigator has own props: ' + navOwn.join(','));
+  RT.check('own.screen', scrOwn.length === 0, 'screen has own props: ' + scrOwn.join(','));
+  var geoOwn = Object.getOwnPropertyNames(n.geolocation);
+  RT.check('own.geolocation', geoOwn.length === 0, 'navigator.geolocation has own props: ' + geoOwn.join(','));
+  var so = screen.orientation ? Object.getOwnPropertyNames(screen.orientation) : [];
+  RT.check('own.screenOrientation', so.length === 0, 'screen.orientation has own props: ' + so.join(','));
+  var mql = matchMedia('(pointer: fine)');
+  var mqlOwn = Object.getOwnPropertyNames(mql);
+  RT.check('own.mediaQueryList', mqlOwn.length === 0, 'MediaQueryList instance has own props: ' + mqlOwn.join(','));
+
+  RT.section('3. accessor descriptor shapes vs native reference on the same prototype');
+  function shape(d) { return d ? { g: typeof d.get, s: typeof d.set, e: d.enumerable, c: d.configurable, v: 'value' in d } : null; }
+  var refNav = JSON.stringify(shape(Object.getOwnPropertyDescriptor(NP, 'onLine')));
+  var navBad = [];
+  ['userAgent', 'platform', 'oscpu', 'appVersion', 'maxTouchPoints', 'hardwareConcurrency', 'languages', 'language', 'pdfViewerEnabled', 'plugins', 'mimeTypes', 'userAgentData'].forEach(function (k) {
+    var d = Object.getOwnPropertyDescriptor(NP, k); if (!d) return;
+    var s = JSON.stringify(shape(d));
+    if (s !== refNav) navBad.push(k + ' ' + s);
+  });
+  if (navBad.length) RT.fired('shape.navigator', 'descriptor shape differs from Navigator.prototype.onLine ' + refNav + ': ' + navBad.join(' | ')); else RT.clean('shape.navigator', 'all match ' + refNav);
+  var refScr = JSON.stringify(shape(Object.getOwnPropertyDescriptor(SP, 'orientation')));
+  var scrBad = [];
+  ['width', 'height', 'availWidth', 'availHeight', 'availLeft', 'availTop', 'left', 'top', 'colorDepth', 'pixelDepth'].forEach(function (k) {
+    var d = Object.getOwnPropertyDescriptor(SP, k); if (!d) return;
+    var s = JSON.stringify(shape(d));
+    if (s !== refScr) scrBad.push(k + ' ' + s);
+  });
+  if (scrBad.length) RT.fired('shape.screen', 'descriptor shape differs from Screen.prototype.orientation ' + refScr + ': ' + scrBad.join(' | ')); else RT.clean('shape.screen', 'all match ' + refScr);
+  // window-level: devicePixelRatio/outerWidth/outerHeight live where innerWidth lives, with the same shape
+  var holder = Object.getOwnPropertyDescriptor(w, 'innerWidth') ? w : Window.prototype;
+  var refWin = JSON.stringify(shape(Object.getOwnPropertyDescriptor(holder, 'innerWidth')));
+  var winBad = [];
+  ['devicePixelRatio', 'outerWidth', 'outerHeight', 'matchMedia'].forEach(function (k) {
+    var onInst = Object.getOwnPropertyDescriptor(w, k), onProto = Object.getOwnPropertyDescriptor(Window.prototype, k);
+    var where = onInst ? 'instance' : onProto ? 'prototype' : 'missing';
+    var refWhere = Object.getOwnPropertyDescriptor(w, 'innerWidth') ? 'instance' : 'prototype';
+    if (where !== refWhere) winBad.push(k + ' lives on ' + where + ', innerWidth on ' + refWhere);
+    var d = onInst || onProto;
+    if (k !== 'matchMedia' && d && JSON.stringify(shape(d)) !== refWin) winBad.push(k + ' ' + JSON.stringify(shape(d)) + ' vs innerWidth ' + refWin);
+    if (k === 'matchMedia' && d && (typeof d.value !== 'function' || d.writable !== true || d.enumerable !== true || d.configurable !== true)) winBad.push('matchMedia ' + JSON.stringify(shape(d)));
+  });
+  if (winBad.length) RT.fired('shape.window', winBad.join(' | ')); else RT.clean('shape.window', 'window accessors/methods sit where native ones do with the same shape');
+
+  RT.section('4. enumeration order (for-in over navigator vs prototype key order)');
+  var forIn = []; for (var k in n) forIn.push(k);
+  var protoKeys = Object.getOwnPropertyNames(NP).filter(function (k) { var d = Object.getOwnPropertyDescriptor(NP, k); return d.enumerable; });
+  RT.check('order.navigatorForIn', forIn.join(',') === protoKeys.join(','), 'for-in order differs from Navigator.prototype key order: ' + forIn.join(',') + ' vs ' + protoKeys.join(','), forIn.length + ' keys, same order as prototype');
+  var ua = protoKeys.indexOf('userAgent'), hc = protoKeys.indexOf('hardwareConcurrency'), mt = protoKeys.indexOf('maxTouchPoints'), lg = protoKeys.indexOf('languages');
+  RT.info('order.navigatorKeys', protoKeys.join(','));
+  // Firefox orders Navigator.prototype by WebIDL declaration; the shimmed keys must not have moved to the end.
+  var last = protoKeys.length - 1;
+  var moved = ['userAgent', 'platform', 'oscpu', 'appVersion', 'maxTouchPoints', 'hardwareConcurrency', 'languages', 'language', 'plugins', 'mimeTypes', 'pdfViewerEnabled'].filter(function (k) { return protoKeys.indexOf(k) >= last - 2; });
+  RT.check('order.navigatorMoved', moved.length === 0, 'shimmed keys moved to the end of Navigator.prototype: ' + moved.join(','));
+  var scrKeys = Object.getOwnPropertyNames(SP);
+  RT.info('order.screenKeys', scrKeys.join(','));
+  RT.check('order.screenWidthFirst', scrKeys.indexOf('width') < scrKeys.indexOf('orientation') && scrKeys.indexOf('colorDepth') < scrKeys.indexOf('orientation'), 'Screen.prototype key order changed: ' + scrKeys.join(','));
+  var winKeys = Object.getOwnPropertyNames(w);
+  var dprIdx = winKeys.indexOf('devicePixelRatio'), iwIdx = winKeys.indexOf('innerWidth'), owIdx = winKeys.indexOf('outerWidth'), mmIdx = winKeys.indexOf('matchMedia');
+  RT.info('order.window', 'innerWidth@' + iwIdx + ' outerWidth@' + owIdx + ' devicePixelRatio@' + dprIdx + ' matchMedia@' + mmIdx + ' of ' + winKeys.length);
+  RT.check('order.windowAccessors', dprIdx < 0 || (Math.abs(dprIdx - iwIdx) < 40 && Math.abs(owIdx - iwIdx) < 40), 'window.devicePixelRatio/outerWidth were re-added far from innerWidth (order changed)');
+
+  RT.section('5. API surface coherence for the claimed platform (Firefox 158 release prefs)');
+  // StaticPrefList @ FIREFOX_158_0_RELEASE: dom.webshare.enabled = @IS_NIGHTLY_BUILD@ on Windows else false (GeckoView sets it true);
+  // dom.vibrator.enabled = false everywhere; dom.netinfo.enabled = false everywhere.
+  var share = 'share' in n, canShare = 'canShare' in n, vibrate = 'vibrate' in n, conn = 'connection' in n;
+  RT.info('api.present', JSON.stringify({ share: share, canShare: canShare, vibrate: vibrate, connection: conn, pdfViewerEnabled: n.pdfViewerEnabled, plugins: n.plugins.length, mimeTypes: n.mimeTypes.length, userAgentData: 'userAgentData' in n, oscpu: 'oscpu' in n, buildID: 'buildID' in n }));
+  if (exp.desktop && exp.engine === 'firefox') {
+    RT.check('api.shareDesktopFirefox', !share && !canShare, 'navigator.share/canShare exist but desktop Firefox 158 release has dom.webshare.enabled=false');
+    RT.check('api.vibrateDesktopFirefox', !vibrate, 'navigator.vibrate exists but Firefox 158 has dom.vibrator.enabled=false everywhere');
+    RT.check('api.connectionDesktopFirefox', !conn, 'navigator.connection exists; desktop Firefox has dom.netinfo.enabled=false');
+    RT.check('api.pdfPluginsCoherent', (n.pdfViewerEnabled === true) === (n.plugins.length === 5 && n.mimeTypes.length === 2), 'pdfViewerEnabled=' + n.pdfViewerEnabled + ' but plugins/mimeTypes=' + n.plugins.length + '/' + n.mimeTypes.length + ' (desktop Firefox: true/5/2)');
+    RT.check('api.noUserAgentData', !('userAgentData' in n), 'navigator.userAgentData exists on a Firefox persona');
+  }
+  if (exp.engine === 'chrome') {
+    RT.info('api.chromePersona', 'UA-only persona (documented): oscpu=' + ('oscpu' in n) + ' vendor=' + JSON.stringify(n.vendor) + ' userAgentData=' + ('userAgentData' in n) + ' chrome=' + (typeof w.chrome));
+    var uad = n.userAgentData;
+    if (uad) {
+      var ct = Object.prototype.toString.call(uad);
+      var proto = Object.getPrototypeOf(uad);
+      RT.check('uad.shape', ct === '[object NavigatorUAData]' && proto === w.NavigatorUAData.prototype && Object.getOwnPropertyNames(uad).length === 0, 'NavigatorUAData shape ' + ct + ' own=' + Object.getOwnPropertyNames(uad).join(','));
+      var winIdx = Object.getOwnPropertyNames(w).indexOf('NavigatorUAData');
+      RT.info('uad.windowIndex', 'NavigatorUAData at window key index ' + winIdx + ' of ' + Object.getOwnPropertyNames(w).length + ' (Chrome: among the interface objects, not last)');
+      var pl = n.plugins;
+      var isProxy = (function () { try { structuredClone(pl); return 'cloned'; } catch (e) { return e.name; } })();
+      RT.info('plugins.structuredClone', isProxy + ' (native PluginArray: DataCloneError)');
+      RT.info('plugins.ownNames', Object.getOwnPropertyNames(pl).join(','));
+    }
+  }
+});
+</script>
+</body></html>

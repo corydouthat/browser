@@ -1,0 +1,39 @@
+{
+  "id": "real-device__de",
+  "identity": "real-device",
+  "region": "de",
+  "name": "Real device (no spoofing) / Germany (Berlin)",
+  "desktop": false,
+  "touch": true,
+  "chromeLike": false,
+  "tzShim": false,
+  "userAgent": null,
+  "platform": null,
+  "oscpu": null,
+  "appVersion": null,
+  "maxTouchPoints": null,
+  "hasTouchEvent": true,
+  "pointerFine": false,
+  "hoverHover": false,
+  "minLayoutWidth": null,
+  "screen": null,
+  "dpr": null,
+  "hardwareConcurrency": null,
+  "languages": [
+    "de-DE",
+    "de",
+    "en"
+  ],
+  "acceptLanguage": "de-DE,de;q=0.9,en;q=0.8",
+  "timeZone": "Europe/Berlin",
+  "geolocation": {
+    "latitude": 52.52,
+    "longitude": 13.405,
+    "accuracyMeters": 50
+  },
+  "webgl": null,
+  "userAgentData": false,
+  "uaData": null,
+  "locale": "de-DE",
+  "librariesMobile": null
+}

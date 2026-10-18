@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head>
+<script>
+/* The very first script in the document (the server injects one line before it; see tool/headless/server.mjs).
+   A page that runs here sees whatever the engine shows before any document_start content script that lost the race. */
+(function () {
+  var g = Object.getOwnPropertyDescriptor(Navigator.prototype, 'hardwareConcurrency').get;
+  window.__rtEarly = {
+    t: performance.now(),
+    hwc: navigator.hardwareConcurrency, mtp: navigator.maxTouchPoints, sw: screen.width, sh: screen.height, dpr: devicePixelRatio,
+    outerH: outerHeight, pf: matchMedia('(pointer: fine)').matches, touch: 'ontouchstart' in window, TouchEvent: typeof TouchEvent,
+    getter: g, toString: Function.prototype.toString, getterText: Function.prototype.toString.call(g),
+    scripts: document.scripts.length, readyState: document.readyState, currentScriptFirst: document.currentScript === document.head.querySelector('script:not([src])') || document.scripts.length <= 2
+  };
+})();
+</script>
+<meta charset="utf-8"><title>redteam 13 shim timing vs first inline script</title><script src="./_rt.js"></script></head>
+<body>
+<script>
+RT.run(async function () {
+  var e = window.__rtEarly;
+  var late = { hwc: navigator.hardwareConcurrency, mtp: navigator.maxTouchPoints, sw: screen.width, sh: screen.height, dpr: devicePixelRatio, outerH: outerHeight, pf: matchMedia('(pointer: fine)').matches, touch: 'ontouchstart' in window, TouchEvent: typeof TouchEvent };
+  RT.info('early', JSON.stringify({ t: e.t, hwc: e.hwc, mtp: e.mtp, sw: e.sw, sh: e.sh, dpr: e.dpr, outerH: e.outerH, pf: e.pf, touch: e.touch, TouchEvent: e.TouchEvent, scripts: e.scripts, readyState: e.readyState }));
+  RT.info('late', JSON.stringify(late));
+  var diffs = Object.keys(late).filter(function (k) { return JSON.stringify(late[k]) !== JSON.stringify(e[k]); }).map(function (k) { return k + ': early=' + JSON.stringify(e[k]) + ' late=' + JSON.stringify(late[k]); });
+  RT.check('timing.valuesChanged', diffs.length === 0, 'values observed by the first inline script differ from later ones (shim ran after page script): ' + diffs.join(', '));
+  var lateGetter = Object.getOwnPropertyDescriptor(Navigator.prototype, 'hardwareConcurrency').get;
+  RT.check('timing.getterIdentity', lateGetter === e.getter, 'Navigator.prototype.hardwareConcurrency getter was replaced after the first inline script ran');
+  RT.check('timing.toStringIdentity', Function.prototype.toString === e.toString, 'Function.prototype.toString was replaced after the first inline script ran');
+  var viaEarly = e.toString.call(lateGetter);
+  RT.check('timing.earlyToStringOnLateGetter', /\[native code\]/.test(viaEarly) && !/CFG|compute|hatch/.test(viaEarly), 'Function.prototype.toString captured by the first inline script prints the shim source: ' + JSON.stringify(viaEarly.slice(0, 120)));
+  RT.check('timing.earlyGetterOnNavigator', e.getter.call(navigator) === late.hwc, 'getter captured early returns ' + e.getter.call(navigator) + ' vs now ' + late.hwc);
+  RT.info('timing.firstScriptIsOurs', 'scripts seen by the early script=' + e.scripts + ' currentScriptFirst=' + e.currentScriptFirst);
+});
+</script>
+</body></html>

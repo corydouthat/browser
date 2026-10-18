@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>redteam 05 matchMedia vs CSS</title><script src="./_rt.js"></script></head>
+<body>
+<div id="probes" style="position:absolute;left:-9999px"></div>
+<script>
+RT.run(async function () {
+  var exp = RT.expected();
+  var style = document.createElement('style'); document.head.appendChild(style);
+  var sheet = style.sheet;
+  var probes = document.getElementById('probes');
+  var i = 0;
+  function cssMatches(q) {
+    var id = 'p' + (i++);
+    var el = document.createElement('span'); el.id = id; el.style.cssText = '--hit:0;display:inline-block;width:1px;height:1px'; probes.appendChild(el);
+    try { sheet.insertRule('@media ' + q + ' { #' + id + ' { --hit: 1 !important; } }', sheet.cssRules.length); } catch (e) { return 'invalid:' + e.message; }
+    void el.offsetWidth;
+    return getComputedStyle(el).getPropertyValue('--hit').trim() === '1';
+  }
+  function cssMediaText(q) {
+    try { var idx = sheet.insertRule('@media ' + q + ' {}', sheet.cssRules.length); return sheet.cssRules[idx].media.mediaText; } catch (e) { return 'invalid'; }
+  }
+  var S = screen, dpr = window.devicePixelRatio;
+  RT.section('1. JS matchMedia vs CSS @media for the same query');
+  var queries = ['(pointer: fine)', '(pointer: coarse)', '(pointer: none)', '(hover: hover)', '(hover: none)', '(any-pointer: coarse)', '(any-pointer: fine)', '(any-hover: hover)', '(any-hover: none)', '(pointer)', '(hover)', 'not (pointer: coarse)', '(pointer: fine) and (hover: hover)', 'screen and (pointer: coarse), (hover: none)', '(orientation: portrait)', '(orientation: landscape)', '(min-width: 1200px)', '(max-width: 480px)', '(min-device-width: 1024px)', '(device-width: ' + S.width + 'px)', '(device-height: ' + S.height + 'px)', '(max-device-width: 600px)', '(resolution: ' + dpr + 'dppx)', '(min-resolution: 1.5dppx)', '(-webkit-device-pixel-ratio: ' + dpr + ')', '(-webkit-min-device-pixel-ratio: 2)', '(prefers-color-scheme: dark)', '(display-mode: browser)', '(color: 8)', '(color-gamut: p3)'];
+  var disagree = [];
+  var deviceLimit = [];
+  var table = [];
+  // device-* / resolution: the shim keeps JS matchMedia coherent with screen.* (RT-04), but the style engine
+  // evaluates them from the real display (no desktop-viewport branch in nsMediaFeatures) - a documented
+  // engine-level limit (docs/limitations.md, harness css.maxDeviceWidth480 / css.minResolution2 on device).
+  var DEVICE_FEATURE = /\(\s*(?:min-|max-)?(?:device-|resolution|-webkit-|-moz-)/i;
+  queries.forEach(function (q) {
+    var js, css;
+    try { js = matchMedia(q).matches; } catch (e) { js = 'error'; }
+    css = cssMatches(q);
+    table.push(q + ' js=' + js + ' css=' + css);
+    if (typeof css === 'boolean' && js !== css) (DEVICE_FEATURE.test(q) ? deviceLimit : disagree).push(q + ': js=' + js + ' css=' + css);
+  });
+  RT.info('media.table', table.join(' ; '));
+  if (disagree.length) RT.fired('media.jsVsCss', disagree.join(' | ')); else RT.clean('media.jsVsCss', (queries.length - deviceLimit.length) + ' queries agree');
+  if (deviceLimit.length) RT.info('media.jsVsCssDevice', 'documented engine limit (stylesheet device-*/resolution come from the real display): ' + deviceLimit.join(' | ')); else RT.clean('media.jsVsCssDevice', 'stylesheet device-*/resolution agree with JS (real display matches the persona)');
+
+  RT.section('2. screen.* / devicePixelRatio vs device-* / resolution media features');
+  var dw = matchMedia('(device-width: ' + S.width + 'px)').matches, dh = matchMedia('(device-height: ' + S.height + 'px)').matches;
+  RT.check('media.deviceWidthVsScreen', dw, 'screen.width=' + S.width + ' but (device-width: ' + S.width + 'px) is false; CSS device-width is ' + probeDeviceWidth());
+  RT.check('media.deviceHeightVsScreen', dh, 'screen.height=' + S.height + ' but (device-height: ' + S.height + 'px) is false');
+  var res = matchMedia('(resolution: ' + dpr + 'dppx)').matches;
+  RT.check('media.resolutionVsDpr', res, 'devicePixelRatio=' + dpr + ' but (resolution: ' + dpr + 'dppx) is false; (min-resolution: 1.5dppx)=' + matchMedia('(min-resolution: 1.5dppx)').matches + ' (min-resolution: 2dppx)=' + matchMedia('(min-resolution: 2dppx)').matches);
+  function probeDeviceWidth() { // binary search the CSS device-width
+    var lo = 0, hi = 8192; while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (matchMedia('(min-device-width: ' + mid + 'px)').matches) lo = mid; else hi = mid - 1; } return lo;
+  }
+  var cssDW = probeDeviceWidth();
+  RT.info('media.cssDeviceWidth', cssDW + 'px (screen.width ' + S.width + ', innerWidth ' + innerWidth + ')');
+  var ar = matchMedia('(device-aspect-ratio: ' + S.width + '/' + S.height + ')').matches;
+  RT.check('media.deviceAspectRatio', ar, '(device-aspect-ratio: ' + S.width + '/' + S.height + ') false for screen ' + S.width + 'x' + S.height);
+
+  RT.section('3. orientation coherence (CSS vs screen.orientation vs sizes)');
+  var portraitCss = cssMatches('(orientation: portrait)');
+  var so = screen.orientation ? screen.orientation.type : null;
+  RT.info('orientation', 'css portrait=' + portraitCss + ' screen.orientation=' + so + '/' + (screen.orientation && screen.orientation.angle) + ' inner=' + innerWidth + 'x' + innerHeight + ' screen=' + S.width + 'x' + S.height);
+  var portraitSizes = innerHeight > innerWidth;
+  RT.check('orientation.cssVsInner', portraitCss === portraitSizes, '(orientation: portrait)=' + portraitCss + ' but innerWidth/innerHeight=' + innerWidth + '/' + innerHeight);
+  if (so) RT.check('orientation.typeVsCss', /portrait/.test(so) === portraitCss, 'screen.orientation.type=' + so + ' but CSS portrait=' + portraitCss);
+  if (so) RT.check('orientation.typeVsScreenDims', /portrait/.test(so) === (S.height > S.width), 'screen.orientation.type=' + so + ' but screen is ' + S.width + 'x' + S.height);
+
+  RT.section('4. MediaQueryList.media serialization vs CSSOM mediaText');
+  var serBad = [];
+  ['(pointer:fine)', '(POINTER: FINE)', '(hover:hover)', '(  any-pointer : coarse )', 'screen and (pointer:coarse)', '(pointer:fine),(hover:none)', '(min-width:100px)', '(pointer:fine) and (min-width:100px)', 'not (hover:none)', '(pointer: fine)'].forEach(function (q) {
+    var js = matchMedia(q).media, css = cssMediaText(q);
+    if (js !== css) serBad.push(JSON.stringify(q) + ' js=' + JSON.stringify(js) + ' cssom=' + JSON.stringify(css));
+  });
+  if (serBad.length) RT.fired('media.serialization', serBad.join(' | ')); else RT.clean('media.serialization', 'matchMedia(q).media equals CSSOM mediaText for 10 spellings');
+  var a = matchMedia('(pointer:fine)').media, b = matchMedia('(pointer: fine)').media;
+  RT.check('media.serializationNormalized', a === b, 'matchMedia("(pointer:fine)").media=' + JSON.stringify(a) + ' vs "(pointer: fine)" -> ' + JSON.stringify(b));
+  var inv = matchMedia('(pointer: bogus)');
+  RT.info('media.invalidQuery', 'media=' + JSON.stringify(inv.media) + ' matches=' + inv.matches + ' (native: "not all"/false)');
+  var inv2 = matchMedia('(hover: bogus) and (min-width: 1px)');
+  RT.info('media.invalidQuery2', 'media=' + JSON.stringify(inv2.media) + ' matches=' + inv2.matches);
+
+  RT.section('5. MQL change events / listeners for pointer queries');
+  var m = matchMedia('(pointer: fine)');
+  RT.check('media.mqlIdentityProto', Object.getPrototypeOf(m) === MediaQueryList.prototype && m.media === '(pointer: fine)', 'MQL shape off: media=' + m.media);
+  var m2 = matchMedia('(pointer: fine)');
+  RT.info('media.mqlSameQueryIdentity', (m === m2) + ' (native Firefox: false)');
+});
+</script>
+</body></html>

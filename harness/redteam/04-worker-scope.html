@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>redteam 04 worker scope</title><script src="./_rt.js"></script></head>
+<body>
+<script>
+function rtWorkerSnap(s) {
+  var o = {};
+  function t(k, f) { try { o[k] = f(); } catch (e) { o[k] = 'error:' + (e && e.message); } }
+  t('hwc', function () { return s.navigator.hardwareConcurrency; });
+  t('ua', function () { return s.navigator.userAgent; });
+  t('platform', function () { return s.navigator.platform; });
+  t('oscpu', function () { return s.navigator.oscpu; });
+  t('appVersion', function () { return s.navigator.appVersion; });
+  t('languages', function () { return Array.prototype.slice.call(s.navigator.languages); });
+  t('language', function () { return s.navigator.language; });
+  t('tz', function () { return new s.Intl.DateTimeFormat().resolvedOptions().timeZone; });
+  t('locale', function () { return new s.Intl.DateTimeFormat().resolvedOptions().locale; });
+  t('tzo', function () { return new s.Date().getTimezoneOffset(); });
+  t('webgl', function () {
+    if (typeof s.OffscreenCanvas === 'undefined') return 'no OffscreenCanvas';
+    var c = new s.OffscreenCanvas(8, 8); var gl = c.getContext('webgl'); if (!gl) return 'no gl';
+    var ext = gl.getExtension('WEBGL_debug_renderer_info');
+    return { vendor: ext ? gl.getParameter(ext.UNMASKED_VENDOR_WEBGL) : null, renderer: ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : null, maxTex: gl.getParameter(gl.MAX_TEXTURE_SIZE) };
+  });
+  t('geo', function () { return 'geolocation' in s.navigator; });
+  return o;
+}
+RT.run(async function () {
+  var win = rtWorkerSnap(window);
+  try { var c = document.createElement('canvas'); var gl = c.getContext('webgl'); if (gl) { var ext = gl.getExtension('WEBGL_debug_renderer_info'); win.webgl = { vendor: ext ? gl.getParameter(ext.UNMASKED_VENDOR_WEBGL) : null, renderer: ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : null, maxTex: gl.getParameter(gl.MAX_TEXTURE_SIZE) }; } else win.webgl = 'no gl'; } catch (e) { win.webgl = 'error:' + e.message; }
+  RT.info('window', JSON.stringify(win));
+  var src = 'var rtWorkerSnap=' + rtWorkerSnap.toString() + ';';
+  function compare(tag, snap) {
+    if (!snap || snap.timeout || snap.error) { RT.info(tag, JSON.stringify(snap)); return; }
+    var diffs = [];
+    // hwc: worker-scope shim is the documented M2 gap (docs/limitations.md) - recorded, not fired.
+    // oscpu: WorkerNavigator has no oscpu in Firefox either (not a tell).
+    var documented = [];
+    ['hwc', 'ua', 'platform', 'appVersion', 'languages', 'language', 'tz', 'locale', 'tzo'].forEach(function (k) { if (JSON.stringify(snap[k]) !== JSON.stringify(win[k])) (k === 'hwc' ? documented : diffs).push(k + '=' + JSON.stringify(snap[k]) + ' (window ' + JSON.stringify(win[k]) + ')'); });
+    if (documented.length) RT.info(tag + '.documented', 'worker-scope shim is M2: ' + documented.join(', '));
+    if (typeof snap.webgl === 'object' && typeof win.webgl === 'object' && JSON.stringify(snap.webgl) !== JSON.stringify(win.webgl)) diffs.push('webgl=' + JSON.stringify(snap.webgl) + ' (window ' + JSON.stringify(win.webgl) + ')');
+    else RT.info(tag + '.webgl', JSON.stringify(snap.webgl));
+    if (diffs.length) RT.fired(tag, diffs.join(', ')); else RT.clean(tag, 'agrees with window');
+  }
+  RT.section('1. dedicated Worker (blob)');
+  var dw = await RT.withTimeout(new Promise(function (res, rej) {
+    var u = URL.createObjectURL(new Blob([src + 'self.onmessage=function(){postMessage(rtWorkerSnap(self))};'], { type: 'text/javascript' }));
+    var w = new Worker(u); w.onmessage = function (e) { res(e.data); w.terminate(); }; w.onerror = function (e) { rej(new Error(e.message)); }; w.postMessage(1);
+  }), 8000, 'worker');
+  compare('worker.dedicated', dw);
+  RT.section('2. SharedWorker (blob)');
+  var sw = await RT.withTimeout(new Promise(function (res, rej) {
+    if (typeof SharedWorker === 'undefined') { rej(new Error('no SharedWorker')); return; }
+    var u = URL.createObjectURL(new Blob([src + 'onconnect=function(e){var p=e.ports[0];p.postMessage(rtWorkerSnap(self));};'], { type: 'text/javascript' }));
+    var w = new SharedWorker(u); w.port.onmessage = function (e) { res(e.data); }; w.onerror = function (e) { rej(new Error(e.message)); }; w.port.start();
+  }), 8000, 'sharedworker');
+  compare('worker.shared', sw);
+  RT.section('3. ServiceWorker (scope ./, file sw.js)');
+  var svc = await RT.withTimeout((async function () {
+    if (!('serviceWorker' in navigator)) throw new Error('no serviceWorker');
+    var reg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
+    var sw = reg.installing || reg.waiting || reg.active;
+    if (!sw) throw new Error('no worker object');
+    var snap = await new Promise(function (res) {
+      var ch = new MessageChannel(); ch.port1.onmessage = function (e) { res(e.data); };
+      var send = function () { sw.postMessage('snap', [ch.port2]); };
+      if (sw.state === 'activated' || sw.state === 'installed' || sw.state === 'installing') send(); else sw.addEventListener('statechange', send, { once: true });
+    });
+    try { await reg.unregister(); } catch (e) {}
+    return snap;
+  })(), 10000, 'serviceworker');
+  compare('worker.service', svc);
+});
+</script>
+</body></html>

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>redteam 09 pointerType on tap (device)</title><script src="./_rt.js"></script>
+<style>#box{width:260px;height:90px;border:2px dashed #666;display:flex;align-items:center;justify-content:center;font:16px sans-serif;user-select:none;touch-action:manipulation}</style></head>
+<body>
+<div id="box">Tap / click here 3 times</div>
+<script>
+/* Device-only: headless has no tap. Every event from a real finger must look like a mouse.
+   MouseEvent.mozInputSource: 0 unknown, 1 mouse, 2 pen, 3 eraser, 4 cursor, 5 touch, 6 keyboard. */
+RT.run(async function () {
+  var exp = RT.expected();
+  RT.info('static', JSON.stringify({ maxTouchPoints: navigator.maxTouchPoints, ontouchstart: 'ontouchstart' in window, TouchEvent: typeof TouchEvent, PointerEvent: typeof PointerEvent, pointerFine: matchMedia('(pointer: fine)').matches, anyCoarse: matchMedia('(any-pointer: coarse)').matches }));
+  var synthetic = new PointerEvent('pointerdown', { pointerType: 'touch' });
+  RT.info('synthetic', 'new PointerEvent({pointerType:"touch"}).pointerType=' + synthetic.pointerType + ' (constructor accepts any string; not a tell)');
+  var box = document.getElementById('box');
+  var events = [];
+  var types = ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click', 'touchstart', 'touchend', 'pointerover', 'mousemove', 'contextmenu'];
+  types.forEach(function (t) { box.addEventListener(t, function (e) {
+    var rec = { type: t, pointerType: e.pointerType, pointerId: e.pointerId, isPrimary: e.isPrimary, width: e.width, height: e.height, pressure: e.pressure, mozInputSource: e.mozInputSource, buttons: e.buttons, detail: e.detail, ctor: e.constructor && e.constructor.name, isTrusted: e.isTrusted, mozPressure: e.mozPressure };
+    events.push(rec);
+    judge(rec);
+  }); });
+  var taps = 0;
+  function judge(e) {
+    if (!e.isTrusted) return;
+    if (e.type === 'click') taps++;
+    if (e.pointerType !== undefined && e.pointerType !== 'mouse') RT.fired('tap.pointerType', e.type + ' pointerType=' + e.pointerType + ' (persona says no touch screen)');
+    if (e.mozInputSource === 5 || e.mozInputSource === 2) RT.fired('tap.mozInputSource', e.type + ' mozInputSource=' + e.mozInputSource + ' (5=touch, 2=pen; mouse=1)');
+    if (/^touch/.test(e.type)) RT.fired('tap.touchEvent', e.type + ' fired although TouchEvent is removed');
+    if (e.type === 'pointerdown' && e.pointerType === 'mouse' && (e.width > 1 || e.height > 1 || (e.pressure !== 0.5 && e.pressure !== 0))) RT.fired('tap.contactGeometry', 'mouse pointerdown with width/height/pressure ' + e.width + '/' + e.height + '/' + e.pressure + ' (real mouse: 1/1/0.5)');
+    if (e.type === 'pointerdown' && e.pointerType === 'mouse' && e.pointerId !== 0 && e.pointerId !== 1) RT.info('tap.pointerId', 'mouse pointerdown pointerId=' + e.pointerId + ' (desktop Firefox mouse: 0)');
+    if (e.type === 'click' && e.detail === 0) RT.info('tap.clickDetail', 'click.detail=0 (mouse click: 1)');
+    if (taps >= 3) { RT.info('tap.events', JSON.stringify(events)); window.__hatchPageDone = true; }
+  }
+  var hadTap = await RT.withTimeout(new Promise(function (res) { var iv = setInterval(function () { if (taps >= 3) { clearInterval(iv); res(true); } }, 200); }), 1500, 'tap');
+  if (hadTap !== true) RT.device('tap.pointerType', 'no trusted tap within 1.5 s (headless); on the phone tap the box: pointerdown.pointerType must be "mouse", mozInputSource 1, no touch* events, mousemove/pointerover before mousedown');
+  if (exp.desktop) RT.info('hover', 'also on device: hover the box with an external mouse; pointerover/mousemove must arrive before any mousedown');
+});
+</script>
+</body></html>

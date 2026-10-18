@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>redteam 07 Intl vs language vs Accept-Language</title><script src="./_rt.js"></script></head>
+<body>
+<script>
+RT.run(async function () {
+  var n = navigator;
+  var langs = Array.from(n.languages), lang = n.language;
+  var dtf = new Intl.DateTimeFormat().resolvedOptions(), nf = new Intl.NumberFormat().resolvedOptions(), col = new Intl.Collator().resolvedOptions();
+  var pr = new Intl.PluralRules().resolvedOptions(), rtf = typeof Intl.RelativeTimeFormat === 'function' ? new Intl.RelativeTimeFormat().resolvedOptions() : null;
+  var now = new Date(2026, 0, 31, 13, 5, 7);
+  var o = { languages: langs, language: lang, dtfLocale: dtf.locale, nfLocale: nf.locale, collatorLocale: col.locale, pluralLocale: pr.locale, rtfLocale: rtf && rtf.locale, defaultDate: now.toLocaleDateString(), langDate: now.toLocaleDateString(lang), defaultNumber: (1234567.891).toLocaleString(), langNumber: (1234567.891).toLocaleString(lang), defaultTime: now.toLocaleTimeString(), langTime: now.toLocaleTimeString(lang), dateString: now.toString() };
+  RT.info('intl', JSON.stringify(o));
+  function base(l) { return String(l || '').toLowerCase().split('-')[0]; }
+  RT.section('1. navigator.language(s) vs Intl default locale');
+  RT.check('intl.languagesFirst', langs[0] === lang, 'navigator.language=' + lang + ' but languages[0]=' + langs[0]);
+  RT.check('intl.dtfLocaleInLanguages', base(dtf.locale) === base(lang), 'Intl default locale ' + dtf.locale + ' vs navigator.language ' + lang + ' (desktop Firefox: app locale == first accept language for a user who picked a language)');
+  RT.check('intl.allIntlAgree', [nf.locale, col.locale, pr.locale, rtf ? rtf.locale : dtf.locale].every(function (l) { return l === dtf.locale; }), 'Intl services disagree: ' + [dtf.locale, nf.locale, col.locale, pr.locale, rtf && rtf.locale].join(','));
+  RT.check('intl.toLocaleDefaultVsLang', o.defaultDate === o.langDate && o.defaultNumber === o.langNumber, 'toLocale*() with no locale (' + o.defaultDate + ' / ' + o.defaultNumber + ') differs from navigator.language (' + o.langDate + ' / ' + o.langNumber + ')');
+  RT.section('2. Accept-Language header vs navigator.languages');
+  var echo = await RT.withTimeout(fetch('./echo', { cache: 'no-store' }).then(function (r) { return r.json(); }), 5000, 'echo');
+  if (echo && echo.headers) {
+    var al = echo.headers['accept-language'] || '';
+    var hdr = al.split(',').map(function (s) { return s.split(';')[0].trim(); }).filter(Boolean);
+    RT.info('acceptLanguage', al);
+    RT.check('intl.acceptVsLanguages', hdr.join('|').toLowerCase() === langs.join('|').toLowerCase(), 'Accept-Language [' + hdr.join(',') + '] vs navigator.languages [' + langs.join(',') + ']');
+    RT.info('acceptLanguage.q', al + ' (desktop Firefox default "en-US,en;q=0.5"; q-step 0.1 for >2 entries)');
+  } else RT.info('acceptLanguage', 'echo unavailable: ' + JSON.stringify(echo));
+  RT.section('3. document / UI strings');
+  var dir = getComputedStyle(document.documentElement).direction;
+  RT.info('misc', 'dir=' + dir + ' lang attr=' + document.documentElement.lang);
+  var dn = typeof Intl.DisplayNames === 'function' ? new Intl.DisplayNames(undefined, { type: 'language' }).of(base(lang)) : null;
+  RT.info('displayNames', 'Intl.DisplayNames(default).of(' + base(lang) + ')=' + dn);
+});
+</script>
+</body></html>

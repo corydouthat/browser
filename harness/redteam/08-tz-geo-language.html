@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>redteam 08 TZ vs geolocation vs language</title><script src="./_rt.js"></script></head>
+<body>
+<script>
+RT.run(async function () {
+  var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  var now = new Date();
+  function intlOffset(tz, d) {
+    var f = new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    var p = {}; f.formatToParts(d).forEach(function (x) { p[x.type] = x.value; });
+    return Math.round((Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second) - Math.floor(d.getTime() / 1000) * 1000) / 60000);
+  }
+  var dateOff = -now.getTimezoneOffset(), iOff = intlOffset(tz, now);
+  var jan = new Date(now.getFullYear(), 0, 1), jul = new Date(now.getFullYear(), 6, 1);
+  RT.section('1. Date vs Intl time zone');
+  RT.info('tz', JSON.stringify({ tz: tz, dateOffset: dateOff, intlOffset: iOff, janOffset: -jan.getTimezoneOffset(), julOffset: -jul.getTimezoneOffset(), intlJan: intlOffset(tz, jan), intlJul: intlOffset(tz, jul), toString: now.toString(), toLocale: now.toLocaleString('en-US', { timeZoneName: 'long' }) }));
+  RT.check('tz.dateVsIntlNow', dateOff === iOff, 'Date offset ' + dateOff + ' vs Intl(' + tz + ') ' + iOff);
+  RT.check('tz.dateVsIntlDst', -jan.getTimezoneOffset() === intlOffset(tz, jan) && -jul.getTimezoneOffset() === intlOffset(tz, jul), 'DST pattern differs: Date jan/jul ' + (-jan.getTimezoneOffset()) + '/' + (-jul.getTimezoneOffset()) + ' vs Intl ' + intlOffset(tz, jan) + '/' + intlOffset(tz, jul));
+  var tzName = (now.toString().match(/\(([^)]+)\)\s*$/) || [])[1] || '';
+  var intlName = (function () { try { var p = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'long' }).formatToParts(now); return (p.filter(function (x) { return x.type === 'timeZoneName'; })[0] || {}).value; } catch (e) { return null; } })();
+  RT.check('tz.toStringName', !intlName || tzName === intlName, 'Date.toString() zone name "' + tzName + '" vs Intl long name "' + intlName + '"');
+  var parsed = Date.parse('2026-07-01T12:00:00');
+  var viaCtor = new Date(2026, 6, 1, 12, 0, 0).getTime();
+  RT.check('tz.parseVsCtor', parsed === viaCtor, 'Date.parse(local ISO) ' + parsed + ' vs new Date(y,m,d,h) ' + viaCtor + ' (a Date shim that misses Date.parse)');
+  RT.section('2. geolocation vs time zone');
+  var perm = await RT.withTimeout(navigator.permissions.query({ name: 'geolocation' }).then(function (s) { return s.state; }), 3000, 'perm');
+  RT.info('geo.permissionBefore', JSON.stringify(perm) + ' (desktop Firefox for a never-visited site: "prompt")');
+  var t0 = performance.now();
+  var fixes = [];
+  for (var k = 0; k < 3; k++) {
+    var fix = await RT.withTimeout(new Promise(function (res, rej) { navigator.geolocation.getCurrentPosition(function (p) { res({ lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy, alt: p.coords.altitude, ts: p.timestamp, stack: RT.frames(new Error().stack), ms: performance.now() - t0, proto: Object.getPrototypeOf(p) === GeolocationPosition.prototype, own: Object.getOwnPropertyNames(p).length + Object.getOwnPropertyNames(p.coords).length, json: JSON.stringify(p) }); }, function (e) { rej(new Error('geo error ' + e.code + ' ' + e.message)); }, { timeout: 8000, enableHighAccuracy: true }); }), 9000, 'geo');
+    fixes.push(fix);
+  }
+  RT.info('geo.fixes', JSON.stringify(fixes.map(function (f) { return f && f.lat !== undefined ? { lat: f.lat, lon: f.lon, acc: f.acc, ms: Math.round(f.ms), own: f.own, proto: f.proto } : f; })));
+  var f0 = fixes[0];
+  if (f0 && f0.lat !== undefined) {
+    RT.check('geo.callbackStack', f0.stack.length <= 1, 'success callback runs with ' + f0.stack.length + ' frames on the stack (native: just the callback): ' + f0.stack.join(' || '));
+    RT.check('geo.objectShape', f0.proto && f0.own === 0, 'GeolocationPosition shape: proto ok=' + f0.proto + ' ownProps=' + f0.own);
+    RT.info('geo.json', f0.json.slice(0, 200));
+    var lonHours = f0.lon / 15, tzHours = dateOff / 60;
+    RT.check('geo.lonVsTz', Math.abs(lonHours - tzHours) <= 3, 'longitude ' + f0.lon.toFixed(2) + ' implies UTC' + (lonHours >= 0 ? '+' : '') + lonHours.toFixed(1) + ' but zone offset is ' + tzHours + ' h (' + tz + ')');
+    var cont = tz.split('/')[0];
+    var geoCont = (f0.lon < -30 && f0.lon > -170) ? 'America' : (f0.lon >= -30 && f0.lon < 40 && f0.lat > 34) ? 'Europe' : (f0.lon >= 25 && f0.lat > -12) ? 'Asia' : 'other';
+    RT.check('geo.continentVsTz', cont === geoCont || cont === 'UTC' || cont === 'Etc', 'position is in ' + geoCont + ' but tz is ' + tz);
+    var moves = []; for (var j = 1; j < fixes.length; j++) if (fixes[j] && fixes[j].lat !== undefined) moves.push(Math.round(Math.hypot((fixes[j].lat - fixes[j - 1].lat) * 111320, (fixes[j].lon - fixes[j - 1].lon) * 111320 * Math.cos(f0.lat * Math.PI / 180)) * 10) / 10);
+    RT.info('geo.jitterMetres', JSON.stringify(moves) + ' between consecutive fixes ' + Math.round(fixes[1] ? fixes[1].ms - f0.ms : 0) + ' ms apart (network provider: identical cached fix; GPS indoors: 5-30 m)');
+    RT.info('geo.timing', 'first fix in ' + Math.round(f0.ms) + ' ms, accuracy ' + f0.acc + ' m (enableHighAccuracy), altitude ' + f0.alt);
+    var permAfter = await RT.withTimeout(navigator.permissions.query({ name: 'geolocation' }).then(function (s) { return s.state; }), 3000, 'perm');
+    RT.info('geo.permissionAfter', JSON.stringify(permAfter));
+  } else RT.info('geo', 'no fix: ' + JSON.stringify(f0));
+  RT.section('3. language region vs time zone');
+  var langs = Array.from(navigator.languages);
+  var tzCountry = { 'America/New_York': 'US', 'America/Chicago': 'US', 'America/Denver': 'US', 'America/Los_Angeles': 'US', 'Europe/London': 'GB', 'Europe/Berlin': 'DE', 'Asia/Tokyo': 'JP', 'Europe/Paris': 'FR', 'Europe/Madrid': 'ES', 'Europe/Rome': 'IT', 'Australia/Sydney': 'AU', 'America/Toronto': 'CA', 'Asia/Shanghai': 'CN', 'Asia/Kolkata': 'IN', 'America/Sao_Paulo': 'BR' }[tz];
+  var countryLang = { US: ['en'], GB: ['en'], DE: ['de'], JP: ['ja'], FR: ['fr'], ES: ['es', 'ca'], IT: ['it'], AU: ['en'], CA: ['en', 'fr'], CN: ['zh'], IN: ['en', 'hi'], BR: ['pt'] };
+  if (tzCountry) {
+    var regions = langs.map(function (l) { return (l.split('-')[1] || '').toUpperCase(); }).filter(Boolean);
+    var bases = langs.map(function (l) { return l.split('-')[0].toLowerCase(); });
+    var ok = regions.indexOf(tzCountry) >= 0 || countryLang[tzCountry].some(function (b) { return bases.indexOf(b) >= 0; });
+    RT.check('lang.vsTz', ok, 'languages ' + langs.join(',') + ' do not fit ' + tz + ' (' + tzCountry + ')');
+  } else RT.info('lang.vsTz', 'no country mapping for ' + tz + ' (host zone?) languages=' + langs.join(','));
+});
+</script>
+</body></html>

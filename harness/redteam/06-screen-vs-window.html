@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>redteam 06 screen vs window</title><script src="./_rt.js"></script></head>
+<body>
+<script>
+RT.run(async function () {
+  var S = screen, vv = window.visualViewport;
+  var o = { screen: [S.width, S.height], avail: [S.availWidth, S.availHeight], availLT: [S.availLeft, S.availTop], leftTop: ['left' in S ? S.left : null, 'top' in S ? S.top : null], inner: [innerWidth, innerHeight], outer: [outerWidth, outerHeight], screenXY: [screenX, screenY], screenLT: [screenLeft, screenTop], mozInner: [window.mozInnerScreenX, window.mozInnerScreenY], client: [document.documentElement.clientWidth, document.documentElement.clientHeight], vv: vv ? [vv.width, vv.height, vv.scale, vv.offsetLeft, vv.offsetTop] : null, dpr: devicePixelRatio, colorDepth: S.colorDepth, pixelDepth: S.pixelDepth, fullscreen: !!document.fullscreenElement };
+  RT.info('geometry', JSON.stringify(o));
+  RT.section('1. hard impossibilities');
+  RT.check('win.innerWithinScreen', innerWidth <= S.width && innerHeight <= S.height, 'inner ' + innerWidth + 'x' + innerHeight + ' exceeds screen ' + S.width + 'x' + S.height);
+  RT.check('win.outerWithinScreen', outerWidth <= S.width && outerHeight <= S.height, 'outer ' + outerWidth + 'x' + outerHeight + ' exceeds screen ' + S.width + 'x' + S.height);
+  RT.check('win.outerGeInner', outerWidth >= innerWidth && outerHeight >= innerHeight, 'outer ' + outerWidth + 'x' + outerHeight + ' smaller than inner ' + innerWidth + 'x' + innerHeight);
+  RT.check('win.availWithinScreen', S.availWidth <= S.width && S.availHeight <= S.height && S.availLeft >= 0 && S.availTop >= 0, 'avail ' + S.availWidth + 'x' + S.availHeight + ' @' + S.availLeft + ',' + S.availTop + ' vs screen ' + S.width + 'x' + S.height);
+  RT.check('win.innerWithinAvail', document.fullscreenElement || (innerWidth <= S.availWidth && innerHeight <= S.availHeight), 'inner ' + innerWidth + 'x' + innerHeight + ' exceeds availHeight/availWidth ' + S.availWidth + 'x' + S.availHeight + ' while not fullscreen');
+  var chromeH = outerHeight - innerHeight, topChrome = window.mozInnerScreenY - screenY, leftChrome = window.mozInnerScreenX - screenX;
+  RT.check('win.chromeGeometry', topChrome >= 0 && topChrome <= chromeH && leftChrome >= 0 && leftChrome <= outerWidth - innerWidth, 'mozInnerScreenY-screenY=' + topChrome + ' vs outerHeight-innerHeight=' + chromeH + '; mozInnerScreenX-screenX=' + leftChrome + ' vs outerWidth-innerWidth=' + (outerWidth - innerWidth));
+  RT.check('win.windowOnScreen', screenX + outerWidth <= S.width + 16 && screenY + outerHeight <= S.height + 16 && screenX >= -16 && screenY >= -16, 'window rect ' + screenX + ',' + screenY + ' ' + outerWidth + 'x' + outerHeight + ' does not fit screen ' + S.width + 'x' + S.height);
+  RT.section('2. zoom / visual viewport at load');
+  if (vv) {
+    RT.check('vv.scaleOne', Math.abs(vv.scale - 1) < 0.001, 'visualViewport.scale=' + vv.scale + ' at load (desktop browsers: 1; a forced desktop viewport zoomed out to fit the display is < 1)');
+    RT.check('vv.widthVsInner', Math.abs(vv.width - document.documentElement.clientWidth) <= 1, 'visualViewport.width=' + vv.width + ' vs clientWidth=' + document.documentElement.clientWidth);
+  }
+  RT.section('3. plausibility (not impossible, but unusual on a real desktop)');
+  if (!document.fullscreenElement && outerHeight > S.availHeight) RT.info('win.outerOverAvail', 'outerHeight ' + outerHeight + ' > availHeight ' + S.availHeight + ' while not fullscreen (a maximized desktop window stops at availHeight; only fullscreen reaches ' + S.height + ')');
+  else RT.clean('win.outerOverAvail', 'outerHeight ' + outerHeight + ' <= availHeight ' + S.availHeight);
+  RT.check('screen.depths', S.colorDepth === S.pixelDepth && (S.colorDepth === 24 || S.colorDepth === 30 || S.colorDepth === 32), 'colorDepth/pixelDepth ' + S.colorDepth + '/' + S.pixelDepth);
+  RT.check('screen.availLTZero', (S.availLeft === 0) && (S.availTop === 0 || S.availTop > 0), 'availLeft/availTop ' + S.availLeft + '/' + S.availTop);
+  var tb = S.height - S.availHeight;
+  RT.info('screen.taskbar', 'height-availHeight=' + tb + ' (Windows taskbar 40 at 1x; macOS menu bar 25)');
+  var cw = document.documentElement.clientWidth;
+  RT.info('scrollbar', 'innerWidth-clientWidth=' + (innerWidth - cw) + ' (classic scrollbars 15-17, overlay 0)');
+});
+</script>
+</body></html>

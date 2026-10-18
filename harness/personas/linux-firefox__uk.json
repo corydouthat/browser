@@ -1,0 +1,48 @@
+{
+  "id": "linux-firefox__uk",
+  "identity": "linux-firefox",
+  "region": "uk",
+  "name": "Linux · Firefox 158 / United Kingdom (London)",
+  "desktop": true,
+  "touch": false,
+  "chromeLike": false,
+  "tzShim": false,
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0",
+  "platform": "Linux x86_64",
+  "oscpu": "Linux x86_64",
+  "appVersion": "5.0 (X11)",
+  "maxTouchPoints": 0,
+  "hasTouchEvent": false,
+  "pointerFine": true,
+  "hoverHover": true,
+  "minLayoutWidth": 1366,
+  "screen": {
+    "width": 1920,
+    "height": 1080,
+    "availWidth": 1920,
+    "availHeight": 1053,
+    "colorDepth": 24,
+    "dpr": 1
+  },
+  "dpr": 1,
+  "hardwareConcurrency": 8,
+  "languages": [
+    "en-GB",
+    "en"
+  ],
+  "acceptLanguage": "en-GB,en;q=0.9",
+  "timeZone": "Europe/London",
+  "geolocation": {
+    "latitude": 51.5074,
+    "longitude": -0.1278,
+    "accuracyMeters": 50
+  },
+  "webgl": {
+    "vendor": "Mesa",
+    "renderer": "Mesa Intel(R) UHD Graphics 620 (KBL GT2)"
+  },
+  "userAgentData": false,
+  "uaData": null,
+  "locale": "en-GB",
+  "librariesMobile": false
+}

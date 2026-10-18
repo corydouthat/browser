@@ -1,0 +1,127 @@
+{
+  "generatedBy": "harness/tool/build-vendor.mjs",
+  "esbuild": "0.28.2",
+  "bundle": {
+    "file": "detectors.bundle.js",
+    "bytes": 839363,
+    "sha256": "0bf36885dd03f11974023d68cf5f366fe0ae617e0e98112b03582a20047edc7d"
+  },
+  "modernizr": {
+    "version": "3.13.1",
+    "config": [
+      "touchevents",
+      "pointerevents"
+    ],
+    "sha256": "b894bb590eae94d1a4be8350a774d6acb52aaa4093ed014c347a662cfe63819d"
+  },
+  "libraries": [
+    {
+      "name": "ua-parser-js",
+      "version": "2.0.10",
+      "id": "ua-parser-js@2.0.10",
+      "role": "detector",
+      "integrity": "sha512-t+3Ktbq0Ies2vaSezfOaWiolH4OigQIO1dk+1xDpOydB1COVPocVYOrEV5rqZ0kFY9XYG1v9LutCyMgYBpABcw==",
+      "resolved": "https://registry.npmjs.org/ua-parser-js/-/ua-parser-js-2.0.10.tgz",
+      "entrySha256": "2b18095c57046a114097254d93b49172e85498fd00da52cfb03d490c644d4112"
+    },
+    {
+      "name": "mobile-detect",
+      "version": "1.4.5",
+      "id": "mobile-detect@1.4.5",
+      "role": "detector",
+      "integrity": "sha512-yc0LhH6tItlvfLBugVUEtgawwFU2sIe+cSdmRJJCTMZ5GEJyLxNyC/NIOAOGk67Fa8GNpOttO3Xz/1bHpXFD/g==",
+      "resolved": "https://registry.npmjs.org/mobile-detect/-/mobile-detect-1.4.5.tgz",
+      "entrySha256": "62373bbbea36adc1ccbea9873330406fe7f63f35d88ff7d31e786d8baee2783d"
+    },
+    {
+      "name": "ismobilejs",
+      "version": "1.1.1",
+      "id": "ismobilejs@1.1.1",
+      "role": "detector",
+      "integrity": "sha512-VaFW53yt8QO61k2WJui0dHf4SlL8lxBofUuUmwBo0ljPk0Drz2TiuDW4jo3wDcv41qy/SxrJ+VAzJ/qYqsmzRw==",
+      "resolved": "https://registry.npmjs.org/ismobilejs/-/ismobilejs-1.1.1.tgz",
+      "entrySha256": "4392c4ba9af8e08082fc54087c09663b0441d2d3350daeb375209caa7812230a"
+    },
+    {
+      "name": "is-mobile",
+      "version": "5.0.0",
+      "id": "is-mobile@5.0.0",
+      "role": "detector",
+      "integrity": "sha512-Tz/yndySvLAEXh+Uk8liFCxOwVH6YutuR74utvOcu7I9Di+DwM0mtdPVZNaVvvBUM2OXxne/NhOs1zAO7riusQ==",
+      "resolved": "https://registry.npmjs.org/is-mobile/-/is-mobile-5.0.0.tgz",
+      "entrySha256": "799aa13adfc2c6e425b3de92e32dccd4903e3de194547e17bfceb49d8f6a247b"
+    },
+    {
+      "name": "detect-it",
+      "version": "4.0.1",
+      "id": "detect-it@4.0.1",
+      "role": "detector",
+      "integrity": "sha512-dg5YBTJYvogK1+dA2mBUDKzOWfYZtHVba89SyZUhc4+e3i2tzgjANFg5lDRCd3UOtRcw00vUTMK8LELcMdicug==",
+      "resolved": "https://registry.npmjs.org/detect-it/-/detect-it-4.0.1.tgz",
+      "entrySha256": "c415c87a237b1a389c1761aac0431e627f3e59eaf72272f1f5c38e5bf7ca6ba5"
+    },
+    {
+      "name": "bowser",
+      "version": "2.14.1",
+      "id": "bowser@2.14.1",
+      "role": "detector",
+      "integrity": "sha512-tzPjzCxygAKWFOJP011oxFHs57HzIhOEracIgAePE4pqB3LikALKnSzUyU4MGs9/iCEUuHlAJTjTc5M+u7YEGg==",
+      "resolved": "https://registry.npmjs.org/bowser/-/bowser-2.14.1.tgz",
+      "entrySha256": "c412675f822d7d7ff22f0563364c48d77f6bee4b020cde1a938866ea4ee354c2"
+    },
+    {
+      "name": "platform",
+      "version": "1.3.6",
+      "id": "platform@1.3.6",
+      "role": "detector",
+      "integrity": "sha512-fnWVljUchTro6RiCFvCXBbNhJc2NijN7oIQxbwsyL0buWJPG85v81ehlHI9fXrJsMNgTofEoWIQeClKpgxFLrg==",
+      "resolved": "https://registry.npmjs.org/platform/-/platform-1.3.6.tgz",
+      "entrySha256": "8274836f95ba740ec770172df97b621e0f846ac8cc2f422ebdf96def8fd021d5"
+    },
+    {
+      "name": "react-device-detect",
+      "version": "2.2.3",
+      "id": "react-device-detect@2.2.3",
+      "role": "detector",
+      "integrity": "sha512-buYY3qrCnQVlIFHrC5UcUoAj7iANs/+srdkwsnNjI7anr3Tt7UY6MqNxtMLlr0tMBied0O49UZVK8XKs3ZIiPw==",
+      "resolved": "https://registry.npmjs.org/react-device-detect/-/react-device-detect-2.2.3.tgz",
+      "entrySha256": "d222597c37ae4e2243850838e6305b30e51f72efcaef4ab708bb0f17374b8607"
+    },
+    {
+      "name": "device-detector-js",
+      "version": "3.0.3",
+      "id": "device-detector-js@3.0.3",
+      "role": "detector",
+      "integrity": "sha512-jM89LJAvP6uOd84at8OlD9dWP8KeYCCHUde0RT0HQo/stdoRH4b54Xl/fntx2nEXCmqiFhmo+/cJetS2VGUHPw==",
+      "resolved": "https://registry.npmjs.org/device-detector-js/-/device-detector-js-3.0.3.tgz",
+      "entrySha256": "2fba592a07afd18dfa61b246e2f52fd775bc8ef0ebf37e21ea62b5d31b92230e"
+    },
+    {
+      "name": "modernizr",
+      "version": "3.13.1",
+      "id": "modernizr@3.13.1",
+      "role": "detector",
+      "integrity": "sha512-jc7F04Wd8ngu+fNZYMdWmho6bdiNNnt01lAEF6WAGRay7haGzjWEj5wfBC/zNgv5BySJ+h29/ERMFX+zEcijvg==",
+      "resolved": "https://registry.npmjs.org/modernizr/-/modernizr-3.13.1.tgz",
+      "entrySha256": "e6ccc10e95990df156b4577c24e066b3e9c39086b3be616cf7edea03f7e871b0"
+    },
+    {
+      "name": "react",
+      "version": "18.3.1",
+      "id": "react@18.3.1",
+      "role": "peer",
+      "integrity": "sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==",
+      "resolved": "https://registry.npmjs.org/react/-/react-18.3.1.tgz",
+      "entrySha256": "a216c390bf956cbb906c66d29fdb2e2ad6999464a5ca83e476533a6f25ad0ef3"
+    },
+    {
+      "name": "react-dom",
+      "version": "18.3.1",
+      "id": "react-dom@18.3.1",
+      "role": "peer",
+      "integrity": "sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==",
+      "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-18.3.1.tgz",
+      "entrySha256": "f26fcb81b5d1dc32c6edea34645c75b60d259916293d3208c8be48ac33e882e4"
+    }
+  ]
+}

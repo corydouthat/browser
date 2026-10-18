@@ -1,0 +1,47 @@
+{
+  "generatedFrom": [
+    "personas/identities.json",
+    "personas/regions.json"
+  ],
+  "identities": [
+    "win-firefox",
+    "mac-firefox",
+    "linux-firefox",
+    "win-chrome",
+    "real-device"
+  ],
+  "regions": [
+    "device",
+    "us-east",
+    "uk",
+    "de",
+    "jp"
+  ],
+  "personas": [
+    "win-firefox__device",
+    "win-firefox__us-east",
+    "win-firefox__uk",
+    "win-firefox__de",
+    "win-firefox__jp",
+    "mac-firefox__device",
+    "mac-firefox__us-east",
+    "mac-firefox__uk",
+    "mac-firefox__de",
+    "mac-firefox__jp",
+    "linux-firefox__device",
+    "linux-firefox__us-east",
+    "linux-firefox__uk",
+    "linux-firefox__de",
+    "linux-firefox__jp",
+    "win-chrome__device",
+    "win-chrome__us-east",
+    "win-chrome__uk",
+    "win-chrome__de",
+    "win-chrome__jp",
+    "real-device__device",
+    "real-device__us-east",
+    "real-device__uk",
+    "real-device__de",
+    "real-device__jp"
+  ]
+}

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>redteam 10 WebGL plausibility</title><script src="./_rt.js"></script></head>
+<body>
+<script>
+RT.run(async function () {
+  var exp = RT.expected();
+  var c = document.createElement('canvas'), gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+  var c2 = document.createElement('canvas'), gl2 = c2.getContext('webgl2');
+  if (!gl) { RT.device('webgl', 'no WebGL context in this host (headless Linux without GL); run on the phone'); return; }
+  function P(g, k) { try { return g.getParameter(g[k] !== undefined ? g[k] : k); } catch (e) { return 'error:' + e.message; } }
+  var before = gl.getParameter(0x9246);
+  var ext = gl.getExtension('WEBGL_debug_renderer_info');
+  var exts = gl.getSupportedExtensions() || [];
+  var info = { vendor: P(gl, 'VENDOR'), renderer: P(gl, 'RENDERER'), version: P(gl, 'VERSION'), glsl: P(gl, 'SHADING_LANGUAGE_VERSION'), unmaskedVendor: ext ? gl.getParameter(ext.UNMASKED_VENDOR_WEBGL) : null, unmaskedRenderer: ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : null, unmaskedBeforeExt: before, maxTex: P(gl, 'MAX_TEXTURE_SIZE'), maxCube: P(gl, 'MAX_CUBE_MAP_TEXTURE_SIZE'), maxRB: P(gl, 'MAX_RENDERBUFFER_SIZE'), maxViewport: Array.from(P(gl, 'MAX_VIEWPORT_DIMS') || []), maxVarying: P(gl, 'MAX_VARYING_VECTORS'), maxVertUniform: P(gl, 'MAX_VERTEX_UNIFORM_VECTORS'), maxFragUniform: P(gl, 'MAX_FRAGMENT_UNIFORM_VECTORS'), maxVertAttribs: P(gl, 'MAX_VERTEX_ATTRIBS'), maxTexUnits: P(gl, 'MAX_COMBINED_TEXTURE_IMAGE_UNITS'), lineWidth: Array.from(P(gl, 'ALIASED_LINE_WIDTH_RANGE') || []), pointSize: Array.from(P(gl, 'ALIASED_POINT_SIZE_RANGE') || []), aniso: (function () { var a = gl.getExtension('EXT_texture_filter_anisotropic'); return a ? gl.getParameter(a.MAX_TEXTURE_MAX_ANISOTROPY_EXT) : null; })(), fragHigh: (function () { var f = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT); return f ? [f.precision, f.rangeMin, f.rangeMax] : null; })(), extCount: exts.length, exts: exts, webgl2: !!gl2, webgl2Renderer: gl2 ? (function () { var e = gl2.getExtension('WEBGL_debug_renderer_info'); return e ? gl2.getParameter(e.UNMASKED_RENDERER_WEBGL) : null; })() : null, maxDrawBuffers: gl2 ? gl2.getParameter(gl2.MAX_DRAW_BUFFERS) : null, maxColorAttachments: gl2 ? gl2.getParameter(gl2.MAX_COLOR_ATTACHMENTS) : null, max3D: gl2 ? gl2.getParameter(gl2.MAX_3D_TEXTURE_SIZE) : null };
+  RT.info('webgl', JSON.stringify(info));
+  var r = String(info.unmaskedRenderer || ''), v = String(info.unmaskedVendor || '');
+  RT.section('1. renderer string vs claimed platform');
+  RT.check('webgl.unmaskedBeforeExt', before === null, 'UNMASKED_RENDERER_WEBGL readable before getExtension: ' + before);
+  RT.check('webgl.extListed', exts.indexOf('WEBGL_debug_renderer_info') >= 0, 'WEBGL_debug_renderer_info missing from getSupportedExtensions');
+  if (exp.desktop) {
+    RT.check('webgl.mobileGpuName', !/adreno|mali|powervr|android|qualcomm|arm\b|immortalis|xclipse|tegra|vivante/i.test(r + ' ' + v), 'unmasked renderer/vendor names a mobile GPU: ' + v + ' / ' + r);
+    RT.check('webgl.rendererVsPlatform', exp.platform !== 'windows' || /angle|direct3d|d3d11|nvidia|amd|radeon|intel/i.test(r), 'Windows persona but renderer "' + r + '" is not an ANGLE/D3D string');
+    RT.check('webgl.rendererVsPlatformMac', exp.platform !== 'mac' || /apple|amd|intel|metal/i.test(r), 'macOS persona but renderer "' + r + '"');
+  }
+  RT.section('2. capabilities vs the claimed GPU/driver');
+  var claimsD3D = /d3d11|direct3d/i.test(r);
+  var hasETC = exts.some(function (e) { return /compressed_texture_etc|etc1/i.test(e); }), hasASTC = exts.some(function (e) { return /astc/i.test(e); }), hasPVR = exts.some(function (e) { return /pvrtc/i.test(e); }), hasS3TC = exts.some(function (e) { return /s3tc/i.test(e); });
+  RT.info('webgl.compressed', JSON.stringify({ etc: hasETC, astc: hasASTC, pvrtc: hasPVR, s3tc: hasS3TC }));
+  if (claimsD3D) {
+    RT.check('webgl.d3dLineWidth', info.lineWidth[0] === 1 && info.lineWidth[1] === 1, 'ANGLE D3D11 reports ALIASED_LINE_WIDTH_RANGE [1,1]; got ' + JSON.stringify(info.lineWidth));
+    RT.check('webgl.d3dCompressed', hasS3TC && !hasETC && !hasASTC && !hasPVR, 'ANGLE D3D11 exposes S3TC and never ETC/ASTC/PVRTC; got s3tc=' + hasS3TC + ' etc=' + hasETC + ' astc=' + hasASTC + ' pvrtc=' + hasPVR);
+    RT.check('webgl.d3dMaxTex', info.maxTex >= 16384, 'NVIDIA GTX 1660 on D3D11 feature level 11: MAX_TEXTURE_SIZE 16384, got ' + info.maxTex);
+  }
+  if (/apple m1/i.test(r)) {
+    RT.check('webgl.m1MaxTex', info.maxTex === 16384, 'Apple M1 reports MAX_TEXTURE_SIZE 16384, got ' + info.maxTex);
+    RT.check('webgl.m1Compressed', !hasS3TC || (hasETC && hasASTC), 'Apple M1 (Metal) exposes ETC/ASTC alongside S3TC; got s3tc=' + hasS3TC + ' etc=' + hasETC + ' astc=' + hasASTC);
+  }
+  if (/mesa/i.test(r)) RT.check('webgl.mesaCompressed', hasS3TC, 'Mesa Intel exposes S3TC; got s3tc=' + hasS3TC);
+  RT.check('webgl.precision', !info.fragHigh || info.fragHigh[0] === 23, 'fragment highp precision ' + JSON.stringify(info.fragHigh));
+  RT.check('webgl.webgl2Agrees', !gl2 || info.webgl2Renderer === info.unmaskedRenderer, 'WebGL2 unmasked renderer "' + info.webgl2Renderer + '" differs from WebGL1 "' + info.unmaskedRenderer + '"');
+  RT.section('3. renderer via OffscreenCanvas in a Worker (shim does not reach workers)');
+  var w = await RT.withTimeout(new Promise(function (res, rej) {
+    var src = 'self.onmessage=function(){try{var c=new OffscreenCanvas(8,8);var g=c.getContext("webgl");if(!g){postMessage("no gl");return;}var e=g.getExtension("WEBGL_debug_renderer_info");postMessage({vendor:e?g.getParameter(e.UNMASKED_VENDOR_WEBGL):null,renderer:e?g.getParameter(e.UNMASKED_RENDERER_WEBGL):null});}catch(x){postMessage("error:"+x.message)}};';
+    var wk = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' }))); wk.onmessage = function (e) { res(e.data); wk.terminate(); }; wk.onerror = function (e) { rej(new Error(e.message)); }; wk.postMessage(1);
+  }), 8000, 'worker-gl');
+  if (w && typeof w === 'object' && !w.timeout && !w.error) RT.check('webgl.workerRenderer', w.renderer === info.unmaskedRenderer && w.vendor === info.unmaskedVendor, 'worker OffscreenCanvas unmasked renderer "' + w.renderer + '" (' + w.vendor + ') vs window "' + info.unmaskedRenderer + '"');
+  else RT.info('webgl.workerRenderer', JSON.stringify(w));
+});
+</script>
+</body></html>

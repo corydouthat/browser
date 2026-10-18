@@ -1,0 +1,48 @@
+{
+  "id": "win-firefox__uk",
+  "identity": "win-firefox",
+  "region": "uk",
+  "name": "Windows · Firefox 158 / United Kingdom (London)",
+  "desktop": true,
+  "touch": false,
+  "chromeLike": false,
+  "tzShim": false,
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+  "platform": "Win32",
+  "oscpu": "Windows NT 10.0; Win64; x64",
+  "appVersion": "5.0 (Windows)",
+  "maxTouchPoints": 0,
+  "hasTouchEvent": false,
+  "pointerFine": true,
+  "hoverHover": true,
+  "minLayoutWidth": 1366,
+  "screen": {
+    "width": 1920,
+    "height": 1080,
+    "availWidth": 1920,
+    "availHeight": 1040,
+    "colorDepth": 24,
+    "dpr": 1
+  },
+  "dpr": 1,
+  "hardwareConcurrency": 8,
+  "languages": [
+    "en-GB",
+    "en"
+  ],
+  "acceptLanguage": "en-GB,en;q=0.9",
+  "timeZone": "Europe/London",
+  "geolocation": {
+    "latitude": 51.5074,
+    "longitude": -0.1278,
+    "accuracyMeters": 50
+  },
+  "webgl": {
+    "vendor": "Google Inc. (NVIDIA)",
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1660 SUPER Direct3D11 vs_5_0 ps_5_0, D3D11)"
+  },
+  "userAgentData": false,
+  "uaData": null,
+  "locale": "en-GB",
+  "librariesMobile": false
+}

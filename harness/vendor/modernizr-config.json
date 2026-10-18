@@ -1,0 +1,11 @@
+{
+  "minify": true,
+  "classPrefix": "",
+  "enableClasses": false,
+  "enableJSClass": false,
+  "options": [],
+  "feature-detects": [
+    "touchevents",
+    "pointerevents"
+  ]
+}

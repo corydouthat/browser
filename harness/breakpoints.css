@@ -1,0 +1,34 @@
+/*
+ * CSS-level probes for the Hatch detection harness. Each rule flips --hit on a probe element when the
+ * media query applies; probes/media.js reads it back with getComputedStyle. These are evaluated by the
+ * style engine, so a JS-only spoof (matchMedia patch) cannot influence them.
+ */
+.css-probe { --hit: 0; display: inline-block; width: 1px; height: 1px; }
+
+@media (pointer: fine) { #css-pointer-fine { --hit: 1; } }
+@media (hover: hover) { #css-hover-hover { --hit: 1; } }
+@media (any-pointer: coarse) { #css-any-pointer-coarse { --hit: 1; } }
+@media (any-hover: hover) { #css-any-hover-hover { --hit: 1; } }
+
+/* Bootstrap lg = 992, Tailwind lg = 1024 / xl = 1280, MUI lg = 1200 (all above the stock 980 px desktop viewport). */
+@media (min-width: 992px) { #css-bp-992 { --hit: 1; } }
+@media (min-width: 1024px) { #css-bp-1024 { --hit: 1; } }
+@media (min-width: 1200px) { #css-bp-1200 { --hit: 1; } }
+@media (min-width: 1280px) { #css-bp-1280 { --hit: 1; } }
+
+@media (min-device-width: 1024px) { #css-min-device-width-1024 { --hit: 1; } }
+/* Legacy mobile gates: the engine evaluates device-* / resolution from the real display (Gecko nsMediaFeatures
+   has no desktop-viewport branch), so these are device-scoped signals and a documented limitation. */
+@media (max-device-width: 480px) { #css-max-device-width-480 { --hit: 1; } }
+@media (min-resolution: 2dppx) { #css-min-resolution-2 { --hit: 1; } }
+@media (orientation: portrait) { #css-orientation-portrait { --hit: 1; } }
+
+/* Visible layout demo: a 3-column grid that collapses below 992 px, like a Bootstrap page would. */
+.grid-demo { display: grid; grid-template-columns: 1fr; gap: 8px; }
+@media (min-width: 992px) { .grid-demo { grid-template-columns: repeat(3, 1fr); } }
+.grid-demo > div { padding: 8px 10px; border: 1px solid #c9d2dc; border-radius: 6px; background: #f6f8fa; font-size: 13px; }
+.bucket::after { content: "< 992 (mobile layout)"; }
+@media (min-width: 992px) { .bucket::after { content: ">= 992 (Bootstrap lg)"; } }
+@media (min-width: 1024px) { .bucket::after { content: ">= 1024 (Tailwind lg)"; } }
+@media (min-width: 1200px) { .bucket::after { content: ">= 1200 (MUI lg)"; } }
+@media (min-width: 1280px) { .bucket::after { content: ">= 1280 (Tailwind xl)"; } }

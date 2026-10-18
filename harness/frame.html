@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hatch harness frame</title>
+</head>
+<body>
+<script>
+/* Posts a navigator/screen/Intl snapshot to the parent. Used as same-origin, cross-origin
+   (served from window.__hatchCrossOrigin) and by the headless runner as a readiness page. */
+(function () {
+  var hatchSnapshot = function hatchSnapshot(w) {
+    var n = w.navigator;
+    var out = {};
+    function t(k, f) { try { out[k] = f(); } catch (e) { out[k] = 'error: ' + (e && e.message); } }
+    t('userAgent', function () { return n.userAgent; });
+    t('platform', function () { return n.platform; });
+    t('oscpu', function () { return 'oscpu' in n ? n.oscpu : null; });
+    t('appVersion', function () { return n.appVersion; });
+    t('languages', function () { return Array.prototype.slice.call(n.languages); });
+    t('hardwareConcurrency', function () { return n.hardwareConcurrency; });
+    t('maxTouchPoints', function () { return n.maxTouchPoints; });
+    t('timeZone', function () { return new w.Intl.DateTimeFormat().resolvedOptions().timeZone; });
+    t('locale', function () { return new w.Intl.DateTimeFormat().resolvedOptions().locale; });
+    t('screenWidth', function () { return w.screen.width; });
+    t('screenHeight', function () { return w.screen.height; });
+    t('dpr', function () { return w.devicePixelRatio; });
+    t('ontouchstart', function () { return 'ontouchstart' in w; });
+    t('touchEvent', function () { return typeof w.TouchEvent !== 'undefined'; });
+    t('dateOffset', function () { return new w.Date().getTimezoneOffset(); });
+    t('pointerFine', function () { return w.matchMedia('(pointer: fine)').matches; });
+    return out;
+  };
+  var tag = (new URLSearchParams(location.search).get('tag')) || 'frame';
+  var snapshot = hatchSnapshot(window);
+  window.__hatchFrameSnapshot = snapshot;
+  if (window.parent && window.parent !== window) {
+    try { window.parent.postMessage({ type: 'hatch-frame', tag: tag, snapshot: snapshot }, '*'); } catch (e) { /* no parent */ }
+  }
+  document.body.textContent = JSON.stringify(snapshot);
+})();
+</script>
+</body>
+</html>

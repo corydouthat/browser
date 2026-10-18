@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>redteam 01 toString</title><script src="./_rt.js"></script></head>
+<body>
+<script>
+RT.run(async function () {
+  var w = window;
+  function getter(proto, name) { var d = proto && Object.getOwnPropertyDescriptor(proto, name); return d && d.get ? d.get : null; }
+  function method(obj, name) { var d = obj && Object.getOwnPropertyDescriptor(obj, name); return d && typeof d.value === 'function' ? d.value : null; }
+  var NP = w.Navigator.prototype, SP = w.Screen.prototype;
+  // Reference natives the shim never touches (same realm, same binding generator).
+  var refGetter = getter(NP, 'onLine') || getter(NP, 'cookieEnabled');
+  var refMethod = method(NP, 'javaEnabled') || method(w.Document.prototype, 'createElement');
+  // SpiderMonkey resolves a function's own `length` / `name` lazily, for natives AND for script functions:
+  // a fresh function lists [length, name]; after `.name` was read it lists [name, length]. Own-property
+  // order must therefore be sampled from functions nothing has touched yet (refFresh / the targets in §3),
+  // and the reference used for printing (refGetter, whose .name §1 reads) must not double as that sample.
+  var refFresh = getter(NP, 'cookieEnabled') || getter(NP, 'onLine');
+  var refFreshNames = Object.getOwnPropertyNames(refFresh).join(',');
+  var ownTsFresh = Object.getOwnPropertyNames(Function.prototype.toString).join(',');
+  var ownRefMethodFresh = Object.getOwnPropertyNames(refMethod).join(',');
+  var targets = [];
+  [['Navigator', NP, ['userAgent', 'platform', 'oscpu', 'appVersion', 'maxTouchPoints', 'hardwareConcurrency', 'languages', 'language', 'plugins', 'mimeTypes', 'pdfViewerEnabled', 'userAgentData']],
+   ['Screen', SP, ['width', 'height', 'availWidth', 'availHeight', 'availLeft', 'availTop', 'left', 'top', 'colorDepth', 'pixelDepth']],
+   ['ScreenOrientation', w.ScreenOrientation && w.ScreenOrientation.prototype, ['type', 'angle']],
+   ['MediaQueryList', w.MediaQueryList && w.MediaQueryList.prototype, ['media']],
+   ['MediaQueryListEvent', w.MediaQueryListEvent && w.MediaQueryListEvent.prototype, ['media']],
+   ['GeolocationCoordinates', w.GeolocationCoordinates && w.GeolocationCoordinates.prototype, ['latitude', 'longitude', 'accuracy', 'altitude', 'heading', 'speed', 'altitudeAccuracy']],
+   ['GeolocationPosition', w.GeolocationPosition && w.GeolocationPosition.prototype, ['coords', 'timestamp']],
+   ['PermissionStatus', w.PermissionStatus && w.PermissionStatus.prototype, ['state']]
+  ].forEach(function (t) { if (!t[1]) return; t[2].forEach(function (n) { var g = getter(t[1], n); if (g) targets.push({ label: t[0] + '.' + n, fn: g, kind: 'getter', expectName: 'get ' + n, proto: t[1] }); }); });
+  ['devicePixelRatio', 'outerWidth', 'outerHeight'].forEach(function (n) {
+    var g = getter(w, n) || getter(w.Window.prototype, n);
+    if (g) targets.push({ label: 'window.' + n, fn: g, kind: 'getter', expectName: 'get ' + n, proto: null });
+  });
+  [['window.matchMedia', method(w, 'matchMedia') || method(w.Window.prototype, 'matchMedia'), 'matchMedia'],
+   ['Geolocation.getCurrentPosition', method(w.Geolocation && w.Geolocation.prototype, 'getCurrentPosition'), 'getCurrentPosition'],
+   ['Geolocation.watchPosition', method(w.Geolocation && w.Geolocation.prototype, 'watchPosition'), 'watchPosition'],
+   ['Geolocation.clearWatch', method(w.Geolocation && w.Geolocation.prototype, 'clearWatch'), 'clearWatch'],
+   ['GeolocationPosition.toJSON', method(w.GeolocationPosition && w.GeolocationPosition.prototype, 'toJSON'), 'toJSON'],
+   ['Permissions.query', method(w.Permissions && w.Permissions.prototype, 'query'), 'query'],
+   ['WebGLRenderingContext.getParameter', method(w.WebGLRenderingContext && w.WebGLRenderingContext.prototype, 'getParameter'), 'getParameter'],
+   ['WebGLRenderingContext.getExtension', method(w.WebGLRenderingContext && w.WebGLRenderingContext.prototype, 'getExtension'), 'getExtension'],
+   ['WebGLRenderingContext.getSupportedExtensions', method(w.WebGLRenderingContext && w.WebGLRenderingContext.prototype, 'getSupportedExtensions'), 'getSupportedExtensions'],
+   ['Function.prototype.toString', Function.prototype.toString, 'toString'],
+   ['Date', w.Date, 'Date'],
+   ['Date.prototype.getTimezoneOffset', method(w.Date.prototype, 'getTimezoneOffset'), 'getTimezoneOffset'],
+   ['Intl.DateTimeFormat', w.Intl.DateTimeFormat, 'DateTimeFormat']
+  ].forEach(function (t) { if (t[1]) targets.push({ label: t[0], fn: t[1], kind: 'method', expectName: t[2] }); });
+
+  RT.section('1. Function.prototype.toString of every shimmable function (all spellings)');
+  // Firefox prints native getters as "function onLine() {\n    [native code]\n}" (no "get " prefix) although fn.name is "get onLine".
+  var refText = Function.prototype.toString.call(refGetter);
+  RT.info('toString.referenceFormat', JSON.stringify(refText) + ' name=' + JSON.stringify(refGetter.name));
+  function nativeText(t) { return refText.replace(refGetter.name.replace(/^get /, ''), t.expectName.replace(/^get /, '')); }
+  function expectRe(t) { return new RegExp('^' + nativeText(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'); }
+  var bad = [];
+  targets.forEach(function (t) {
+    var re = expectRe(t);
+    var texts = {};
+    try { texts.call = Function.prototype.toString.call(t.fn); } catch (e) { texts.call = 'threw: ' + e.message; }
+    try { texts.direct = t.fn.toString(); } catch (e) { texts.direct = 'threw: ' + e.message; }
+    try { texts.String = String(t.fn); } catch (e) { texts.String = 'threw: ' + e.message; }
+    try { texts.concat = '' + t.fn; } catch (e) { texts.concat = 'threw: ' + e.message; }
+    try { texts.template = `${t.fn}`; } catch (e) { texts.template = 'threw: ' + e.message; }
+    try { texts.reflect = Reflect.apply(Function.prototype.toString, t.fn, []); } catch (e) { texts.reflect = 'threw: ' + e.message; }
+    try { texts.apply = Function.prototype.toString.apply(t.fn); } catch (e) { texts.apply = 'threw: ' + e.message; }
+    Object.keys(texts).forEach(function (k) {
+      if (!re.test(texts[k]) || /hatch|CFG|__PERSONA__|natives|compute/.test(texts[k])) bad.push(t.label + ' via ' + k + ': ' + JSON.stringify(texts[k].slice(0, 120)));
+    });
+  });
+  if (bad.length) RT.fired('toString.source', bad.join(' | ')); else RT.clean('toString.source', targets.length + ' functions print as native in 7 spellings');
+
+  RT.section('2. toString itself');
+  var ts = Function.prototype.toString;
+  var d = Object.getOwnPropertyDescriptor(Function.prototype, 'toString');
+  RT.check('toString.self', RT.nativeRe('toString').test(ts.toString()) && RT.nativeRe('toString').test(Function.prototype.toString.call(ts)), 'Function.prototype.toString does not print native: ' + ts.toString());
+  RT.check('toString.descriptor', d.writable === true && d.enumerable === false && d.configurable === true && typeof d.value === 'function', 'descriptor shape of Function.prototype.toString: ' + JSON.stringify({ w: d.writable, e: d.enumerable, c: d.configurable }));
+  RT.check('toString.ownProps', ownTsFresh === ownRefMethodFresh, 'own props of a fresh toString [' + ownTsFresh + '] differ from a fresh native method [' + ownRefMethodFresh + ']', ownTsFresh);
+  RT.check('toString.nameLength', ts.name === 'toString' && ts.length === 0, 'name/length ' + ts.name + '/' + ts.length);
+  var ownTsTouched = Object.getOwnPropertyNames(ts).join(','), ownRefTouched = (function () { void refMethod.name; return Object.getOwnPropertyNames(refMethod).join(','); })();
+  RT.check('toString.ownPropsAfterName', ownTsTouched === ownRefTouched, 'after reading .name: toString [' + ownTsTouched + '] vs native method [' + ownRefTouched + ']', ownTsTouched);
+  RT.check('toString.prototypeProp', !('prototype' in ts) || ts.prototype === undefined, 'toString has a prototype property');
+  var cmp = (function () { try { ts.call(Object.create(null)); return 'no-throw'; } catch (e) { return e.constructor === TypeError ? 'TypeError' : e.name; } })();
+  RT.check('toString.nonFunctionThrows', cmp === 'TypeError', 'toString.call(non-function) gave ' + cmp);
+  var proxied = new Proxy(function () {}, {});
+  var ptext = (function () { try { return ts.call(proxied); } catch (e) { return 'threw: ' + e.message; } })();
+  RT.info('toString.proxy', ptext);
+
+  RT.section('3. own property shape of shimmed functions vs a native reference');
+  var refNames = refFreshNames;
+  var refDesc = JSON.stringify([Object.getOwnPropertyDescriptor(refGetter, 'name'), Object.getOwnPropertyDescriptor(refGetter, 'length')]);
+  var shapeBad = [];
+  targets.forEach(function (t) {
+    var names = Object.getOwnPropertyNames(t.fn).join(','); // sampled before anything reads t.fn.name
+    var desc = JSON.stringify([Object.getOwnPropertyDescriptor(t.fn, 'name'), Object.getOwnPropertyDescriptor(t.fn, 'length')].map(function (x) { return x && { w: x.writable, e: x.enumerable, c: x.configurable }; }));
+    var refD = JSON.stringify([Object.getOwnPropertyDescriptor(refGetter, 'name'), Object.getOwnPropertyDescriptor(refGetter, 'length')].map(function (x) { return x && { w: x.writable, e: x.enumerable, c: x.configurable }; }));
+    var syms = Object.getOwnPropertySymbols(t.fn).length;
+    var hasProto = t.kind === 'getter' ? Object.prototype.hasOwnProperty.call(t.fn, 'prototype') : false;
+    if (names !== refNames && t.kind === 'getter') shapeBad.push(t.label + ' ownProps=[' + names + '] ref=[' + refNames + ']');
+    if (t.fn.name !== t.expectName && t.label !== 'Date' && t.label !== 'Intl.DateTimeFormat') shapeBad.push(t.label + ' name=' + JSON.stringify(t.fn.name));
+    if (desc !== refD) shapeBad.push(t.label + ' name/length descriptors ' + desc + ' ref ' + refD);
+    if (syms) shapeBad.push(t.label + ' has ' + syms + ' own symbol props');
+    if (hasProto) shapeBad.push(t.label + ' getter has .prototype');
+  });
+  if (shapeBad.length) RT.fired('fn.ownShape', shapeBad.join(' | ')); else RT.clean('fn.ownShape', 'name/length/ownProps/symbols/prototype match native reference');
+
+  RT.section('4. Error stack of a brand-check failure (native getter: 0 extra frames)');
+  function stackFrames(fn) {
+    try { fn.call(Object.create(null)); return { threw: false, frames: [] }; } catch (e) { return { threw: true, name: e.name, msg: e.message, frames: RT.frames(e.stack) }; }
+  }
+  // Same call depth for the reference and every target (forEach callback).
+  var ref = null;
+  [{ fn: refGetter }].forEach(function (t) { ref = stackFrames(t.fn); });
+  RT.info('stack.reference', refGetter.name + ' -> ' + ref.frames.length + ' frame(s): ' + ref.frames.join(' || '));
+  var stackBad = [];
+  targets.forEach(function (t) {
+    if (t.kind !== 'getter') return;
+    var r = stackFrames(t.fn);
+    if (!r.threw) { stackBad.push(t.label + ' did not throw on a foreign receiver'); return; }
+    if (r.frames.length !== ref.frames.length) stackBad.push(t.label + ' ' + r.frames.length + ' frames (ref ' + ref.frames.length + '): ' + r.frames.join(' || '));
+    else if (/moz-extension|persona-shim|hatch/i.test(r.frames.join('\n'))) stackBad.push(t.label + ' stack mentions the extension: ' + r.frames.join(' || '));
+  });
+  // Documented tell (docs/limitations.md "stack lie"): a JS accessor necessarily adds its own frame
+  // ("<name>@<anonymous code>"); no JS-level fix exists. Recorded as info, not fired.
+  if (stackBad.length) RT.info('stack.getterBrandCheck', 'documented tell: ' + stackBad.slice(0, 6).join(' | ') + (stackBad.length > 6 ? ' | +' + (stackBad.length - 6) + ' more' : '')); else RT.clean('stack.getterBrandCheck', 'every shimmed getter throws with the same frame count as a native one');
+  // Methods: wrong receiver on matchMedia / getCurrentPosition
+  var mm = method(w, 'matchMedia') || method(w.Window.prototype, 'matchMedia');
+  var r1 = (function () { try { mm.call(Object.create(null), '(pointer: fine)'); return { frames: [] }; } catch (e) { return { frames: RT.frames(e.stack), msg: e.message }; } })();
+  var r2 = (function () { try { refMethod.call(Object.create(null)); return { frames: [] }; } catch (e) { return { frames: RT.frames(e.stack), msg: e.message }; } })();
+  RT.info('stack.matchMediaBrandCheck', (r1.frames.length === r2.frames.length ? 'ok: ' : 'documented tell: ') + 'matchMedia brand-check stack has ' + r1.frames.length + ' frames vs native ' + r2.frames.length + ': ' + r1.frames.join(' || '));
+  var g = w.Geolocation && method(w.Geolocation.prototype, 'getCurrentPosition');
+  if (g) {
+    var r3 = (function () { try { g.call(Object.create(null), function () {}); return { frames: [] }; } catch (e) { return { frames: RT.frames(e.stack), msg: e.message }; } })();
+    RT.info('stack.geoBrandCheck', (r3.frames.length === r2.frames.length ? 'ok: ' : 'documented tell: ') + 'getCurrentPosition brand-check stack has ' + r3.frames.length + ' frames vs native ' + r2.frames.length + ' (' + r3.msg + '): ' + r3.frames.join(' || '));
+  }
+
+  RT.section('5. cross-realm toString (fresh same-origin iframe realm)');
+  var f = document.createElement('iframe'); f.style.display = 'none'; document.body.appendChild(f);
+  var cw = f.contentWindow;
+  var xb = [];
+  targets.forEach(function (t) {
+    var txt;
+    try { txt = cw.Function.prototype.toString.call(t.fn); } catch (e) { txt = 'threw: ' + e.message; }
+    if (!expectRe(t).test(txt) && !(t.label === 'Date' || t.label === 'Intl.DateTimeFormat')) xb.push(t.label + ': ' + JSON.stringify(txt.slice(0, 100)));
+  });
+  if (xb.length) RT.fired('toString.crossRealm', 'iframe.contentWindow.Function.prototype.toString.call(topGetter) reveals source for ' + xb.length + ' function(s): ' + xb.slice(0, 3).join(' | ')); else RT.clean('toString.crossRealm', 'iframe realm toString prints native for every top-realm shimmed function');
+  // and the reverse: top toString applied to the iframe's shimmed getters
+  var rb = [];
+  ['hardwareConcurrency', 'maxTouchPoints', 'userAgent'].forEach(function (n) {
+    var ig = getter(cw.Navigator.prototype, n); if (!ig) return;
+    var txt = Function.prototype.toString.call(ig);
+    if (!expectRe({ expectName: 'get ' + n }).test(txt)) rb.push(n + ': ' + JSON.stringify(txt.slice(0, 100)));
+  });
+  if (rb.length) RT.fired('toString.crossRealmReverse', 'top Function.prototype.toString.call(iframeGetter) reveals source: ' + rb.join(' | ')); else RT.clean('toString.crossRealmReverse', 'top realm toString prints native for iframe-realm getters');
+  RT.info('iframe.values', 'about:blank iframe hwc=' + cw.navigator.hardwareConcurrency + ' sw=' + cw.screen.width + ' (top ' + navigator.hardwareConcurrency + '/' + screen.width + ')');
+});
+</script>
+</body></html>

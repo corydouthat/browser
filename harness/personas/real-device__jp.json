@@ -1,0 +1,39 @@
+{
+  "id": "real-device__jp",
+  "identity": "real-device",
+  "region": "jp",
+  "name": "Real device (no spoofing) / Japan (Tokyo)",
+  "desktop": false,
+  "touch": true,
+  "chromeLike": false,
+  "tzShim": false,
+  "userAgent": null,
+  "platform": null,
+  "oscpu": null,
+  "appVersion": null,
+  "maxTouchPoints": null,
+  "hasTouchEvent": true,
+  "pointerFine": false,
+  "hoverHover": false,
+  "minLayoutWidth": null,
+  "screen": null,
+  "dpr": null,
+  "hardwareConcurrency": null,
+  "languages": [
+    "ja-JP",
+    "ja",
+    "en"
+  ],
+  "acceptLanguage": "ja-JP,ja;q=0.9,en;q=0.8",
+  "timeZone": "Asia/Tokyo",
+  "geolocation": {
+    "latitude": 35.6762,
+    "longitude": 139.6503,
+    "accuracyMeters": 50
+  },
+  "webgl": null,
+  "userAgentData": false,
+  "uaData": null,
+  "locale": "ja-JP",
+  "librariesMobile": null
+}

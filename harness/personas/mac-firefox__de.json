@@ -1,0 +1,49 @@
+{
+  "id": "mac-firefox__de",
+  "identity": "mac-firefox",
+  "region": "de",
+  "name": "macOS · Firefox 158 / Germany (Berlin)",
+  "desktop": true,
+  "touch": false,
+  "chromeLike": false,
+  "tzShim": false,
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:158.0) Gecko/20100101 Firefox/158.0",
+  "platform": "MacIntel",
+  "oscpu": "Intel Mac OS X 10.15",
+  "appVersion": "5.0 (Macintosh)",
+  "maxTouchPoints": 0,
+  "hasTouchEvent": false,
+  "pointerFine": true,
+  "hoverHover": true,
+  "minLayoutWidth": 1366,
+  "screen": {
+    "width": 1440,
+    "height": 900,
+    "availWidth": 1440,
+    "availHeight": 875,
+    "colorDepth": 30,
+    "dpr": 2
+  },
+  "dpr": 2,
+  "hardwareConcurrency": 8,
+  "languages": [
+    "de-DE",
+    "de",
+    "en"
+  ],
+  "acceptLanguage": "de-DE,de;q=0.9,en;q=0.8",
+  "timeZone": "Europe/Berlin",
+  "geolocation": {
+    "latitude": 52.52,
+    "longitude": 13.405,
+    "accuracyMeters": 50
+  },
+  "webgl": {
+    "vendor": "Apple",
+    "renderer": "Apple M1"
+  },
+  "userAgentData": false,
+  "uaData": null,
+  "locale": "de-DE",
+  "librariesMobile": false
+}

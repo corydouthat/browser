@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hatch detection harness</title>
+<link rel="stylesheet" href="./breakpoints.css">
+<style>
+  :root { color-scheme: light; }
+  body { margin: 0; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #1b1f23; background: #fff; }
+  header { padding: 12px 16px; border-bottom: 1px solid #d0d7de; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  header h1 { font-size: 16px; margin: 0 12px 0 0; }
+  .chip { display: inline-block; padding: 2px 10px; border-radius: 999px; background: #eef2f6; border: 1px solid #c9d2dc; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+  #banner { padding: 10px 16px; font-weight: 600; font-size: 15px; }
+  #banner.PASS { background: #dcf5e4; color: #0a5a2a; }
+  #banner.FAIL { background: #fde2e1; color: #8a1c1c; }
+  #banner.RUNNING { background: #fff4d6; color: #6b4b00; }
+  #banner.ERROR { background: #fde2e1; color: #8a1c1c; }
+  main { padding: 12px 16px 48px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
+  button { font: inherit; padding: 6px 12px; border-radius: 6px; border: 1px solid #c9d2dc; background: #f6f8fa; cursor: pointer; }
+  button:hover { background: #eef2f6; }
+  #tap-box { user-select: none; -webkit-user-select: none; touch-action: manipulation; display: inline-flex; align-items: center; justify-content: center; width: 220px; height: 64px; border: 2px dashed #6f7d8c; border-radius: 8px; margin: 6px 0 14px; background: #f6f8fa; cursor: pointer; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; vertical-align: top; padding: 4px 8px; border-bottom: 1px solid #e6ebf0; }
+  th { background: #f6f8fa; position: sticky; top: 0; }
+  td.status { font-weight: 700; white-space: nowrap; }
+  tr.PASS td.status { color: #0a7a3a; }
+  tr.FAIL td.status { color: #c62828; }
+  tr.FAIL.hard { background: #fff5f5; }
+  tr.SKIPPED td.status { color: #6f7d8c; }
+  tr.INFO td.status { color: #3b6ea5; }
+  td.id { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; white-space: nowrap; }
+  td.val { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; max-width: 420px; }
+  .note { color: #57606a; font-size: 12px; }
+  h2 { font-size: 14px; margin: 18px 0 6px; }
+  #status { color: #57606a; font-size: 12px; }
+  .grid-demo { margin: 6px 0 10px; }
+</style>
+<!-- Vendored detector libraries (exact versions, see vendor/MANIFEST.json); classic script so it runs before the module. -->
+<script src="./vendor/detectors.bundle.js"></script>
+</head>
+<body>
+<header>
+  <h1>Hatch detection harness</h1>
+  <span class="chip" id="persona-chip">persona: …</span>
+  <span class="chip" id="env-chip">env: …</span>
+  <span class="chip" id="version-chip">schema v1</span>
+  <span id="status">starting…</span>
+</header>
+<div id="banner" class="RUNNING">Running probes…</div>
+<main>
+  <div class="controls">
+    <button id="btn-copy" type="button">Copy JSON</button>
+    <button id="btn-send" type="button">Send report</button>
+    <button id="btn-rerun" type="button">Re-run</button>
+    <button id="btn-copy-text" type="button">Copy table</button>
+  </div>
+  <div id="tap-box">Tap / click here (pointerType probe)</div>
+  <div class="grid-demo"><div>column 1</div><div>column 2</div><div>column 3</div></div>
+  <div class="note">Layout bucket: <span class="bucket"></span></div>
+  <h2>Signals</h2>
+  <table id="signals">
+    <thead><tr><th>Status</th><th>Tier</th><th>Scope</th><th>Signal</th><th>Expected</th><th>Actual</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <h2>Libraries</h2>
+  <table id="libraries">
+    <thead><tr><th>Status</th><th>Library</th><th>Mobile?</th><th>Detail</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <h2>Summary</h2>
+  <pre id="summary"></pre>
+</main>
+<script type="module" src="./harness.js"></script>
+</body>
+</html>

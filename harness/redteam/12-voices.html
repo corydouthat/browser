@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>redteam 12 speechSynthesis voices</title><script src="./_rt.js"></script></head>
+<body>
+<script>
+RT.run(async function () {
+  var exp = RT.expected();
+  if (!('speechSynthesis' in window)) { RT.info('voices', 'no speechSynthesis'); return; }
+  var voices = speechSynthesis.getVoices();
+  if (!voices.length) {
+    voices = await RT.withTimeout(new Promise(function (res) { speechSynthesis.addEventListener('voiceschanged', function () { res(speechSynthesis.getVoices()); }, { once: true }); }), 3000, 'voices');
+    if (!Array.isArray(voices)) voices = speechSynthesis.getVoices();
+  }
+  var list = voices.map(function (v) { return { name: v.name, uri: v.voiceURI, lang: v.lang, local: v.localService, def: v.default }; });
+  RT.info('voices', voices.length + ' voices: ' + JSON.stringify(list.slice(0, 12)));
+  // GeckoView registers Android TTS voices as voiceURI "moz-tts:android:<locale>" (SpeechSynthesisService.java @ FIREFOX_158_0_RELEASE);
+  // desktop Firefox uses urn:moz-tts:sapi: (Windows), urn:moz-tts:osx: (macOS), urn:moz-tts:speechd: (Linux).
+  var android = list.filter(function (v) { return /android/i.test(v.uri) || /android/i.test(v.name); });
+  if (exp.desktop) {
+    RT.check('voices.androidUri', android.length === 0, android.length + ' voice(s) with an Android voiceURI, e.g. ' + JSON.stringify(android[0]));
+    var expectedPrefix = { windows: /sapi/i, mac: /osx/i, linux: /speechd/i }[exp.platform];
+    if (voices.length && expectedPrefix) RT.check('voices.platformUri', list.some(function (v) { return expectedPrefix.test(v.uri); }), 'no voiceURI matches the ' + exp.platform + ' engine (' + expectedPrefix + '); URIs: ' + list.map(function (v) { return v.uri; }).slice(0, 5).join(','));
+    if (!voices.length) RT.device('voices', 'no voices in this host (headless Linux without speech-dispatcher); on the phone the list is Android TTS');
+  } else RT.info('voices.persona', 'no desktop persona');
+});
+</script>
+</body></html>

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>redteam 30 touch gestures vs dom.w3c_touch_events.enabled=0 (device)</title>
+<script src="./_rt.js"></script>
+<style>
+  body { margin: 0; font: 14px/1.4 system-ui, sans-serif; }
+  main { padding: 12px; }
+  .box { border: 2px dashed #888; margin: 12px 0; padding: 8px; user-select: none; }
+  #tap { height: 80px; display: flex; align-items: center; justify-content: center; }
+  #canvas { touch-action: none; width: 100%; height: 240px; background: #eef; display: block; }
+  #carousel { overflow: hidden; touch-action: pan-y; }
+  #track { display: flex; gap: 8px; will-change: transform; }
+  #track div { flex: 0 0 60%; height: 100px; background: #fde; display: flex; align-items: center; justify-content: center; }
+  #spacer { height: 2400px; background: linear-gradient(#fff, #ddd); }
+</style>
+</head>
+<body>
+<main>
+<h1>Touch gestures vs. the desktop persona (device page)</h1>
+<p>Web-compat + detector page for <code>dom.w3c_touch_events.enabled = 0</code>. Headless has no finger and
+reports <code>needs-device</code>. On the phone: (1) tap the box, (2) draw a stroke in the canvas, (3) swipe the
+carousel sideways, (4) long-press the paragraph below. A check fires when the engine delivers input a real
+desktop could not deliver: trusted TouchEvent objects while <code>typeof TouchEvent === "undefined"</code>, or
+<code>pointerType "touch"</code> / <code>mozInputSource 5</code> while <code>navigator.maxTouchPoints === 0</code>
+(verified in headless Firefox 158 with a WebDriver touch pointer: touch* and pointer* events still reach
+<code>addEventListener</code>). The <code>info compat.*</code> lines record whether the page scrolled while the
+canvas / carousel were being dragged: with the pref off, <code>nsIFrame::GetCompositorHitTestInfo</code> skips the
+touch-action flags and <code>EventListenerManager::IsApzAwareEvent</code> is false for touch listeners, so APZ pans
+without waiting for <code>touch-action: none</code> / <code>preventDefault()</code> (FIREFOX_158_0_RELEASE).</p>
+<div id="tap" class="box">1. Tap here</div>
+<div class="box">2. Draw here (touch-action: none)<canvas id="canvas"></canvas></div>
+<div class="box">3. Swipe sideways (touch-action: pan-y, touchmove preventDefault)
+  <div id="carousel"><div id="track"><div>slide 1</div><div>slide 2</div><div>slide 3</div><div>slide 4</div></div></div>
+</div>
+<p id="select" class="box">4. Long-press this sentence: a word should get selected and the selection handles should
+appear (AccessibleCaret is disabled when the touch pref is off unless layout.accessiblecaret.enabled is set).</p>
+<div id="spacer">scrollable filler</div>
+</main>
+<script>
+RT.run(async function () {
+  var n = navigator;
+  var surface = {
+    touchEventDefined: typeof window.TouchEvent !== 'undefined',
+    ontouchstart: 'ontouchstart' in window,
+    maxTouchPoints: n.maxTouchPoints,
+    pointerFine: matchMedia('(pointer: fine)').matches,
+    hoverHover: matchMedia('(hover: hover)').matches
+  };
+  RT.info('static', JSON.stringify(surface));
+  var interactions = 0;
+  function describe(e) {
+    return e.type + ' pointerType=' + (e.pointerType === undefined ? '-' : e.pointerType) +
+      ' mozInputSource=' + (e.mozInputSource === undefined ? '-' : e.mozInputSource) +
+      ' class=' + Object.prototype.toString.call(e) + ' trusted=' + e.isTrusted;
+  }
+  function watch(el, id) {
+    ['pointerdown', 'pointerup', 'pointercancel', 'mousedown', 'mouseup', 'click', 'contextmenu'].forEach(function (t) {
+      el.addEventListener(t, function (e) {
+        if (!e.isTrusted) return;
+        interactions++;
+        RT.info(id + '.event', describe(e));
+        if (e.pointerType === 'touch' && n.maxTouchPoints === 0) {
+          RT.fired(id + '.pointerType', e.type + ' pointerType "touch" while navigator.maxTouchPoints === 0');
+        }
+        if (e.mozInputSource === 5 && surface.pointerFine && !surface.touchEventDefined) {
+          RT.fired(id + '.mozInputSource', e.type + ' mozInputSource 5 (touch) while (pointer: fine) and no TouchEvent');
+        }
+      });
+    });
+    ['touchstart', 'touchend', 'touchcancel'].forEach(function (t) {
+      el.addEventListener(t, function (e) {
+        if (!e.isTrusted) return;
+        interactions++;
+        RT.info(id + '.event', describe(e));
+        if (!surface.touchEventDefined) {
+          RT.fired(id + '.touchEvent', e.type + ' delivered to addEventListener while typeof TouchEvent === "undefined"');
+        }
+      }, { passive: true });
+    });
+  }
+  watch(document.getElementById('tap'), 'tap');
+
+  // ---- canvas: draw with pointer events; measure page scroll during the stroke --------------------
+  var canvas = document.getElementById('canvas');
+  canvas.width = canvas.clientWidth || 300; canvas.height = 240;
+  var ctx = canvas.getContext('2d');
+  var stroke = null;
+  watch(canvas, 'canvas');
+  canvas.addEventListener('pointerdown', function (e) {
+    stroke = { id: e.pointerId, moves: 0, scrollY0: window.scrollY, x: e.offsetX, y: e.offsetY };
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+  });
+  canvas.addEventListener('pointermove', function (e) {
+    if (!stroke || e.pointerId !== stroke.id) return;
+    stroke.moves++;
+    ctx.strokeStyle = '#336'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(stroke.x, stroke.y); ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke();
+    stroke.x = e.offsetX; stroke.y = e.offsetY;
+  });
+  function endStroke(e) {
+    if (!stroke || e.pointerId !== stroke.id) return;
+    var dy = Math.abs(window.scrollY - stroke.scrollY0);
+    RT.info('compat.canvasStroke', 'pointermove=' + stroke.moves + ' ended by ' + e.type + ' pageScrolledPx=' + Math.round(dy) +
+      (dy > 4 ? ' => APZ panned the page over touch-action:none (drawing/map drag breaks)' : ' => ok'));
+    stroke = null;
+  }
+  canvas.addEventListener('pointerup', endStroke);
+  canvas.addEventListener('pointercancel', endStroke);
+
+  // ---- carousel: horizontal swipe handled by touch listeners with preventDefault ------------------
+  var carousel = document.getElementById('carousel');
+  var track = document.getElementById('track');
+  var swipe = null; var offset = 0;
+  watch(carousel, 'carousel');
+  carousel.addEventListener('touchstart', function (e) {
+    var t = e.touches[0]; swipe = { x0: t.clientX, y0: t.clientY, scrollY0: window.scrollY, dx: 0, moves: 0 };
+  }, { passive: true });
+  carousel.addEventListener('touchmove', function (e) {
+    if (!swipe) return;
+    var t = e.touches[0]; swipe.dx = t.clientX - swipe.x0; swipe.moves++;
+    if (Math.abs(swipe.dx) > Math.abs(t.clientY - swipe.y0)) { e.preventDefault(); track.style.transform = 'translateX(' + (offset + swipe.dx) + 'px)'; }
+  }, { passive: false });
+  function endSwipe(e) {
+    if (!swipe) return;
+    offset += swipe.dx;
+    var dy = Math.abs(window.scrollY - swipe.scrollY0);
+    RT.info('compat.carouselSwipe', 'touchmove=' + swipe.moves + ' dx=' + Math.round(swipe.dx) + ' ended by ' + e.type + ' pageScrolledPx=' + Math.round(dy) +
+      (dy > 4 ? ' => APZ scrolled although touchmove called preventDefault()' : ' => ok'));
+    swipe = null;
+  }
+  carousel.addEventListener('touchend', endSwipe, { passive: true });
+  carousel.addEventListener('touchcancel', endSwipe, { passive: true });
+
+  // ---- long-press text selection ------------------------------------------------------------------
+  document.addEventListener('selectionchange', function () {
+    var s = String(window.getSelection && window.getSelection());
+    if (s.trim()) RT.info('compat.longPressSelect', 'selection="' + s.trim().slice(0, 40) + '"');
+  });
+
+  var had = await RT.withTimeout(new Promise(function (res) {
+    var iv = setInterval(function () { if (interactions > 0) { clearInterval(iv); res(true); } }, 200);
+  }), 1500, 'interaction');
+  if (had !== true) {
+    RT.device('touch.gestures', 'no trusted input within 1.5 s (headless); on the phone tap, draw, swipe and long-press, then read the info compat.* lines');
+  } else {
+    // Keep collecting on the phone: the page is read by eye / screenshot, not by the runner.
+    window.__hatchKeepOpen = true;
+  }
+});
+</script>
+</body>
+</html>

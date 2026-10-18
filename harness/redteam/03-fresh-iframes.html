@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>redteam 03 fresh iframes</title><script src="./_rt.js"></script></head>
+<body>
+<script>
+// Snapshot source shared with frames (no closures).
+function rtSnap(w) {
+  var o = {};
+  function t(k, f) { try { o[k] = f(); } catch (e) { o[k] = 'error:' + (e && e.message); } }
+  t('hwc', function () { return w.navigator.hardwareConcurrency; });
+  t('mtp', function () { return w.navigator.maxTouchPoints; });
+  t('ua', function () { return w.navigator.userAgent; });
+  t('platform', function () { return w.navigator.platform; });
+  t('sw', function () { return w.screen.width; });
+  t('sh', function () { return w.screen.height; });
+  t('dpr', function () { return w.devicePixelRatio; });
+  t('outerH', function () { return w.outerHeight; });
+  t('pf', function () { return w.matchMedia('(pointer: fine)').matches; });
+  t('touch', function () { return 'ontouchstart' in w; });
+  t('TouchEvent', function () { return typeof w.TouchEvent; });
+  t('tsNative', function () { var g = w.Object.getOwnPropertyDescriptor(w.Navigator.prototype, 'hardwareConcurrency').get; return w.Function.prototype.toString.call(g) === 'function hardwareConcurrency() {\n    [native code]\n}'; });
+  return o;
+}
+var SNAP_SRC = rtSnap.toString();
+var results = {};
+window.__rtReport = function (tag, snap) { results[tag] = snap; };
+window.addEventListener('message', function (ev) { var d = ev.data; if (d && d.rt === 'frame') results[d.tag] = d.snap; });
+
+RT.run(async function () {
+  var top = rtSnap(window);
+  RT.info('top', JSON.stringify(top));
+  function cmp(tag, snap, extraNote) {
+    if (!snap) { RT.info(tag, 'no snapshot' + (extraNote ? ' (' + extraNote + ')' : '')); return; }
+    var diffs = [];
+    ['hwc', 'mtp', 'ua', 'platform', 'sw', 'sh', 'dpr', 'pf', 'touch', 'TouchEvent'].forEach(function (k) { if (JSON.stringify(snap[k]) !== JSON.stringify(top[k])) diffs.push(k + '=' + JSON.stringify(snap[k]) + ' (top ' + JSON.stringify(top[k]) + ')'); });
+    if (snap.tsNative === false) diffs.push('hardwareConcurrency getter prints source');
+    if (diffs.length) RT.fired(tag, diffs.join(', ')); else RT.clean(tag, 'agrees with top');
+  }
+  var host = document.createElement('div'); host.style.cssText = 'position:absolute;left:-9999px;'; document.body.appendChild(host);
+
+  RT.section('1. about:blank iframe read synchronously after append');
+  var f1 = document.createElement('iframe'); host.appendChild(f1);
+  var immediate = rtSnap(f1.contentWindow);
+  cmp('aboutBlank.sync', immediate);
+  // Capture the realm's natives now (a page would use them later as a pristine toolkit)
+  var pristineGetter = f1.contentWindow.Object.getOwnPropertyDescriptor(f1.contentWindow.Navigator.prototype, 'hardwareConcurrency').get;
+  var pristineScreen = f1.contentWindow.Object.getOwnPropertyDescriptor(f1.contentWindow.Screen.prototype, 'width').get;
+  var pristineTs = f1.contentWindow.Function.prototype.toString;
+  await RT.wait(100);
+  cmp('aboutBlank.100ms', rtSnap(f1.contentWindow));
+  var viaPristine = { hwc: pristineGetter.call(navigator), sw: pristineScreen.call(screen) };
+  RT.check('aboutBlank.pristineGetterOnTop', viaPristine.hwc === top.hwc && viaPristine.sw === top.sw, 'iframe-realm getters applied to top objects give ' + JSON.stringify(viaPristine) + ' vs top ' + JSON.stringify({ hwc: top.hwc, sw: top.sw }), JSON.stringify(viaPristine));
+  var topGetter = Object.getOwnPropertyDescriptor(Navigator.prototype, 'hardwareConcurrency').get;
+  var xts = pristineTs.call(topGetter);
+  RT.check('aboutBlank.pristineToStringOnTop', xts === 'function hardwareConcurrency() {\n    [native code]\n}', 'iframe-realm Function.prototype.toString on the top getter: ' + JSON.stringify(xts.slice(0, 140)));
+
+  RT.section('2. document.write into the about:blank iframe');
+  var f2 = document.createElement('iframe'); host.appendChild(f2);
+  f2.contentDocument.open();
+  f2.contentDocument.write('<script>parent.__rtReport("docwrite", (' + SNAP_SRC + ')(window));<\/script>');
+  f2.contentDocument.close();
+  cmp('aboutBlank.documentWrite', results.docwrite);
+
+  RT.section('3. srcdoc / javascript: / data: / blob: / sandboxed frames (first inline script in each)');
+  function frameScript(tag) { return '<script>(function(){var s=(' + SNAP_SRC + ')(window);try{parent.postMessage({rt:"frame",tag:"' + tag + '",snap:s},"*")}catch(e){}})();<\/script>'; }
+  var fs = document.createElement('iframe'); fs.srcdoc = '<!doctype html><meta charset=utf-8>' + frameScript('srcdoc'); host.appendChild(fs);
+  var fj = document.createElement('iframe'); fj.src = 'javascript:' + JSON.stringify('<!doctype html>' + frameScript('javascriptUrl')); host.appendChild(fj);
+  var fd = document.createElement('iframe'); fd.src = 'data:text/html;charset=utf-8,' + encodeURIComponent('<!doctype html>' + frameScript('dataUrl')); host.appendChild(fd);
+  var blobUrl = URL.createObjectURL(new Blob(['<!doctype html>' + frameScript('blobUrl')], { type: 'text/html' }));
+  var fb = document.createElement('iframe'); fb.src = blobUrl; host.appendChild(fb);
+  var fx = document.createElement('iframe'); fx.setAttribute('sandbox', 'allow-scripts'); fx.srcdoc = '<!doctype html>' + frameScript('sandboxSrcdoc'); host.appendChild(fx);
+  var fxo = document.createElement('iframe'); fxo.setAttribute('sandbox', 'allow-scripts allow-same-origin'); fxo.srcdoc = '<!doctype html>' + frameScript('sandboxSameOrigin'); host.appendChild(fxo);
+  var fsb = document.createElement('iframe'); fsb.setAttribute('sandbox', 'allow-scripts'); fsb.src = 'data:text/html;charset=utf-8,' + encodeURIComponent('<!doctype html>' + frameScript('sandboxData')); host.appendChild(fsb);
+  await RT.wait(1500);
+  ['srcdoc', 'javascriptUrl', 'dataUrl', 'blobUrl', 'sandboxSrcdoc', 'sandboxSameOrigin', 'sandboxData'].forEach(function (tag) { cmp('frame.' + tag, results[tag], 'frame never reported'); });
+
+  RT.section('4. window.open about:blank (may be blocked)');
+  var popup = null;
+  try { popup = window.open('about:blank', 'rt', 'width=200,height=200'); } catch (e) { popup = null; }
+  if (popup) {
+    var ps = rtSnap(popup);
+    cmp('popup.sync', ps);
+    await RT.wait(300);
+    cmp('popup.300ms', rtSnap(popup));
+    try { popup.close(); } catch (e) {}
+  } else RT.info('popup', 'window.open returned null (popup blocked) - cannot judge');
+});
+</script>
+</body></html>
