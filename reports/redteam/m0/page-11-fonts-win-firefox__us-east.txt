@@ -1,0 +1,8 @@
+info page: redteam 11 font probes persona=win-firefox__us-east ua=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0
+info fonts: {"windows":[],"mac":[],"linux":["Noto Sans","Cantarell"],"android":["Noto Serif"]}
+info fonts.canvas: {"Segoe UI":false,"Roboto":false,"Helvetica Neue":false,"DejaVu Sans":false}
+DETECTED fonts.platformCore: none of the fonts every windows install ships (Segoe UI, Calibri, Tahoma, Consolas) is available; found 0/10 of the wider windows set
+clean fonts.androidOnly: ok
+info fonts.systemUi: system-ui=1215.13330078125x98 Segoe=958.7999877929688x98 Roboto=958.7999877929688x98 (system-ui resolves to the OS UI font: Segoe UI on Windows, Roboto on Android)
+
+summary: fired=1 clean=1 info=4 needs-device=0

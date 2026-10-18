@@ -1,0 +1,13 @@
+Popup / target="_blank" viewport (device page)
+
+Web-compat page for AC GeckoEngineSession.onNewSession (FIREFOX_158_0_RELEASE): the popup session is built from DefaultSettings, which copies userAgentOverride only; its GeckoSessionSettings keep VIEWPORT_MODE_MOBILE (GeckoViewSettings.sys.mjs sets browsingContext.forceDesktopViewport per session), so a page opened by window.open() or a target="_blank" link lays out at the display width instead of the persona's desktop width. Headless reports needs-device. On the phone tap either control: the new tab shows its own verdict and the opener page updates through postMessage.
+
+this document: breakpoint bucket
+
+window.open() target=_blank link
+
+info page: redteam 31 popup / target=_blank viewport mode (device) persona=win-firefox__us-east ua=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0
+info opener.viewport: {"clientWidth":1920,"innerWidth":1920,"screenWidth":1920,"bp1024":true,"bp1280":true}
+needs-device popup.viewport: no popup report within 1.5 s (headless); on the phone tap window.open() or the target=_blank link and compare clientWidth with the opener (expected >= 1366 for a desktop persona)
+
+summary: fired=0 clean=0 info=2 needs-device=1

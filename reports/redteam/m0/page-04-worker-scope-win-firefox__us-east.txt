@@ -1,0 +1,19 @@
+info page: redteam 04 worker scope persona=win-firefox__us-east ua=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0
+info window: {"hwc":8,"ua":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0","platform":"Win32","oscpu":"Windows NT 10.0; Win64; x64","appVersion":"5.0 (Windows)","languages":["en-US","en"],"language":"en-US","tz":"America/New_York","locale":"en-US","tzo":240,"webgl":"no gl","geo":true}
+
+## 1. dedicated Worker (blob)
+info worker.dedicated.documented: worker-scope shim is M2: hwc=2 (window 8)
+info worker.dedicated.webgl: "no gl"
+clean worker.dedicated: agrees with window
+
+## 2. SharedWorker (blob)
+info worker.shared.documented: worker-scope shim is M2: hwc=2 (window 8)
+info worker.shared.webgl: "no gl"
+clean worker.shared: agrees with window
+
+## 3. ServiceWorker (scope ./, file sw.js)
+info worker.service.documented: worker-scope shim is M2: hwc=2 (window 8)
+info worker.service.webgl: "n/a"
+clean worker.service: agrees with window
+
+summary: fired=0 clean=3 info=8 needs-device=0

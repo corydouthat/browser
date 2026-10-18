@@ -1,0 +1,26 @@
+info page: redteam 03 fresh iframes persona=win-firefox__us-east ua=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0
+info top: {"hwc":8,"mtp":0,"ua":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0","platform":"Win32","sw":1920,"sh":1080,"dpr":1,"outerH":1080,"pf":true,"touch":false,"TouchEvent":"undefined","tsNative":true}
+
+## 1. about:blank iframe read synchronously after append
+clean aboutBlank.sync: agrees with top
+clean aboutBlank.100ms: agrees with top
+clean aboutBlank.pristineGetterOnTop: {"hwc":8,"sw":1920}
+clean aboutBlank.pristineToStringOnTop: ok
+
+## 2. document.write into the about:blank iframe
+clean aboutBlank.documentWrite: agrees with top
+
+## 3. srcdoc / javascript: / data: / blob: / sandboxed frames (first inline script in each)
+info frame.srcdoc: no snapshot (frame never reported)
+clean frame.javascriptUrl: agrees with top
+info frame.dataUrl: no snapshot (frame never reported)
+info frame.blobUrl: no snapshot (frame never reported)
+info frame.sandboxSrcdoc: no snapshot (frame never reported)
+info frame.sandboxSameOrigin: no snapshot (frame never reported)
+info frame.sandboxData: no snapshot (frame never reported)
+
+## 4. window.open about:blank (may be blocked)
+clean popup.sync: agrees with top
+clean popup.300ms: agrees with top
+
+summary: fired=0 clean=8 info=8 needs-device=0

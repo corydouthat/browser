@@ -1,0 +1,25 @@
+info page: redteam 08 TZ vs geolocation vs language persona=linux-firefox__jp ua=Mozilla/5.0 (X11; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0
+
+## 1. Date vs Intl time zone
+info tz: {"tz":"Asia/Tokyo","dateOffset":540,"intlOffset":540,"janOffset":540,"julOffset":540,"intlJan":540,"intlJul":540,"toString":"Sun Oct 18 2026 20:25:46 GMT+0900 (Japan Standard Time)","toLocale":"10/18/2026, 8:25:46 PM Japan Standard Time"}
+clean tz.dateVsIntlNow: ok
+clean tz.dateVsIntlDst: ok
+clean tz.toStringName: ok
+clean tz.parseVsCtor: ok
+
+## 2. geolocation vs time zone
+info geo.permissionBefore: "granted" (desktop Firefox for a never-visited site: "prompt")
+info geo.fixes: [{"lat":35.67619218137248,"lon":139.6503038295305,"acc":50,"ms":107,"own":0,"proto":true},{"lat":35.676220293951076,"lon":139.65028966295117,"acc":50,"ms":229,"own":0,"proto":true},{"lat":35.67622387843857,"lon":139.6502969308239,"acc":50,"ms":358,"own":0,"proto":true}]
+clean geo.callbackStack: ok
+clean geo.objectShape: ok
+info geo.json: {"coords":{"latitude":35.67619218137248,"longitude":139.6503038295305,"altitude":null,"accuracy":50,"altitudeAccuracy":null,"heading":null,"speed":null},"timestamp":1792322747509}
+clean geo.lonVsTz: ok
+clean geo.continentVsTz: ok
+info geo.jitterMetres: [3.4,0.8] between consecutive fixes 122 ms apart (network provider: identical cached fix; GPS indoors: 5-30 m)
+info geo.timing: first fix in 107 ms, accuracy 50 m (enableHighAccuracy), altitude null
+info geo.permissionAfter: "granted"
+
+## 3. language region vs time zone
+clean lang.vsTz: ok
+
+summary: fired=0 clean=9 info=8 needs-device=0

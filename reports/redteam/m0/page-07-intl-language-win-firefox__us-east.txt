@@ -1,0 +1,19 @@
+info page: redteam 07 Intl vs language vs Accept-Language persona=win-firefox__us-east ua=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0
+info intl: {"languages":["en-US","en"],"language":"en-US","dtfLocale":"en-US","nfLocale":"en-US","collatorLocale":"en-US","pluralLocale":"en-US","rtfLocale":"en-US","defaultDate":"1/31/2026","langDate":"1/31/2026","defaultNumber":"1,234,567.891","langNumber":"1,234,567.891","defaultTime":"1:05:07 PM","langTime":"1:05:07 PM","dateString":"Sat Jan 31 2026 13:05:07 GMT-0500 (Eastern Standard Time)"}
+
+## 1. navigator.language(s) vs Intl default locale
+clean intl.languagesFirst: ok
+clean intl.dtfLocaleInLanguages: ok
+clean intl.allIntlAgree: ok
+clean intl.toLocaleDefaultVsLang: ok
+
+## 2. Accept-Language header vs navigator.languages
+info acceptLanguage: en-US,en;q=0.9
+clean intl.acceptVsLanguages: ok
+info acceptLanguage.q: en-US,en;q=0.9 (desktop Firefox default "en-US,en;q=0.5"; q-step 0.1 for >2 entries)
+
+## 3. document / UI strings
+info misc: dir=ltr lang attr=en
+info displayNames: Intl.DisplayNames(default).of(en)=English
+
+summary: fired=0 clean=5 info=6 needs-device=0

@@ -1,0 +1,19 @@
+info page: redteam 07 Intl vs language vs Accept-Language persona=win-firefox__de ua=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0
+info intl: {"languages":["de-DE","de","en"],"language":"de-DE","dtfLocale":"en-US","nfLocale":"en-US","collatorLocale":"en-US","pluralLocale":"en-US","rtfLocale":"en-US","defaultDate":"1/31/2026","langDate":"31.1.2026","defaultNumber":"1,234,567.891","langNumber":"1.234.567,891","defaultTime":"1:05:07 PM","langTime":"13:05:07","dateString":"Sat Jan 31 2026 13:05:07 GMT+0100 (Central European Standard Time)"}
+
+## 1. navigator.language(s) vs Intl default locale
+clean intl.languagesFirst: ok
+DETECTED intl.dtfLocaleInLanguages: Intl default locale en-US vs navigator.language de-DE (desktop Firefox: app locale == first accept language for a user who picked a language)
+clean intl.allIntlAgree: ok
+DETECTED intl.toLocaleDefaultVsLang: toLocale*() with no locale (1/31/2026 / 1,234,567.891) differs from navigator.language (31.1.2026 / 1.234.567,891)
+
+## 2. Accept-Language header vs navigator.languages
+info acceptLanguage: de-DE,de;q=0.9,en;q=0.8
+clean intl.acceptVsLanguages: ok
+info acceptLanguage.q: de-DE,de;q=0.9,en;q=0.8 (desktop Firefox default "en-US,en;q=0.5"; q-step 0.1 for >2 entries)
+
+## 3. document / UI strings
+info misc: dir=ltr lang attr=en
+info displayNames: Intl.DisplayNames(default).of(de)=German
+
+summary: fired=2 clean=3 info=6 needs-device=0

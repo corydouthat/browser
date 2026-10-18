@@ -1,0 +1,38 @@
+info page: redteam 02 descriptors persona=win-chrome__uk ua=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+
+## 1. markers: own symbols / properties a page can enumerate
+clean marker.windowSymbols: 0 own symbols, none hatch-like
+clean marker.symbolFor: ok
+clean marker.navigatorSymbols: ok
+clean marker.windowNames: ok
+
+## 2. own vs prototype: instances must carry no own data/accessor properties
+clean own.navigator: ok
+clean own.screen: ok
+clean own.geolocation: ok
+clean own.screenOrientation: ok
+clean own.mediaQueryList: ok
+
+## 3. accessor descriptor shapes vs native reference on the same prototype
+clean shape.navigator: all match {"g":"function","s":"undefined","e":true,"c":true,"v":false}
+clean shape.screen: all match {"g":"function","s":"undefined","e":true,"c":true,"v":false}
+clean shape.window: window accessors/methods sit where native ones do with the same shape
+
+## 4. enumeration order (for-in over navigator vs prototype key order)
+clean order.navigatorForIn: 47 keys, same order as prototype
+info order.navigatorKeys: javaEnabled,getGamepads,requestMIDIAccess,mozGetUserMedia,sendBeacon,requestMediaKeySystemAccess,getAutoplayPolicy,registerProtocolHandler,taintEnabled,permissions,mimeTypes,plugins,pdfViewerEnabled,doNotTrack,maxTouchPoints,mediaCapabilities,oscpu,vendor,vendorSub,productSub,cookieEnabled,buildID,serial,mediaDevices,serviceWorker,credentials,clipboard,mediaSession,userActivation,wakeLock,login,globalPrivacyControl,webdriver,hardwareConcurrency,geolocation,appCodeName,appName,appVersion,platform,userAgent,product,language,languages,locks,onLine,storage,userAgentData
+clean order.navigatorMoved: ok
+info order.screenKeys: mozLockOrientation,mozUnlockOrientation,availWidth,availHeight,width,height,colorDepth,pixelDepth,top,left,availTop,availLeft,mozOrientation,onmozorientationchange,orientation,constructor
+clean order.screenWidthFirst: ok
+info order.window: innerWidth@728 outerWidth@738 devicePixelRatio@743 matchMedia@675 of 947
+clean order.windowAccessors: ok
+
+## 5. API surface coherence for the claimed platform (Firefox 158 release prefs)
+info api.present: {"share":false,"canShare":false,"vibrate":false,"connection":false,"pdfViewerEnabled":true,"plugins":5,"mimeTypes":2,"userAgentData":true,"oscpu":true,"buildID":true}
+info api.chromePersona: UA-only persona (documented): oscpu=true vendor="" userAgentData=true chrome=undefined
+clean uad.shape: ok
+info uad.windowIndex: NavigatorUAData at window key index 925 of 947 (Chrome: among the interface objects, not last)
+info plugins.structuredClone: DataCloneError (native PluginArray: DataCloneError)
+info plugins.ownNames: 0,1,2,3,4,PDF Viewer,Chrome PDF Viewer,Chromium PDF Viewer,Microsoft Edge PDF Viewer,WebKit built-in PDF
+
+summary: fired=0 clean=17 info=9 needs-device=0

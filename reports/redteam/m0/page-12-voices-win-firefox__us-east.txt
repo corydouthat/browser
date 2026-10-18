@@ -1,0 +1,6 @@
+info page: redteam 12 speechSynthesis voices persona=win-firefox__us-east ua=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0
+info voices: 0 voices: []
+clean voices.androidUri: ok
+needs-device voices: no voices in this host (headless Linux without speech-dispatcher); on the phone the list is Android TTS
+
+summary: fired=0 clean=1 info=2 needs-device=1

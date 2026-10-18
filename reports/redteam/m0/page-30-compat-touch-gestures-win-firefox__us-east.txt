@@ -1,0 +1,20 @@
+Touch gestures vs. the desktop persona (device page)
+
+Web-compat + detector page for dom.w3c_touch_events.enabled = 0. Headless has no finger and reports needs-device. On the phone: (1) tap the box, (2) draw a stroke in the canvas, (3) swipe the carousel sideways, (4) long-press the paragraph below. A check fires when the engine delivers input a real desktop could not deliver: trusted TouchEvent objects while typeof TouchEvent === "undefined", or pointerType "touch" / mozInputSource 5 while navigator.maxTouchPoints === 0 (verified in headless Firefox 158 with a WebDriver touch pointer: touch* and pointer* events still reach addEventListener). The info compat.* lines record whether the page scrolled while the canvas / carousel were being dragged: with the pref off, nsIFrame::GetCompositorHitTestInfo skips the touch-action flags and EventListenerManager::IsApzAwareEvent is false for touch listeners, so APZ pans without waiting for touch-action: none / preventDefault() (FIREFOX_158_0_RELEASE).
+
+1. Tap here
+2. Draw here (touch-action: none)
+3. Swipe sideways (touch-action: pan-y, touchmove preventDefault)
+slide 1
+slide 2
+slide 3
+slide 4
+
+4. Long-press this sentence: a word should get selected and the selection handles should appear (AccessibleCaret is disabled when the touch pref is off unless layout.accessiblecaret.enabled is set).
+
+scrollable filler
+info page: redteam 30 touch gestures vs dom.w3c_touch_events.enabled=0 (device) persona=win-firefox__us-east ua=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0
+info static: {"touchEventDefined":false,"ontouchstart":false,"maxTouchPoints":0,"pointerFine":true,"hoverHover":true}
+needs-device touch.gestures: no trusted input within 1.5 s (headless); on the phone tap, draw, swipe and long-press, then read the info compat.* lines
+
+summary: fired=0 clean=0 info=2 needs-device=1

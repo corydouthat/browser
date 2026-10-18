@@ -1,0 +1,8 @@
+Tap / click here 3 times
+info page: redteam 09 pointerType on tap (device) persona=win-firefox__us-east ua=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0
+info static: {"maxTouchPoints":0,"ontouchstart":false,"TouchEvent":"undefined","PointerEvent":"function","pointerFine":true,"anyCoarse":false}
+info synthetic: new PointerEvent({pointerType:"touch"}).pointerType=touch (constructor accepts any string; not a tell)
+needs-device tap.pointerType: no trusted tap within 1.5 s (headless); on the phone tap the box: pointerdown.pointerType must be "mouse", mozInputSource 1, no touch* events, mousemove/pointerover before mousedown
+info hover: also on device: hover the box with an external mouse; pointerover/mousemove must arrive before any mousedown
+
+summary: fired=0 clean=0 info=4 needs-device=1

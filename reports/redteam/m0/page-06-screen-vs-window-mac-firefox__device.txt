@@ -1,0 +1,24 @@
+info page: redteam 06 screen vs window persona=mac-firefox__device ua=Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:158.0) Gecko/20100101 Firefox/158.0
+info geometry: {"screen":[1440,900],"avail":[1440,875],"availLT":[0,0],"leftTop":[0,0],"inner":[1440,814],"outer":[1440,900],"screenXY":[0,0],"screenLT":[0,0],"mozInner":[0,86],"client":[1440,814],"vv":[1440,814,1,0,0],"dpr":2,"colorDepth":30,"pixelDepth":30,"fullscreen":false}
+
+## 1. hard impossibilities
+clean win.innerWithinScreen: ok
+clean win.outerWithinScreen: ok
+clean win.outerGeInner: ok
+clean win.availWithinScreen: ok
+clean win.innerWithinAvail: ok
+clean win.chromeGeometry: ok
+clean win.windowOnScreen: ok
+
+## 2. zoom / visual viewport at load
+clean vv.scaleOne: ok
+clean vv.widthVsInner: ok
+
+## 3. plausibility (not impossible, but unusual on a real desktop)
+info win.outerOverAvail: outerHeight 900 > availHeight 875 while not fullscreen (a maximized desktop window stops at availHeight; only fullscreen reaches 900)
+clean screen.depths: ok
+clean screen.availLTZero: ok
+info screen.taskbar: height-availHeight=25 (Windows taskbar 40 at 1x; macOS menu bar 25)
+info scrollbar: innerWidth-clientWidth=0 (classic scrollbars 15-17, overlay 0)
+
+summary: fired=0 clean=11 info=5 needs-device=0

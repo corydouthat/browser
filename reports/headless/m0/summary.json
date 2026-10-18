@@ -1,0 +1,553 @@
+{
+  "finishedAt": "2026-10-18T11:39:38.429Z",
+  "firefox": "Mozilla Firefox 158.0",
+  "runs": [
+    {
+      "runId": "linux-firefox__jp",
+      "personaId": "linux-firefox__jp",
+      "control": null,
+      "ext": true,
+      "tz": "Asia/Tokyo",
+      "window": {
+        "width": 1920,
+        "height": 1080
+      },
+      "browserVersion": "158.0",
+      "firefoxPid": 1467806,
+      "addonId": "bridge@hatch.app",
+      "shimReady": true,
+      "file": "/home/cory/repos/browser/build/harness-reports/linux-firefox__jp.json",
+      "summary": {
+        "overall": "PASS",
+        "pass": 64,
+        "fail": 3,
+        "skipped": 13,
+        "info": 10,
+        "hardFail": [],
+        "softFail": [
+          "intl.locale",
+          "contexts.worker.hardwareConcurrency",
+          "contexts.sharedWorker.hardwareConcurrency"
+        ],
+        "deviceSkipped": [
+          "touch.orientation",
+          "css.bp992",
+          "css.bp1024",
+          "css.bp1200",
+          "css.bp1280",
+          "css.minDeviceWidth1024",
+          "css.maxDeviceWidth480",
+          "css.minResolution2",
+          "layout.clientWidth",
+          "interactive.pointerEvents",
+          "interactive.pointerType"
+        ],
+        "libraryFail": [],
+        "libraryTotal": 10,
+        "libraryPass": 10
+      },
+      "ok": true
+    },
+    {
+      "runId": "mac-firefox__device",
+      "personaId": "mac-firefox__device",
+      "control": null,
+      "ext": true,
+      "tz": null,
+      "window": {
+        "width": 1440,
+        "height": 900
+      },
+      "browserVersion": "158.0",
+      "firefoxPid": 1468102,
+      "addonId": "bridge@hatch.app",
+      "shimReady": true,
+      "file": "/home/cory/repos/browser/build/harness-reports/mac-firefox__device.json",
+      "summary": {
+        "overall": "PASS",
+        "pass": 57,
+        "fail": 2,
+        "skipped": 13,
+        "info": 18,
+        "hardFail": [],
+        "softFail": [
+          "contexts.worker.hardwareConcurrency",
+          "contexts.sharedWorker.hardwareConcurrency"
+        ],
+        "deviceSkipped": [
+          "touch.orientation",
+          "css.bp992",
+          "css.bp1024",
+          "css.bp1200",
+          "css.bp1280",
+          "css.minDeviceWidth1024",
+          "css.maxDeviceWidth480",
+          "css.minResolution2",
+          "layout.clientWidth",
+          "interactive.pointerEvents",
+          "interactive.pointerType"
+        ],
+        "libraryFail": [],
+        "libraryTotal": 10,
+        "libraryPass": 10
+      },
+      "ok": true
+    },
+    {
+      "runId": "real-device__device",
+      "personaId": "real-device__device",
+      "control": null,
+      "ext": true,
+      "tz": null,
+      "window": {
+        "width": 1366,
+        "height": 768
+      },
+      "browserVersion": "158.0",
+      "firefoxPid": 1468393,
+      "addonId": "bridge@hatch.app",
+      "file": "/home/cory/repos/browser/build/harness-reports/real-device__device.json",
+      "summary": {
+        "overall": "PASS",
+        "pass": 30,
+        "fail": 0,
+        "skipped": 20,
+        "info": 40,
+        "hardFail": [],
+        "softFail": [],
+        "deviceSkipped": [
+          "touch.orientation",
+          "css.bp992",
+          "css.bp1024",
+          "css.bp1200",
+          "css.bp1280",
+          "css.minDeviceWidth1024",
+          "css.maxDeviceWidth480",
+          "css.minResolution2",
+          "layout.clientWidth",
+          "interactive.pointerEvents",
+          "interactive.pointerType"
+        ],
+        "libraryFail": [],
+        "libraryTotal": 10,
+        "libraryPass": 0
+      },
+      "ok": true
+    },
+    {
+      "runId": "real-device__jp",
+      "personaId": "real-device__jp",
+      "control": null,
+      "ext": true,
+      "tz": "Asia/Tokyo",
+      "window": {
+        "width": 1366,
+        "height": 768
+      },
+      "browserVersion": "158.0",
+      "firefoxPid": 1468654,
+      "addonId": "bridge@hatch.app",
+      "shimReady": true,
+      "file": "/home/cory/repos/browser/build/harness-reports/real-device__jp.json",
+      "summary": {
+        "overall": "PASS",
+        "pass": 37,
+        "fail": 1,
+        "skipped": 20,
+        "info": 32,
+        "hardFail": [],
+        "softFail": [
+          "intl.locale"
+        ],
+        "deviceSkipped": [
+          "touch.orientation",
+          "css.bp992",
+          "css.bp1024",
+          "css.bp1200",
+          "css.bp1280",
+          "css.minDeviceWidth1024",
+          "css.maxDeviceWidth480",
+          "css.minResolution2",
+          "layout.clientWidth",
+          "interactive.pointerEvents",
+          "interactive.pointerType"
+        ],
+        "libraryFail": [],
+        "libraryTotal": 10,
+        "libraryPass": 0
+      },
+      "ok": true
+    },
+    {
+      "runId": "win-chrome__uk",
+      "personaId": "win-chrome__uk",
+      "control": null,
+      "ext": true,
+      "tz": "Europe/London",
+      "window": {
+        "width": 1920,
+        "height": 1080
+      },
+      "browserVersion": "158.0",
+      "firefoxPid": 1468912,
+      "addonId": "bridge@hatch.app",
+      "shimReady": true,
+      "file": "/home/cory/repos/browser/build/harness-reports/win-chrome__uk.json",
+      "summary": {
+        "overall": "PASS",
+        "pass": 66,
+        "fail": 3,
+        "skipped": 13,
+        "info": 8,
+        "hardFail": [],
+        "softFail": [
+          "ua.vendor",
+          "contexts.worker.hardwareConcurrency",
+          "contexts.sharedWorker.hardwareConcurrency"
+        ],
+        "deviceSkipped": [
+          "touch.orientation",
+          "css.bp992",
+          "css.bp1024",
+          "css.bp1200",
+          "css.bp1280",
+          "css.minDeviceWidth1024",
+          "css.maxDeviceWidth480",
+          "css.minResolution2",
+          "layout.clientWidth",
+          "interactive.pointerEvents",
+          "interactive.pointerType"
+        ],
+        "libraryFail": [],
+        "libraryTotal": 10,
+        "libraryPass": 10
+      },
+      "ok": true
+    },
+    {
+      "runId": "win-firefox__de",
+      "personaId": "win-firefox__de",
+      "control": null,
+      "ext": true,
+      "tz": "Europe/Berlin",
+      "window": {
+        "width": 1920,
+        "height": 1080
+      },
+      "browserVersion": "158.0",
+      "firefoxPid": 1469289,
+      "addonId": "bridge@hatch.app",
+      "shimReady": true,
+      "file": "/home/cory/repos/browser/build/harness-reports/win-firefox__de.json",
+      "summary": {
+        "overall": "PASS",
+        "pass": 64,
+        "fail": 3,
+        "skipped": 13,
+        "info": 10,
+        "hardFail": [],
+        "softFail": [
+          "intl.locale",
+          "contexts.worker.hardwareConcurrency",
+          "contexts.sharedWorker.hardwareConcurrency"
+        ],
+        "deviceSkipped": [
+          "touch.orientation",
+          "css.bp992",
+          "css.bp1024",
+          "css.bp1200",
+          "css.bp1280",
+          "css.minDeviceWidth1024",
+          "css.maxDeviceWidth480",
+          "css.minResolution2",
+          "layout.clientWidth",
+          "interactive.pointerEvents",
+          "interactive.pointerType"
+        ],
+        "libraryFail": [],
+        "libraryTotal": 10,
+        "libraryPass": 10
+      },
+      "ok": true
+    },
+    {
+      "runId": "win-firefox__device",
+      "personaId": "win-firefox__device",
+      "control": null,
+      "ext": true,
+      "tz": null,
+      "window": {
+        "width": 1920,
+        "height": 1080
+      },
+      "browserVersion": "158.0",
+      "firefoxPid": 1469573,
+      "addonId": "bridge@hatch.app",
+      "shimReady": true,
+      "file": "/home/cory/repos/browser/build/harness-reports/win-firefox__device.json",
+      "summary": {
+        "overall": "PASS",
+        "pass": 57,
+        "fail": 2,
+        "skipped": 13,
+        "info": 18,
+        "hardFail": [],
+        "softFail": [
+          "contexts.worker.hardwareConcurrency",
+          "contexts.sharedWorker.hardwareConcurrency"
+        ],
+        "deviceSkipped": [
+          "touch.orientation",
+          "css.bp992",
+          "css.bp1024",
+          "css.bp1200",
+          "css.bp1280",
+          "css.minDeviceWidth1024",
+          "css.maxDeviceWidth480",
+          "css.minResolution2",
+          "layout.clientWidth",
+          "interactive.pointerEvents",
+          "interactive.pointerType"
+        ],
+        "libraryFail": [],
+        "libraryTotal": 10,
+        "libraryPass": 10
+      },
+      "ok": true
+    },
+    {
+      "runId": "win-firefox__us-east",
+      "personaId": "win-firefox__us-east",
+      "control": null,
+      "ext": true,
+      "tz": "America/New_York",
+      "window": {
+        "width": 1920,
+        "height": 1080
+      },
+      "browserVersion": "158.0",
+      "firefoxPid": 1469832,
+      "addonId": "bridge@hatch.app",
+      "shimReady": true,
+      "file": "/home/cory/repos/browser/build/harness-reports/win-firefox__us-east.json",
+      "summary": {
+        "overall": "PASS",
+        "pass": 65,
+        "fail": 2,
+        "skipped": 13,
+        "info": 10,
+        "hardFail": [],
+        "softFail": [
+          "contexts.worker.hardwareConcurrency",
+          "contexts.sharedWorker.hardwareConcurrency"
+        ],
+        "deviceSkipped": [
+          "touch.orientation",
+          "css.bp992",
+          "css.bp1024",
+          "css.bp1200",
+          "css.bp1280",
+          "css.minDeviceWidth1024",
+          "css.maxDeviceWidth480",
+          "css.minResolution2",
+          "layout.clientWidth",
+          "interactive.pointerEvents",
+          "interactive.pointerType"
+        ],
+        "libraryFail": [],
+        "libraryTotal": 10,
+        "libraryPass": 10
+      },
+      "ok": true
+    },
+    {
+      "runId": "ctl-coarse",
+      "personaId": "win-firefox__us-east",
+      "control": "ctl-coarse",
+      "ext": true,
+      "tz": "America/New_York",
+      "window": {
+        "width": 1920,
+        "height": 1080
+      },
+      "browserVersion": "158.0",
+      "firefoxPid": 1470103,
+      "addonId": "bridge@hatch.app",
+      "shimReady": true,
+      "file": "/home/cory/repos/browser/build/harness-reports/ctl-coarse.json",
+      "summary": {
+        "overall": "FAIL",
+        "pass": 61,
+        "fail": 6,
+        "skipped": 13,
+        "info": 10,
+        "hardFail": [
+          "css.pointerFine",
+          "css.hoverHover",
+          "css.anyPointerCoarse"
+        ],
+        "softFail": [
+          "css.anyHoverHover",
+          "contexts.worker.hardwareConcurrency",
+          "contexts.sharedWorker.hardwareConcurrency"
+        ],
+        "deviceSkipped": [
+          "touch.orientation",
+          "css.bp992",
+          "css.bp1024",
+          "css.bp1200",
+          "css.bp1280",
+          "css.minDeviceWidth1024",
+          "css.maxDeviceWidth480",
+          "css.minResolution2",
+          "layout.clientWidth",
+          "interactive.pointerEvents",
+          "interactive.pointerType"
+        ],
+        "libraryFail": [],
+        "libraryTotal": 10,
+        "libraryPass": 10
+      },
+      "controlCheck": {
+        "ok": true,
+        "overall": "FAIL",
+        "failed": [
+          "css.pointerFine",
+          "css.hoverHover",
+          "css.anyPointerCoarse",
+          "css.anyHoverHover",
+          "contexts.worker.hardwareConcurrency",
+          "contexts.sharedWorker.hardwareConcurrency"
+        ],
+        "missing": [],
+        "unexpected": [],
+        "mustPassBroken": []
+      },
+      "ok": true
+    },
+    {
+      "runId": "ctl-touch",
+      "personaId": "win-firefox__us-east",
+      "control": "ctl-touch",
+      "ext": true,
+      "tz": "America/New_York",
+      "window": {
+        "width": 1920,
+        "height": 1080
+      },
+      "browserVersion": "158.0",
+      "firefoxPid": 1470394,
+      "addonId": "bridge@hatch.app",
+      "shimReady": true,
+      "file": "/home/cory/repos/browser/build/harness-reports/ctl-touch.json",
+      "summary": {
+        "overall": "FAIL",
+        "pass": 64,
+        "fail": 3,
+        "skipped": 13,
+        "info": 10,
+        "hardFail": [
+          "touch.createEvent"
+        ],
+        "softFail": [
+          "contexts.worker.hardwareConcurrency",
+          "contexts.sharedWorker.hardwareConcurrency"
+        ],
+        "deviceSkipped": [
+          "touch.orientation",
+          "css.bp992",
+          "css.bp1024",
+          "css.bp1200",
+          "css.bp1280",
+          "css.minDeviceWidth1024",
+          "css.maxDeviceWidth480",
+          "css.minResolution2",
+          "layout.clientWidth",
+          "interactive.pointerEvents",
+          "interactive.pointerType"
+        ],
+        "libraryFail": [],
+        "libraryTotal": 10,
+        "libraryPass": 10
+      },
+      "controlCheck": {
+        "ok": true,
+        "overall": "FAIL",
+        "failed": [
+          "touch.createEvent",
+          "contexts.worker.hardwareConcurrency",
+          "contexts.sharedWorker.hardwareConcurrency"
+        ],
+        "missing": [],
+        "unexpected": [],
+        "mustPassBroken": []
+      },
+      "ok": true
+    },
+    {
+      "runId": "ctl-noext",
+      "personaId": "win-firefox__us-east",
+      "control": "ctl-noext",
+      "ext": false,
+      "tz": "America/New_York",
+      "window": {
+        "width": 1920,
+        "height": 1080
+      },
+      "browserVersion": "158.0",
+      "firefoxPid": 1470675,
+      "file": "/home/cory/repos/browser/build/harness-reports/ctl-noext.json",
+      "summary": {
+        "overall": "FAIL",
+        "pass": 60,
+        "fail": 7,
+        "skipped": 13,
+        "info": 10,
+        "hardFail": [
+          "screen.width",
+          "screen.height",
+          "screen.availWidth",
+          "screen.availHeight",
+          "geo.position"
+        ],
+        "softFail": [
+          "geo.accuracy",
+          "geo.permission"
+        ],
+        "deviceSkipped": [
+          "touch.orientation",
+          "css.bp992",
+          "css.bp1024",
+          "css.bp1200",
+          "css.bp1280",
+          "css.minDeviceWidth1024",
+          "css.maxDeviceWidth480",
+          "css.minResolution2",
+          "layout.clientWidth",
+          "interactive.pointerEvents",
+          "interactive.pointerType"
+        ],
+        "libraryFail": [],
+        "libraryTotal": 10,
+        "libraryPass": 10
+      },
+      "controlCheck": {
+        "ok": true,
+        "overall": "FAIL",
+        "failed": [
+          "screen.width",
+          "screen.height",
+          "screen.availWidth",
+          "screen.availHeight",
+          "geo.position",
+          "geo.accuracy",
+          "geo.permission"
+        ],
+        "missing": [],
+        "unexpected": [],
+        "mustPassBroken": []
+      },
+      "ok": true
+    }
+  ]
+}

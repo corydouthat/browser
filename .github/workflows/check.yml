@@ -1,0 +1,102 @@
+# Hatch CI: mirrors `make check-full` on a GitHub-hosted runner (4 vCPU / 16 GB, Node + Firefox deps present).
+# Every heavy step still goes through the Makefile/tool scripts, so the same flock serialisation and
+# gradle.properties memory caps apply here as on the VPS (slower than the runner could go, but identical
+# behaviour). versionCode = git rev-list --count HEAD, hence fetch-depth 0.
+name: check
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FIREFOX_VERSION: "158.0"
+
+jobs:
+  check:
+    name: lint + unit + headless
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: harness/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools platforms;android-37.2 build-tools;36.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Cache headless Firefox + geckodriver
+        uses: actions/cache@v4
+        with:
+          path: ~/opt
+          key: firefox-${{ env.FIREFOX_VERSION }}-geckodriver-0.37.1
+      - name: Harness setup (Firefox 158, geckodriver, npm ci)
+        run: tool/headless/setup.sh
+      - name: make check
+        run: make check
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          retention-days: 28
+          path: |
+            build/harness-reports/
+            persona/build/test-results/
+            persona/build/reports/tests/
+          if-no-files-found: ignore
+
+  build:
+    name: APKs + size budget + android lint
+    runs-on: ubuntu-24.04
+    needs: check
+    timeout-minutes: 60
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools platforms;android-37.2 build-tools;36.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Debug APK (sideloadable)
+        run: tool/build_apk.sh debug
+      - name: Release APK + size budget
+        run: make apk
+      - name: Android lint
+        run: make android-lint
+      - name: Upload APKs and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          retention-days: 56
+          path: |
+            dist/*.apk
+            build/size.json
+            app/build/outputs/mapping/release/mapping.txt
+            app/build/reports/lint-results-release.html
+          if-no-files-found: ignore

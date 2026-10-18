@@ -1,0 +1,31 @@
+info page: redteam 05 matchMedia vs CSS persona=win-firefox__us-east ua=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0
+
+## 1. JS matchMedia vs CSS @media for the same query
+info media.table: (pointer: fine) js=true css=true ; (pointer: coarse) js=false css=false ; (pointer: none) js=false css=false ; (hover: hover) js=true css=true ; (hover: none) js=false css=false ; (any-pointer: coarse) js=false css=false ; (any-pointer: fine) js=true css=true ; (any-hover: hover) js=true css=true ; (any-hover: none) js=false css=false ; (pointer) js=true css=true ; (hover) js=true css=true ; not (pointer: coarse) js=true css=true ; (pointer: fine) and (hover: hover) js=true css=true ; screen and (pointer: coarse), (hover: none) js=false css=false ; (orientation: portrait) js=false css=false ; (orientation: landscape) js=true css=true ; (min-width: 1200px) js=true css=true ; (max-width: 480px) js=false css=false ; (min-device-width: 1024px) js=true css=true ; (device-width: 1920px) js=true css=false ; (device-height: 1080px) js=true css=false ; (max-device-width: 600px) js=false css=false ; (resolution: 1dppx) js=true css=true ; (min-resolution: 1.5dppx) js=false css=false ; (-webkit-device-pixel-ratio: 1) js=true css=true ; (-webkit-min-device-pixel-ratio: 2) js=false css=false ; (prefers-color-scheme: dark) js=false css=false ; (display-mode: browser) js=true css=true ; (color: 8) js=true css=true ; (color-gamut: p3) js=false css=false
+clean media.jsVsCss: 28 queries agree
+info media.jsVsCssDevice: documented engine limit (stylesheet device-*/resolution come from the real display): (device-width: 1920px): js=true css=false | (device-height: 1080px): js=true css=false
+
+## 2. screen.* / devicePixelRatio vs device-* / resolution media features
+clean media.deviceWidthVsScreen: ok
+clean media.deviceHeightVsScreen: ok
+clean media.resolutionVsDpr: ok
+info media.cssDeviceWidth: 1920px (screen.width 1920, innerWidth 1920)
+clean media.deviceAspectRatio: ok
+
+## 3. orientation coherence (CSS vs screen.orientation vs sizes)
+info orientation: css portrait=false screen.orientation=landscape-primary/0 inner=1920x994 screen=1920x1080
+clean orientation.cssVsInner: ok
+clean orientation.typeVsCss: ok
+clean orientation.typeVsScreenDims: ok
+
+## 4. MediaQueryList.media serialization vs CSSOM mediaText
+clean media.serialization: matchMedia(q).media equals CSSOM mediaText for 10 spellings
+clean media.serializationNormalized: ok
+info media.invalidQuery: media="(pointer: bogus)" matches=false (native: "not all"/false)
+info media.invalidQuery2: media="(hover: bogus) and (min-width: 1px)" matches=false
+
+## 5. MQL change events / listeners for pointer queries
+clean media.mqlIdentityProto: ok
+info media.mqlSameQueryIdentity: false (native Firefox: false)
+
+summary: fired=0 clean=11 info=8 needs-device=0
