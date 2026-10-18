@@ -4,6 +4,7 @@
  *
  *   node tool/headless/run.mjs [--personas all|id,id] [--controls] [--no-ext] [--out <dir>]
  *                              [--page <file.html>] [--base <persona id>] [--timeout <s>] [--verbose]
+ *                              [--extra-ext <dir>]...
  *
  * For every persona id (<identityId>__<regionId>, or the built-in "none"):
  *   - prefs + clear + env come from personas/golden/<id>.prefs.json (written by the Kotlin
@@ -19,6 +20,9 @@
  * (default win-firefox__us-east) and asserts that they FAIL exactly where expected.
  * --page <file> loads that page (served at /page/) with the persona set-up and prints its body text;
  * a body containing "DETECTED" makes the run fail (red-team pages).
+ * --extra-ext <dir> (repeatable) installs another unpacked extension as a temporary add-on after the Hatch one,
+ * e.g. Android Components' browser-icons extension (`assets/extensions/browser-icons/` inside the
+ * browser-icons AAR) to prove that a second built-in extension adds no tell.
  * Exit code: 1 when any persona run has a hard FAIL / library FAIL, any control assertion fails,
  * or a --page prints DETECTED; 2 on usage/setup errors.
  *
@@ -110,7 +114,7 @@ function usage(code) {
 }
 
 function parseArgs(argv) {
-  const a = { personas: null, controls: false, noExt: false, out: join(REPO, 'build', 'harness-reports'), page: null, base: DEFAULT_BASE, timeout: 90, verbose: false, keep: false, list: false };
+  const a = { personas: null, controls: false, noExt: false, out: join(REPO, 'build', 'harness-reports'), page: null, base: DEFAULT_BASE, timeout: 90, verbose: false, keep: false, list: false, extraExt: [] };
   for (let i = 0; i < argv.length; i++) {
     const f = argv[i];
     const next = () => { if (i + 1 >= argv.length) { console.error(`${f} needs a value`); process.exit(2); } return argv[++i]; };
@@ -119,6 +123,7 @@ function parseArgs(argv) {
     else if (f === '--no-ext') a.noExt = true;
     else if (f === '--out') a.out = resolve(next());
     else if (f === '--page') a.page = resolve(next());
+    else if (f === '--extra-ext') a.extraExt.push(resolve(next()));
     else if (f === '--base') a.base = next();
     else if (f === '--timeout') a.timeout = Number(next());
     else if (f === '--verbose' || f === '-v') a.verbose = true;
@@ -376,6 +381,11 @@ async function runOne(run, ctx) {
         }
       }
     }
+    for (const dir of ctx.args.extraExt) {
+      const id = await withDeadline(driver.installAddon(dir, true), 30000, `installAddon ${basename(dir)}`);
+      log(`extra temporary add-on installed: ${id} (${dir})`);
+      (outcome.extraAddonIds ||= []).push(id);
+    }
     try { await driver.manage().window().setRect({ x: 0, y: 0, width, height }); } catch (e) { log(`setRect: ${e.message}`); }
 
     if (ctx.args.page) {
@@ -478,6 +488,9 @@ async function main() {
   const ffVersion = execFileSync(FIREFOX_BIN, ['--version'], { encoding: 'utf8', env: { ...process.env, MOZ_HEADLESS: '1' } }).trim();
   if (!/Firefox 158\./.test(ffVersion)) throw new Error(`${FIREFOX_BIN} reports "${ffVersion}", expected Firefox 158.x`);
   if (args.page && !existsSync(args.page)) throw new Error(`--page file not found: ${args.page}`);
+  for (const dir of args.extraExt) {
+    if (!existsSync(join(dir, 'manifest.json'))) throw new Error(`--extra-ext: no manifest.json in ${dir}`);
+  }
 
   const runs = plan(args);
   const selenium = await loadSelenium();

@@ -11,6 +11,9 @@ cd "$(dirname "$0")/.."
 APK_LIMIT=$((110 * 1024 * 1024))
 SELFCHECK_LIMIT=$((2 * 1024 * 1024))
 EXTENSION_LIMIT=$((200 * 1024))
+# resources.arsc is stored uncompressed (targetSdk >= 30); with the "en" locale filter (PERF-02) it must stay
+# small. Without the filter the AC/androidx/material string tables for ~150 locales pushed it to 4.1 MB.
+ARSC_LIMIT=$((2 * 1024 * 1024))
 
 apk="${1:-}"
 if [ -z "$apk" ]; then
@@ -38,6 +41,7 @@ abis=$(unzip -Z1 "$apk" | grep -E '^lib/[^/]+/' | cut -d/ -f2 | sort -u | paste 
 # (PERF-01); a regression to uncompressed packaging shows up here before the APK budget does.
 lib_stored_bytes=$(unzip -v "$apk" 2>/dev/null | awk 'NF >= 8 && $2 == "Stored" && index($NF, "lib/") == 1 { s += $1 } END { printf "%d", s + 0 }')
 lib_bytes=$(asset_bytes 'lib/')
+arsc_bytes=$(asset_bytes 'resources.arsc')
 
 mkdir -p build
 status="ok"
@@ -45,6 +49,7 @@ problems=()
 [ "$apk_bytes" -le "$APK_LIMIT" ] || { status="over"; problems+=("apk $apk_bytes > $APK_LIMIT"); }
 [ "$selfcheck_bytes" -le "$SELFCHECK_LIMIT" ] || { status="over"; problems+=("selfcheck $selfcheck_bytes > $SELFCHECK_LIMIT"); }
 [ "$extension_bytes" -le "$EXTENSION_LIMIT" ] || { status="over"; problems+=("extension $extension_bytes > $EXTENSION_LIMIT"); }
+[ "$arsc_bytes" -le "$ARSC_LIMIT" ] || { status="over"; problems+=("resources.arsc $arsc_bytes > $ARSC_LIMIT (locale filter lost?)"); }
 case "$abis" in *x86*|*armeabi-v7a*) status="over"; problems+=("unexpected ABIs: $abis");; esac
 
 cat > build/size.json <<JSON
@@ -57,12 +62,14 @@ cat > build/size.json <<JSON
     "extension": $extension_bytes,
     "extensionVendor": $extension_vendor,
     "libUncompressed": $lib_bytes,
-    "libStoredUncompressedInApk": $lib_stored_bytes
+    "libStoredUncompressedInApk": $lib_stored_bytes,
+    "resourcesArsc": $arsc_bytes
   },
   "limits": {
     "apk": $APK_LIMIT,
     "selfcheck": $SELFCHECK_LIMIT,
-    "extension": $EXTENSION_LIMIT
+    "extension": $EXTENSION_LIMIT,
+    "resourcesArsc": $ARSC_LIMIT
   },
   "status": "$status",
   "problems": [$(printf '"%s",' "${problems[@]+"${problems[@]}"}" | sed 's/,$//')]
@@ -74,6 +81,7 @@ echo "APK       $(mb "$apk_bytes") (limit $(mb "$APK_LIMIT")) abis=$abis"
 echo "selfcheck $(mb "$selfcheck_bytes") (limit $(mb "$SELFCHECK_LIMIT"))"
 echo "extension $(mb "$extension_bytes") (limit $(mb "$EXTENSION_LIMIT"); vendor/eruda $(mb "$extension_vendor") excluded)"
 echo "lib/      $(mb "$lib_bytes") uncompressed, $(mb "$lib_stored_bytes") of it Stored (uncompressed) in the APK"
+echo "arsc      $(mb "$arsc_bytes") (limit $(mb "$ARSC_LIMIT"))"
 echo "-> build/size.json"
 if [ "$status" != "ok" ]; then
   printf 'SIZE BUDGET EXCEEDED: %s\n' "${problems[@]}" >&2

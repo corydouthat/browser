@@ -54,8 +54,12 @@ lint-ext:
 
 unit: unit-persona unit-harness unit-ext vendor-check ## :persona JUnit (goldens, URL rewrites, userscript headers) + harness + extension node tests + vendor-check
 
+# Gradle targets follow tool/build_apk.sh: with a remote build host (HATCH_BUILD_HOST or .buildhost) they run
+# there through tool/remote_build.sh (results come back to persona/build and app/build), else locally under the lock.
+GRADLE_RUN = if [ -n "$${HATCH_BUILD_HOST:-}" ] || [ -s .buildhost ]; then tool/remote_build.sh $(1); else $(LOCK) $(GRADLE) $(1); fi
+
 unit-persona:
-	$(LOCK) $(GRADLE) :persona:test
+	@$(call GRADLE_RUN,:persona:test)
 
 unit-harness:
 	cd $(HARNESS) && $(NODE) --test test/*.test.mjs
@@ -81,8 +85,8 @@ apk: ## release APK (R8) + size budget check -> build/size.json
 	tool/build_apk.sh release
 	tool/check_apk_size.sh
 
-android-lint: ## Android lint on the release variant (under the lock)
-	$(LOCK) $(GRADLE) :app:lintRelease
+android-lint: ## Android lint on the release variant (remote host when configured, else under the lock)
+	@$(call GRADLE_RUN,:app:lintRelease)
 
 check: lint unit headless ## serial: lint -> unit -> headless
 
