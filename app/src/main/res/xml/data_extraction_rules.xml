@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!-- Copied from Fenix (mobile/android/fenix/app/src/main/res/xml/data_extraction_rules.xml, tag
+     FIREFOX_158_0_RELEASE). Android 12+ reads this instead of allowBackup for cloud backup AND device-to-device
+     transfer; on some OEM builds allowBackup="false" alone does not stop the D2D copy (SEC-2). Nothing under the app's
+     data directory (logins database, session store, rules, persona files, shared prefs) leaves the device. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" path="."/>
+        <exclude domain="file" path="."/>
+        <exclude domain="database" path="."/>
+        <exclude domain="sharedpref" path="."/>
+        <exclude domain="external" path="."/>
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" path="."/>
+        <exclude domain="file" path="."/>
+        <exclude domain="database" path="."/>
+        <exclude domain="sharedpref" path="."/>
+        <exclude domain="external" path="."/>
+    </device-transfer>
+</data-extraction-rules>
