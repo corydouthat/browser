@@ -1,6 +1,10 @@
 package app.hatch.engine
 
 import android.content.Context
+// hatch:rules begin
+import app.hatch.applinks.AppLinksPolicy
+import app.hatch.components
+// hatch:rules end
 import mozilla.components.browser.errorpages.ErrorPages
 import mozilla.components.concept.engine.request.ErrorType
 import mozilla.components.browser.state.store.BrowserStore
@@ -14,12 +18,17 @@ import mozilla.components.feature.app.links.AppLinksInterceptor
  */
 class HatchRequestInterceptor(
     private val context: Context,
+    // hatch:rules begin — AppSettings.appLinksMode → AppLinksPolicy.launchInApp (AppLinksInterceptor.kt:66 at
+    // FIREFOX_158_0_RELEASE: false = never leave the browser for an engine-supported scheme, fallback URL for others).
+    // Declared before `store` so `HatchRequestInterceptor(context) { store }` keeps binding the trailing lambda to it.
+    private val launchInApp: () -> Boolean = { AppLinksPolicy.of(context.components.settings.appLinksMode).launchInApp },
+    // hatch:rules end
     store: () -> BrowserStore,
 ) : RequestInterceptor {
     private val appLinks: AppLinksInterceptor by lazy {
         AppLinksInterceptor(
             context = context,
-            launchInApp = { true },
+            launchInApp = launchInApp, // hatch:rules
             store = store(),
         )
     }
