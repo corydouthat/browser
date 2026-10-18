@@ -9,6 +9,10 @@ to `reports/device/<version>/` (the share zip, screenshots, `meminfo.json`).
 adb install -r dist/hatch-<version>-<build>-<sha>-debug.apk      # or sideload the file
 ```
 
+Without adb, the reliable way to get a 140 MB debug APK onto the phone is Taildrop from the build box
+(`tailscale file cp dist/<apk> <phone>:`); it needs no browser, runs in the background and stays on the
+tailnet. Browser downloads from a `tailscale serve` share tend to stall when the tab is backgrounded.
+
 Debug builds install as `app.hatch.browser.debug` ("Hatch" with a debug version suffix in Settings), so a
 release build can coexist. First start opens the home URL with the default persona
 `Windows · Firefox 158 / Device (no override)`.
