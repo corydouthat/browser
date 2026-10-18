@@ -1,0 +1,33 @@
+info page: redteam 01 toString persona=win-firefox__us-east ua=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0
+
+## 1. Function.prototype.toString of every shimmable function (all spellings)
+info toString.referenceFormat: "function onLine() {\n    [native code]\n}" name="get onLine"
+clean toString.source: 51 functions print as native in 7 spellings
+
+## 2. toString itself
+clean toString.self: ok
+clean toString.descriptor: ok
+clean toString.ownProps: length,name
+clean toString.nameLength: ok
+clean toString.ownPropsAfterName: length,name
+clean toString.prototypeProp: ok
+clean toString.nonFunctionThrows: ok
+info toString.proxy: function () {
+    [native code]
+}
+
+## 3. own property shape of shimmed functions vs a native reference
+clean fn.ownShape: name/length/ownProps/symbols/prototype match native reference
+
+## 4. Error stack of a brand-check failure (native getter: 0 extra frames)
+info stack.reference: get onLine -> 4 frame(s): stackFrames@http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:110:14 || @http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:114:52 || @http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:114:23 || start@http://127.0.0.1:34817/page/_rt.js:68:27
+info stack.getterBrandCheck: documented tell: Navigator.maxTouchPoints 5 frames (ref 4): get maxTouchPoints@<anonymous code>:40:23 || stackFrames@http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:110:14 || @http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:119:24 || @http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:117:11 || start@http://127.0.0.1:34817/page/_rt.js:68:27 | Navigator.hardwareConcurrency 5 frames (ref 4): get hardwareConcurrency@<anonymous code>:40:23 || stackFrames@http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:110:14 || @http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:119:24 || @http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:117:11 || start@http://127.0.0.1:34817/page/_rt.js:68:27 | Navigator.pdfViewerEnabled 5 frames (ref 4): get pdfViewerEnabled@<anonymous code>:40:23 || stackFrames@http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:110:14 || @http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:119:24 || @http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:117:11 || start@http://127.0.0.1:34817/page/_rt.js:68:27 | Screen.width 5 frames (ref 4): get width@<anonymous code>:40:23 || stackFrames@http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:110:14 || @http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:119:24 || @http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:117:11 || start@http://127.0.0.1:34817/page/_rt.js:68:27 | Screen.height 5 frames (ref 4): get height@<anonymous code>:40:23 || stackFrames@http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:110:14 || @http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:119:24 || @http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:117:11 || start@http://127.0.0.1:34817/page/_rt.js:68:27 | Screen.availWidth 5 frames (ref 4): get availWidth@<anonymous code>:40:23 || stackFrames@http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:110:14 || @http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:119:24 || @http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:117:11 || start@http://127.0.0.1:34817/page/_rt.js:68:27 | +24 more
+info stack.matchMediaBrandCheck: documented tell: matchMedia brand-check stack has 5 frames vs native 3: @<anonymous code>:166:22 || matchMedia@<anonymous code>:64:45 || r1<@http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:129:36 || @http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:129:178 || start@http://127.0.0.1:34817/page/_rt.js:68:27
+info stack.geoBrandCheck: documented tell: getCurrentPosition brand-check stack has 6 frames vs native 3 ('clearWatch' called on an object that does not implement interface Geolocation.): brand@<anonymous code>:408:75 || @<anonymous code>:415:12 || getCurrentPosition@<anonymous code>:64:45 || r3<@http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:134:37 || @http://127.0.0.1:34817/page/01-tostring.html?persona=win-firefox__us-east&env=headless:134:176 || start@http://127.0.0.1:34817/page/_rt.js:68:27
+
+## 5. cross-realm toString (fresh same-origin iframe realm)
+clean toString.crossRealm: iframe realm toString prints native for every top-realm shimmed function
+clean toString.crossRealmReverse: top realm toString prints native for iframe-realm getters
+info iframe.values: about:blank iframe hwc=8 sw=1920 (top 8/1920)
+
+summary: fired=0 clean=11 info=8 needs-device=0

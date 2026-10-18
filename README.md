@@ -14,7 +14,19 @@ desktop environment coherently** (a *persona*: desktop identity × region), at e
 with a JS shim where not, and proves it with a detection harness that runs headless on a server and as a
 Self-check screen on the phone.
 
-## What it does (M0)
+## What it does (M0 + M1)
+
+- **A real browser chrome (M1)**: Chrome-style top address bar (Android Components' `compose-browser-toolbar`:
+  inline autocomplete, security badge, progress, tab counter), Material You theme, a persona strip with a one-tap
+  desktop/phone switch, a grid tab tray with thumbnails and favicons (swipe to close, undo, multi-select, restore
+  after process death, crash recovery), find in page, a main menu, a home page for new tabs, a site-info dialog.
+- **Saved logins (M1)**: Hatch's own password store fills sign-in forms (Google's two-step form included),
+  offers to save after a submit, keeps a per-site "never save" list and shows the list behind your fingerprint /
+  PIN. Google Password Manager cannot fill web forms in a third-party browser; passkeys are wired but wait for
+  Google's privileged-browser allowlist (release signature only) — "Open in another browser" bridges the gap.
+- **Site rules UI (M1)**: list / editor / "test on current site", `.user.js` / `.user.css` import with header
+  preview, per-host switches for the mobile→desktop host rewrites, a site-permissions screen, an app-links mode
+  (default: links stay in Hatch), and an editor for custom identities and regions.
 
 - **Personas**: identity (`win-firefox` default, `mac-firefox`, `linux-firefox`, `win-chrome`, `real-device`)
   × region (`device`, `us-east`, `uk`, `de`, `jp`), switched live from the persona chip; only a time-zone
@@ -28,8 +40,7 @@ Self-check screen on the phone.
 - **Dev tools**: Eruda in any tab (also on strict-CSP sites), Gecko remote debugging over adb, an "Engine
   prefs" truth view, a bridge-extension log.
 - **Add-ons**: install Mozilla-signed `.xpi` files from a URL (uBlock Origin).
-- **Per-site rules**: userscripts / userstyles with a Greasemonkey subset (three bundled, disabled examples;
-  editor UI in M1).
+- **Per-site rules**: userscripts / userstyles with a Greasemonkey subset (three bundled, disabled examples).
 - **Self-check**: the detection harness served by the app itself, with a share-able report zip.
 - The usual browser plumbing via Android Components: prompts incl. file upload, downloads, context menu,
   fullscreen + PiP, site permissions, app links, error pages, session restore, hardware-keyboard shortcuts.

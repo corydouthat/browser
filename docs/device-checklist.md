@@ -135,3 +135,108 @@ soft signal) and note it in `docs/m0-results.md` so the shim fallback is schedul
 Open three tabs (youtube, github, maps), then Self-check → Share report: `meminfo.json` in the zip has the
 per-process PSS; the budget is ≤ 600 MB total. Note cold-start time (launch to first paint) and persona
 switch time (Apply → page reloaded) by stopwatch.
+
+## 7. Credentials gate (hatch:credentials, M1)
+
+Build: a **release** APK for the passkey rows (debug can never be allow-listed); any build for the rest.
+
+- **Google sign-in, `win-firefox`**: accounts.google.com → e-mail → password. Expect the plain web form (no
+  Chrome-style account sheet; that is impossible in Hatch), no "This browser or app may not be secure"
+  interstitial, 2FA prompt reachable. After submit: Hatch's **Save login?** dialog (feature-prompts
+  `SaveLoginDialogFragment`); Save. Sign out, revisit: the username/password fields fill from Hatch's store
+  (one saved login) or the **Use saved login** bar appears above the keyboard (several). Record which.
+- **Google sign-in, `win-chrome`**: same flow. This is the persona most likely to trigger Google's
+  "browser may not be secure" heuristic (Chrome UA on Gecko). Record the exact message if it appears and note
+  that the fix is to use `win-firefox` for Google.
+- **GIS popup flow**: a third-party site with "Sign in with Google" (e.g. stackoverflow.com or canva.com).
+  Expect: a popup tab opens with the Google chooser (desktop viewport, HATCH-WC-05), completes, closes itself,
+  the opener is signed in. Note if the popup tab lands behind the UI or stays open.
+- **Autofill services**: on the same login form, note what the system autofill offers: Google Password
+  Manager (expected: nothing or package-keyed entries, `docs/limitations.md`), Bitwarden/1Password if
+  installed (expected: web-domain suggestions). Settings → **Autofill saved logins** off → the engine fill and
+  the bar stop; on again → they return without a restart.
+- **Saved logins screen**: menu → Saved logins (or Settings → Saved logins…). Expect the biometric / PIN
+  sheet (or the keyguard screen on phones where the biometric stack reports the combination unavailable),
+  then the list: search, eye reveals, copy shows "Password copied" and the clipboard preview is hidden
+  (API 33+), delete asks first, + adds an entry that then fills on that site.
+- **Never save**: on a throwaway site answer **Never save**; the dialog does not return for that origin;
+  Settings → "Forget N never-save site(s)" brings it back.
+- **Passkey attempt (expected to FAIL until Google approves the allowlist)**: webauthn.io → Register.
+  Expect no Android passkey sheet and a page error (`AbortError` / `NotAllowedError`); on login
+  `UnknownError`. Record the exact message and the Android version. Then menu → **Open in another browser**
+  → the same page in Chrome completes with a passkey. When the allowlist entry lands, repeat: the Android
+  "Create a passkey" sheet must appear inside Hatch (release build only).
+- **Downloads notification permission (API 33+)**: first download of the session → the system
+  "Allow Hatch to send notifications?" prompt; allow → progress notification; deny → the download still
+  completes (check the Downloads folder).
+
+## M1 rules module (rules, 2026-10-18)
+
+- **Site rules**: menu → Site rules → enable "Example: hide cookie banners (CSS)" → open a site with a OneTrust
+  banner → reload → banner gone. Open the example "log page info (JS, MAIN world)" → "Test on current site" →
+  the page reloads; Eruda console shows `[hatch] {...}`. Import → From clipboard with a `.user.js` that has
+  `@require` → refused with the reason; one with `@grant GM_addStyle` → preview shows @match / @grant → Add.
+- **Host rewrites**: Settings → Host rewrites → switch `m.youtube.com` off → open `https://m.youtube.com/` →
+  stays on the mobile host (desktop persona still applies); switch it on → reload → `www.youtube.com`.
+- **App links** (YouTube app installed): default "Stay in Hatch" → a `youtube.com/watch` link stays in Hatch;
+  "Ask" → AC's "Open in app?" dialog; "Always" → jumps to the app. An `intent://` link (e.g. a QR-code page)
+  shows the dialog in every mode.
+- **Site permissions / geolocation**: region `us-east` → a maps site shows New York with **no** prompt;
+  region `device` → the real Android location prompt (first time) + Gecko's site prompt; answer "remember" →
+  menu → Site permissions → the origin lists Location = Allowed → Clear → reload → the prompt returns.
+- **Persona editor**: menu → Persona… → Duplicate `Windows · Firefox 158` → change hardwareConcurrency to 12 →
+  Save → Switch… → select the copy → Self-check reports `hardwareConcurrency 12`. Delete the copy while active
+  → the persona falls back to the default preset.
+
+## 8. M1 fix-pass gates (fixer, 2026-10-18)
+
+Device-only checks for the review findings closed in the fix pass; each line names the finding so the result can
+be filed against it in `docs/m1-results.md`. Any build unless stated.
+
+- **UXP-01 home first tap**: tab counter → `+` (home, keyboard up) → tap the "Force desktop" switch once: it toggles
+  (persona snackbar) and the keyboard goes; same for "Change…" and the "Homepage" chip. A tap on blank home area only
+  dismisses the keyboard.
+- **UXP-02 snackbars over overlays**: Settings → toggle "Remote debugging" → the "restart recommended / Restart"
+  snackbar is visible over Settings; menu → Saved logins → unlock → copy a password → "Password copied" visible over
+  the list; tray → swipe a tab → "Tab closed – Undo" visible over the tray.
+- **UXP-03/04 undo window**: long-press the tab counter → "Close tab" (and Ctrl+W with a keyboard): "Tab closed –
+  Undo" appears and disappears by itself after ~4 s; tapping Undo while visible restores the tab.
+- **UXP-05/06 find bar**: Ctrl+F, type, tap a link → the bar closes; Ctrl+F then Ctrl+L then Esc → the URL edit
+  cancels first and the bar stays; Ctrl+L inside Settings leaves Settings and focuses the bar.
+- **UXP-07 select mode**: tray → ⋮ → "Select tabs": "0 selected", close/share disabled; select then unselect one: still
+  in select mode.
+- **UXP-08 font scale**: Android Settings → Display → largest font + display size → Hatch: the "Win · Firefox · US"
+  and "Desktop" chips are fully visible (no clipped text / icons), the strip grows instead.
+- **UXP-09 theme switch**: quick-settings dark theme tile while Hatch is in front: the Activity recreates (tabs intact),
+  status/navigation-bar icons and GeckoView's cover follow the theme immediately.
+- **UXP-10 cutout**: landscape on a punch-hole phone: the site-info badge and the ⋮ button are not under the cutout.
+- **UXP-11/12/13**: edit mode shows a clear (x) once text is typed; menu items animate the sheet closed; Settings →
+  tap the "Home URL" field at the bottom → it stays above the keyboard.
+- **UXP-14 / ENG-06 fresh thumbnail**: open a site, scroll, tap the tab counter: the current card shows the scrolled
+  page within a moment of the tray opening (not the previous capture / favicon).
+- **SEC-1 secure screen**: menu → Saved logins → unlock → reveal a password → take a screenshot: the system refuses
+  ("can't take screenshot"); Recents shows a blank card; press Home, return: locked again, nothing revealed.
+- **SEC-6 key loss (optional, rooted/test device only)**: with saved logins, delete
+  `shared_prefs/hatch_logins_key_kp_post_m.xml`, open Saved logins: the "could not be unlocked … reset" snackbar
+  shows and `databases/logins2.sqlite.undecryptable-*` exists.
+- **ENG-01 memory trim**: open 6 tabs, `adb shell am send-trim-memory app.hatch.browser RUNNING_LOW` (debug:
+  `app.hatch.browser.debug`), `adb shell dumpsys meminfo app.hatch.browser`: fewer content processes; the tray still
+  lists 6 tabs and a suspended one reloads on tap in desktop mode.
+- **ENG-02 cold-start desktop mode**: cold start → tray `+` → load a site → Self-check (a): `layout.clientWidth ≥ 1366`
+  without a reload.
+- **ENG-03 dynamic toolbar (switch on)**: on a page that logs `resize` events (Eruda console), open and close the
+  keyboard: one resize per transition, not three; scroll until hidden: content starts below the status bar; switch it
+  off again afterwards.
+- **ENG-05 restart keeps tabs**: switch region to Japan → immediately open a new tab from the tray → tap Restart within
+  2 s → after relaunch the new tab is there.
+- **PERF-03 StrictMode (debug build)**: `adb logcat | grep StrictMode` during a cold start: no violation tagged
+  `ThumbnailStorage` / `DiskLruCache`; note any other main-thread disk violation for M2.
+- **PERF-07 disk**: after 20 tabs, `adb shell du -sh /data/data/app.hatch.browser/files/no_backup/mozac_browser_thumbnails`
+  ≤ 20 MB.
+- **PERF-09 numbers** (release build, record in `docs/m1-results.md`): `adb shell am start -W app.hatch.browser/app.hatch.MainActivity`
+  ×3 (TotalTime ≤ 2.5 s); `adb shell dumpsys meminfo app.hatch.browser` with 3 loaded tabs before and after opening the
+  tray once (PSS ≤ 600 MB; if > 550 MB the first lever is the thumbnail request size, the second the icon memory
+  cache); stopwatch a persona switch from the sheet (Apply → page reloaded ≤ 2 s).
+- **PERF-05 (M2, release build)**: only after the narrowed keep rule lands: save / fill / list / delete / "Forget
+  never-save" all work.
+

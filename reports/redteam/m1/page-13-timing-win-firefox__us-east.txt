@@ -1,0 +1,11 @@
+info page: redteam 13 shim timing vs first inline script persona=win-firefox__us-east ua=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0
+info early: {"t":183,"hwc":8,"mtp":0,"sw":1920,"sh":1080,"dpr":1,"outerH":1079,"pf":true,"touch":false,"TouchEvent":"undefined","scripts":2,"readyState":"loading"}
+info late: {"hwc":8,"mtp":0,"sw":1920,"sh":1080,"dpr":1,"outerH":1079,"pf":true,"touch":false,"TouchEvent":"undefined"}
+clean timing.valuesChanged: ok
+clean timing.getterIdentity: ok
+clean timing.toStringIdentity: ok
+clean timing.earlyToStringOnLateGetter: ok
+clean timing.earlyGetterOnNavigator: ok
+info timing.firstScriptIsOurs: scripts seen by the early script=2 currentScriptFirst=true
+
+summary: fired=0 clean=5 info=4 needs-device=0

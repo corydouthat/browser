@@ -182,3 +182,15 @@ node tool/headless/gen-expectations.mjs      # harness/personas/*.json follow th
 
 Never enable `privacy.resistFingerprinting`: it overrides UA, platform, pointer, touch and time zone with its
 own values and would fight every persona.
+
+## Custom identities and regions (rules, 2026-10-18)
+
+The persona editor (`ui/persona/PersonaEditorScreen.kt`) writes user-defined entries to
+`filesDir/personas/{identities,regions}/<id>.json` through `PersonaManager.saveIdentity` / `saveRegion`; presets are
+read-only ("Duplicate" creates a custom copy whose id comes from `PersonaDrafts.uniqueId`, never a preset id).
+`PersonaDrafts` validates with the module's rules: blank optional fields are `null` (engine default), ids match
+`^[a-z0-9][a-z0-9_-]{0,63}$`, languages / locale are BCP 47 tags, the time zone is an IANA id (`java.time.ZoneId`),
+geolocation is within range, screen fields are all-or-nothing with `avail* ≤ size`. A `chromeLike` identity keeps the
+`uaData` brands it was duplicated from (not editable field by field). **Custom personas are not golden-tested**:
+`PersonaToPrefs` maps them through the same table, but no `personas/golden/*.prefs.json` or harness expectation
+exists for them; verify with Self-check on the phone.

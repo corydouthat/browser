@@ -19,7 +19,8 @@ The approved design is the plan Cory confirmed on 2026-10-18; `docs/architecture
 | `docs/limitations.md` | every known tell and web-compat cost, what tracks it |
 | `docs/roadmap.md` | M0/M1/M2 with the M0 device checklist (a–k) for Cory |
 | `docs/device-checklist.md` | the runbook: Self-check protocol, 15-site audit, gates |
-| `docs/icon.md`, `THIRD_PARTY.md` | icon provenance, vendored third-party code |
+| `docs/icon.md`, `THIRD_PARTY.md` | icon provenance, vendored third-party code (incl. the four Fenix tab-tray files) |
+| `docs/research/m1-inventory.md`, `browser-chrome.md`, `google-signin-autofill.md`, `passkeys-webauthn.md` | the M1 research: app-module audit after M0 with the risks M1 fixed; toolbar/tab tray/find/menu design (adopt vs hand-roll); why GPM/Chrome's account chooser cannot work and the in-app logins store; GeckoView 158 WebAuthn path and Google's privileged-browser allowlist |
 | `harness/README.md`, `personas/README.md`, `tool/bin/README.md` | local READMEs for those trees |
 
 ## The lock rule (this box is a 2-vCPU / 3.6 GB VPS that also runs production containers)
@@ -59,6 +60,16 @@ The approved design is the plan Cory confirmed on 2026-10-18; `docs/architecture
   reads the goldens and never recomputes prefs.
 - Live switches via `GeckoPreferenceController` (only in `GeckoPrefs.kt`); yaml + restart is the full
   fallback; only `TZ` needs a restart (`AppRestart`, a `:restart` trampoline process).
+- M1 chrome: `compose-browser-toolbar` (top, Chrome-style) + hand-rolled tab tray / find bar / menu; AC
+  `SessionFeature` is the only owner of `EngineView.render/release`; session restore is process-scoped
+  (`Components.sessionRestore`). Overlay z-order and back/Esc order: rules overlays → Saved logins → chrome
+  (`AppUiState.onBack`); every `UiEvent` has exactly one handler, the `when` in `HatchApp`.
+- Credentials: Hatch's own logins store (`service-sync-logins`, key in AndroidKeyStore) fills forms; Google
+  Password Manager and Chrome's account chooser cannot work in a third-party browser; passkeys are wired
+  (`WebAuthnFeature`) but blocked on Google's allowlist (release cert only; never on debug builds). Never shim
+  `navigator.credentials`.
+- `browser-icons` installs a second built-in extension (`icons@mozac.org`); the headless runner's `--extra-ext`
+  proves it tell-free — re-run after every AC upgrade.
 - Persona delivery to pages through the built-in MV2 extension (`contentScripts.register`, MAIN world,
   `document_start`); the shim treats `null` as "do not touch"; `real-device` registers nothing.
 - Region prefs are independent of the identity ("real phone, but German").

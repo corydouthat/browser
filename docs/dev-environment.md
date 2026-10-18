@@ -30,8 +30,15 @@ GitHub-hosted runner. The repo `gradle.properties` caps still apply there, so th
 `.buildhost` contains `user@host` (`tool/remote_build.sh`: rsync the tree to `~/build/hatch`, run Gradle with
 an 8 GB-class heap under the host's own lock, copy `app/build/outputs` and `persona/build/{reports,test-results}`
 back). The host needs JDK 21 at `~/opt/jdk21`, Node at `~/opt/node`, the Android SDK at `~/Android/Sdk`, and
-passwordless SSH (BatchMode). Delete `.buildhost` to build locally again. Everything else (`make check`,
-headless, lint) always runs locally.
+passwordless SSH (BatchMode). Delete `.buildhost` to build locally again. The Makefile's Gradle steps
+(`unit-persona` = `:persona:test`, `android-lint`) follow the same rule, so with a build host configured
+`make check` runs **no Gradle on this box**; ktlint/detekt, the node tests and headless Firefox always run here.
+`tool/remote_build.sh` serialises itself end to end with `flock /tmp/hatch-remote.lock` (a run may wait for
+another caller's build; that is normal).
+
+Do not wrap `make check` (or `run.mjs`) in an outer `flock /tmp/hatch-heavy.lock`: the Makefile targets and the
+runner take that lock themselves per step, and `flock` is not re-entrant across processes, so the outer holder
+deadlocks the inner one.
 
 ## Toolchain
 
@@ -95,9 +102,11 @@ flock /tmp/hatch-heavy.lock ./gradlew --no-daemon --max-workers=1 --console=plai
 - Release: R8 + resource shrinking, signed with `key.properties` + `.jks` (git-ignored; generated in M1,
   backed up over the tailnet). If R8 OOMs under the heap cap, set `isMinifyEnabled = false`.
 - Native libraries are compressed in the APK (`jniLibs.useLegacyPackaging = true`) and extracted at install:
-  the APK budget (110 MB; the unsigned R8 release build measured 103.1 MB on 2026-10-18) counts the compressed
-  size; the on-device footprint is the APK plus ~189 MB of extracted libraries (`libxul.so` 153 MB). Debug APKs
-  (~136 MB, unminified dex) are not held to the budget.
+  the APK budget (110 MB) counts the compressed size: the signed R8 release build measured 100.63 MiB
+  (105,513,437 B) after the M1 fix pass on 2026-10-18 (M1 before the pass: 103.9 MiB; M0: 103.1 MiB), with
+  `resources.arsc` at 0.65 MiB (4.1 MiB before the `localeFilters = ["en"]` filter, PERF-02; budget 2 MiB in
+  `tool/check_apk_size.sh`). The on-device footprint is the APK plus ~189 MB of extracted libraries (`libxul.so`
+  153 MB). Debug APKs (~140 MB, unminified dex) are not held to the budget.
 
 ## Memory budget cheatsheet
 

@@ -96,6 +96,7 @@ make headless                                   # all goldens + controls -> buil
 node tool/headless/run.mjs --personas win-firefox__us-east --controls --out build/harness-reports
 node tool/headless/run.mjs --page harness/redteam/01-tostring.html   # red-team page: body "DETECTED" fails
 node tool/headless/run.mjs --list
+node tool/headless/run.mjs --personas win-firefox__us-east --extra-ext <unpacked extension dir>   # M1: a second add-on
 ```
 
 Per run: Firefox 158.0 (`~/opt/firefox-158.0`, asserted), geckodriver 0.37.1, headless, `TZ` from the golden
@@ -107,6 +108,10 @@ geolocation permission — there is no marker symbol), loads `index.html?persona
 `<out>/<id>.json` (+ `runner` block) and prints the table. The whole run re-execs itself under
 `flock /tmp/hatch-heavy.lock` and, when available, `systemd-run --user --scope -p MemoryMax=1200M`.
 Exit 1 on any hard/library FAIL, a failed control assertion or a DETECTED page; 2 on setup errors.
+`--extra-ext <dir>` (repeatable) installs another unpacked extension as a temporary add-on after the Hatch one
+(the Hatch readiness probe runs first); it exists to prove that a second built-in extension adds no tell. M1 uses
+it with AC's `icons@mozac.org` (`unzip browser-icons-158.0.aar 'assets/extensions/browser-icons/*'` from the
+Gradle cache): `--page` 01/03/07/13 clean, full `win-firefox__us-east` run identical to the baseline.
 
 ### Negative controls (the harness must be able to fail)
 

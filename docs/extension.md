@@ -179,3 +179,28 @@ minimum; built-in extensions never go through AMO) and the unknown-permission wa
 - Only the cached persona is restored at startup (SEC-3); template substitution is single-pass (SEC-4).
 - `assets/extension/test/**` is excluded from the APK (`androidResources.ignoreAssetsPatterns` in
   `app/build.gradle.kts`), verified with `unzip -l`.
+
+## The second built-in extension: `icons@mozac.org` (M1)
+
+`Components.icons.install(engine, store)` (`browser-icons` 158) installs Android Components' favicon collector
+from the AAR's `assets/extensions/browser-icons/`: MV2, one content script `icons.js` at `document_end` on
+`*://*/*` in the isolated world, permissions `geckoViewAddons`, `nativeMessaging`, `nativeMessagingFromContent`.
+It reads `<link rel="icon|shortcut icon|apple-touch-icon|…">` and `<meta property="og:image…">` /
+`<meta name="twitter:image|msapplication-TileImage">` with `querySelectorAll` and posts
+`{url, icons:[{type, href, sizes, mimeType}]}` to the native app `MozacBrowserIcons`, which `BrowserIcons` answers
+with `UpdateIconAction`. It never touches the page world. The headless runner can install it next to the Hatch
+extension (`--extra-ext <dir>`, see `docs/detection-harness.md`) and the red-team pages stay clean with it; if a
+future AC train changes `icons.js`, re-run that check before upgrading (`docs/architecture.md` upgrade checklist).
+It is not the same mechanism as the bridge: the bridge's `hatch-tab` port is per session and carries Hatch
+messages; the icons port is AC-internal.
+
+## Rules UI and host-rewrite toggles (rules, 2026-10-18)
+
+The app-side UI for this contract is `ui/rules/*` (site rules list, editor, `.user.js` / `.user.css` import) and the
+Settings "Host rewrites" section. Nothing in the wire format changed: rules still travel as the `SiteRule` JSON above
+(`RuleValidation` mirrors `ruleProblem()` and adds the match-pattern grammar so a bad pattern is caught before
+`contentScripts.register` throws), and host rewrites are still `{type:"hostRewrites", rules:[{from,to}]}` with no
+disabled flag: the app sends `UrlRewriteRules.extensionHostRewrites` **minus** the hosts the user switched off
+(`AppSettings.disabledHostRewrites`, `HostRewriteFilter.effective`) both in the `state` push at port connect and via
+`sendHostRewrites` on every toggle. Imported userscripts are refused when they need `@require`, `GM_xmlhttpRequest`
+or a `@grant` outside the subset `gm-shim.js` provides (`UserscriptImport.SUPPORTED_GRANTS`).
