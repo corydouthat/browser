@@ -30,19 +30,27 @@ name=$(grep '^versionName=' version.properties | cut -d= -f2)
 when=$(date '+%Y-%m-%d %H:%M')
 
 props=(-PgitSha="$sha" -PgitBranch="$branch" -PbuildTime="$when")
-gradle=(./gradlew --no-daemon --max-workers=1 --console=plain "${props[@]}")
 
 echo "Hatch $name (build $number) — $sha on $branch"
 
-run() { flock /tmp/hatch-heavy.lock "$@"; }
+# With a remote build host configured (HATCH_BUILD_HOST or the gitignored .buildhost file), Gradle
+# runs there via tool/remote_build.sh and the outputs are copied back; otherwise it runs here, under
+# the lock that keeps this 3.6 GB box to one heavy process at a time.
+run_gradle() {
+  if [ -n "${HATCH_BUILD_HOST:-}" ] || [ -s .buildhost ]; then
+    tool/remote_build.sh "${props[@]}" "$@"
+  else
+    flock /tmp/hatch-heavy.lock ./gradlew --no-daemon --max-workers=1 --console=plain "${props[@]}" "$@"
+  fi
+}
 
 case "$mode" in
   debug|install)
-    run "${gradle[@]}" :app:assembleDebug ${extra[@]+"${extra[@]}"}
+    run_gradle :app:assembleDebug ${extra[@]+"${extra[@]}"}
     apk=app/build/outputs/apk/debug/app-arm64-v8a-debug.apk
     ;;
   release)
-    run "${gradle[@]}" :app:assembleRelease ${extra[@]+"${extra[@]}"}
+    run_gradle :app:assembleRelease ${extra[@]+"${extra[@]}"}
     apk=app/build/outputs/apk/release/app-arm64-v8a-release.apk
     ;;
   *) echo "usage: tool/build_apk.sh [debug|release|install]" >&2; exit 1 ;;

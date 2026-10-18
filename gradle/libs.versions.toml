@@ -1,5 +1,5 @@
 [versions]
-agp = "8.13.2"                 # already in ~/.gradle; needs Gradle >= 8.13 (wrapper is 8.14)
+agp = "9.4.1"                  # AC 158 AARs need compileSdk 37.2 and Compose 1.12 needs AGP >= 9.1; AGP 9.4 needs Gradle >= 9.6
 kotlin = "2.4.20"              # exactly what Android Components 158 was built with (stdlib pin in its POMs)
 compose-bom = "2026.09.00"     # exactly AC 158's Compose BOM -> no skew with AC's compose-* artifacts
 mozilla = "158.0"              # AC release train; transitively pins geckoview-omni 158.0.20261007201254
@@ -48,6 +48,8 @@ mozilla-support-webextensions = { module = "org.mozilla.components:support-webex
 mozilla-support-base = { module = "org.mozilla.components:support-base", version.ref = "mozilla" }
 mozilla-support-ktx = { module = "org.mozilla.components:support-ktx", version.ref = "mozilla" }
 mozilla-support-utils = { module = "org.mozilla.components:support-utils", version.ref = "mozilla" }
+# feature-intent only has feature-search at runtime scope; TabIntentProcessor needs SearchUseCases at compile time.
+mozilla-feature-search = { module = "org.mozilla.components:feature-search", version.ref = "mozilla" }
 
 [bundles]
 compose = ["compose-ui", "compose-ui-tooling-preview", "compose-foundation", "compose-material3", "compose-material-icons", "activity-compose", "lifecycle-runtime-compose", "lifecycle-viewmodel-compose"]
@@ -56,12 +58,11 @@ mozilla-core = [
   "mozilla-browser-session-storage", "mozilla-feature-session", "mozilla-feature-tabs", "mozilla-feature-downloads",
   "mozilla-feature-prompts", "mozilla-feature-contextmenu", "mozilla-feature-sitepermissions", "mozilla-feature-app-links",
   "mozilla-feature-intent", "mozilla-browser-errorpages", "mozilla-support-webextensions", "mozilla-support-base",
-  "mozilla-support-ktx", "mozilla-support-utils",
+  "mozilla-support-ktx", "mozilla-support-utils", "mozilla-feature-search",
 ]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

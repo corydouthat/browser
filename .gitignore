@@ -19,3 +19,6 @@ node_modules/
 # Headless harness downloads/reports
 build/
 tool/headless/.cache/
+
+# Remote build host (user@host), machine-specific
+.buildhost
