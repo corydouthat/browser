@@ -11,6 +11,8 @@ material = "1.14.0"
 lifecycle = "2.11.0"
 core-ktx = "1.19.1"
 junit-jupiter = "5.13.4"
+biometric = "1.1.0"            # hatch:credentials — what Fenix 158 pins (gradle/libs.versions.toml: biometric = "1.1.0")
+work = "2.11.2"                # hatch:fixer — the version service-sync-logins 158.0 pulls at runtime scope (PERF-06)
 
 [libraries]
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
@@ -50,6 +52,31 @@ mozilla-support-ktx = { module = "org.mozilla.components:support-ktx", version.r
 mozilla-support-utils = { module = "org.mozilla.components:support-utils", version.ref = "mozilla" }
 # feature-intent only has feature-search at runtime scope; TabIntentProcessor needs SearchUseCases at compile time.
 mozilla-feature-search = { module = "org.mozilla.components:feature-search", version.ref = "mozilla" }
+# hatch:chrome begin — M1 browser chrome (compose toolbar, tab tray thumbnails/favicons, URL autocomplete).
+# The 158.0 POMs put most transitive AC modules at runtime scope, so every module referenced from Kotlin is listed.
+mozilla-compose-browser-toolbar = { module = "org.mozilla.components:compose-browser-toolbar", version.ref = "mozilla" }
+mozilla-compose-base = { module = "org.mozilla.components:compose-base", version.ref = "mozilla" }
+mozilla-ui-icons = { module = "org.mozilla.components:ui-icons", version.ref = "mozilla" }
+mozilla-ui-tabcounter = { module = "org.mozilla.components:ui-tabcounter", version.ref = "mozilla" }
+mozilla-concept-toolbar = { module = "org.mozilla.components:concept-toolbar", version.ref = "mozilla" }
+mozilla-concept-base = { module = "org.mozilla.components:concept-base", version.ref = "mozilla" }
+mozilla-browser-domains = { module = "org.mozilla.components:browser-domains", version.ref = "mozilla" }
+mozilla-browser-thumbnails = { module = "org.mozilla.components:browser-thumbnails", version.ref = "mozilla" }
+mozilla-browser-icons = { module = "org.mozilla.components:browser-icons", version.ref = "mozilla" }
+# hatch:chrome end
+# hatch:credentials begin — in-app logins store (Path 2) + WebAuthn delegate + device-credential gate.
+# POMs verified 2026-10-18: service-sync-logins 158.0 -> appservices logins/sync15/db-crypto 158.0 (same
+# app-services train feature-search already pulls), lib-dataprotect [compile], concept-storage [runtime],
+# androidx.work 2.11.2 [runtime], glean 70.2.0 [runtime]; feature-webauthn 158.0 -> concept-engine only.
+mozilla-service-sync-logins = { module = "org.mozilla.components:service-sync-logins", version.ref = "mozilla" }
+mozilla-feature-webauthn = { module = "org.mozilla.components:feature-webauthn", version.ref = "mozilla" }
+mozilla-concept-storage = { module = "org.mozilla.components:concept-storage", version.ref = "mozilla" }
+mozilla-lib-dataprotect = { module = "org.mozilla.components:lib-dataprotect", version.ref = "mozilla" }
+androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
+# hatch:credentials end
+# hatch:fixer begin — PERF-06: the manifest removes WorkManagerInitializer; HatchApplication is the Configuration.Provider
+androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "work" }
+# hatch:fixer end
 
 [bundles]
 compose = ["compose-ui", "compose-ui-tooling-preview", "compose-foundation", "compose-material3", "compose-material-icons", "activity-compose", "lifecycle-runtime-compose", "lifecycle-viewmodel-compose"]
@@ -59,7 +86,17 @@ mozilla-core = [
   "mozilla-feature-prompts", "mozilla-feature-contextmenu", "mozilla-feature-sitepermissions", "mozilla-feature-app-links",
   "mozilla-feature-intent", "mozilla-browser-errorpages", "mozilla-support-webextensions", "mozilla-support-base",
   "mozilla-support-ktx", "mozilla-support-utils", "mozilla-feature-search",
+  # hatch:credentials begin
+  "mozilla-service-sync-logins", "mozilla-feature-webauthn", "mozilla-concept-storage", "mozilla-lib-dataprotect",
+  # hatch:credentials end
 ]
+# hatch:chrome begin
+mozilla-chrome = [
+  "mozilla-compose-browser-toolbar", "mozilla-compose-base", "mozilla-ui-icons", "mozilla-ui-tabcounter",
+  "mozilla-concept-toolbar", "mozilla-concept-base", "mozilla-browser-domains", "mozilla-browser-thumbnails",
+  "mozilla-browser-icons",
+]
+# hatch:chrome end
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

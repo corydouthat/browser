@@ -106,6 +106,11 @@ android {
             "!.svn", "!.git", "!.ds_store", "!*.scc", ".*", "<dir>_*", "!CVS", "!thumbs.db", "!picasa.ini", "!*~",
             "<dir>test",
         )
+        // hatch:fixer — PERF-02: Hatch's own UI is English-only; without a filter the AC/androidx/material string
+        // tables ship ~150 locale configs (34,857 of 45,710 string entries, ~2.5 MB of a 4.1 MB resources.arsc
+        // stored uncompressed). `localeFilters` is the AGP 9 name (`ApplicationAndroidResources.getLocaleFilters`,
+        // verified in gradle-api-9.4.1.jar); resource shrinking never drops alternative configs of used IDs.
+        localeFilters += listOf("en")
     }
 
 }
@@ -198,4 +203,15 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     // GeckoView 158 (geckoview-omni, transitively) + Android Components 158. Never add geckoview (non-omni).
     implementation(libs.bundles.mozilla.core)
+    // hatch:chrome begin — compose-browser-toolbar + tab tray thumbnails/favicons + domain autocomplete (158.0).
+    implementation(libs.bundles.mozilla.chrome)
+    // hatch:chrome end
+    // hatch:credentials begin — device-credential/biometric gate for the Saved logins screen (its AAR manifest
+    // declares USE_BIOMETRIC/USE_FINGERPRINT). The logins store and WebAuthn modules ride in the mozilla-core bundle.
+    implementation(libs.androidx.biometric)
+    // hatch:credentials end
+    // hatch:fixer begin — PERF-06: compile-time androidx.work for Configuration.Provider (already on the runtime
+    // classpath through service-sync-logins; same version).
+    implementation(libs.androidx.work.runtime)
+    // hatch:fixer end
 }
