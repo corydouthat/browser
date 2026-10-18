@@ -1,0 +1,42 @@
+{
+  "manifest_version": 2,
+  "name": "Hatch Bridge",
+  "version": "0.1.0",
+  "description": "Built-in bridge for the Hatch browser: persona shim, site rules, Eruda devtools and mobile-host rewrites.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "bridge@hatch.app",
+      "strict_min_version": "128.0"
+    }
+  },
+  "permissions": [
+    "<all_urls>",
+    "tabs",
+    "storage",
+    "nativeMessaging",
+    "nativeMessagingFromContent",
+    "scripting",
+    "webNavigation",
+    "webRequest",
+    "webRequestBlocking"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": true
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content/bridge.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": false,
+      "match_about_blank": true
+    }
+  ]
+}
