@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Self-check share zips (cacheDir/share) and report files (Android/data/<pkg>/files/reports) -->
+    <cache-path name="share" path="share/" />
+    <external-files-path name="reports" path="reports/" />
+    <!-- No files-path entry on purpose: filesDir holds the Gecko profile, rules.json and personas/ and must
+         never be addressable through the provider (SEC-6). -->
+</paths>
