@@ -1,0 +1,93 @@
+[
+  {
+    "id": "win-firefox",
+    "name": "Windows · Firefox 158",
+    "desktop": true,
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+    "platform": "Win32",
+    "oscpu": "Windows NT 10.0; Win64; x64",
+    "appVersion": "5.0 (Windows)",
+    "layoutWidth": 1366,
+    "screen": { "width": 1920, "height": 1080, "availWidth": 1920, "availHeight": 1040, "colorDepth": 24, "dpr": 1.0 },
+    "hardwareConcurrency": 8,
+    "webgl": { "vendor": "Google Inc. (NVIDIA)", "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1660 SUPER Direct3D11 vs_5_0 ps_5_0, D3D11)" },
+    "chromeLike": false,
+    "uaData": null,
+    "touch": false
+  },
+  {
+    "id": "mac-firefox",
+    "name": "macOS · Firefox 158",
+    "desktop": true,
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:158.0) Gecko/20100101 Firefox/158.0",
+    "platform": "MacIntel",
+    "oscpu": "Intel Mac OS X 10.15",
+    "appVersion": "5.0 (Macintosh)",
+    "layoutWidth": 1366,
+    "screen": { "width": 1440, "height": 900, "availWidth": 1440, "availHeight": 875, "colorDepth": 30, "dpr": 2.0 },
+    "hardwareConcurrency": 8,
+    "webgl": { "vendor": "Apple", "renderer": "Apple M1" },
+    "chromeLike": false,
+    "uaData": null,
+    "touch": false
+  },
+  {
+    "id": "linux-firefox",
+    "name": "Linux · Firefox 158",
+    "desktop": true,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0",
+    "platform": "Linux x86_64",
+    "oscpu": "Linux x86_64",
+    "appVersion": "5.0 (X11)",
+    "layoutWidth": 1366,
+    "screen": { "width": 1920, "height": 1080, "availWidth": 1920, "availHeight": 1053, "colorDepth": 24, "dpr": 1.0 },
+    "hardwareConcurrency": 8,
+    "webgl": { "vendor": "Mesa", "renderer": "Mesa Intel(R) UHD Graphics 620 (KBL GT2)" },
+    "chromeLike": false,
+    "uaData": null,
+    "touch": false
+  },
+  {
+    "id": "win-chrome",
+    "name": "Windows · Chrome 141 (UA only; JS feature checks can tell it is Gecko)",
+    "desktop": true,
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+    "platform": "Win32",
+    "oscpu": "Windows NT 10.0; Win64; x64",
+    "appVersion": "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+    "layoutWidth": 1366,
+    "screen": { "width": 1920, "height": 1080, "availWidth": 1920, "availHeight": 1040, "colorDepth": 24, "dpr": 1.0 },
+    "hardwareConcurrency": 8,
+    "webgl": { "vendor": "Google Inc. (NVIDIA)", "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1660 SUPER (0x000021C4) Direct3D11 vs_5_0 ps_5_0, D3D11)" },
+    "chromeLike": true,
+    "uaData": {
+      "brands": [
+        { "brand": "Google Chrome", "version": "141" },
+        { "brand": "Not?A_Brand", "version": "8" },
+        { "brand": "Chromium", "version": "141" }
+      ],
+      "platform": "Windows",
+      "platformVersion": "15.0.0",
+      "architecture": "x86",
+      "bitness": "64",
+      "model": ""
+    },
+    "touch": false
+  },
+  {
+    "id": "real-device",
+    "name": "Real device (no spoofing)",
+    "desktop": false,
+    "userAgent": null,
+    "platform": null,
+    "oscpu": null,
+    "appVersion": null,
+    "layoutWidth": 0,
+    "screen": null,
+    "hardwareConcurrency": null,
+    "webgl": null,
+    "chromeLike": false,
+    "uaData": null,
+    "touch": true
+  }
+]

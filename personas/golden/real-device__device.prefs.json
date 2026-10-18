@@ -1,0 +1,42 @@
+{
+  "clear": [
+    "browser.viewport.desktopWidth",
+    "dom.maxtouchpoints.testing.value",
+    "dom.w3c_touch_events.enabled",
+    "general.appversion.override",
+    "general.oscpu.override",
+    "general.platform.override",
+    "general.useragent.override",
+    "intl.accept_languages",
+    "intl.locale.requested",
+    "layout.accessiblecaret.enabled",
+    "ui.allPointerCapabilities",
+    "ui.primaryPointerCapabilities"
+  ],
+  "env": {},
+  "prefs": {},
+  "shim": {
+    "appVersion": null,
+    "chromeLike": false,
+    "desktop": false,
+    "enabled": false,
+    "geolocation": null,
+    "hardwareConcurrency": null,
+    "languages": [
+      "en-US",
+      "en"
+    ],
+    "layoutWidth": 0,
+    "locale": "en-US",
+    "oscpu": null,
+    "platform": null,
+    "screen": null,
+    "timeZone": null,
+    "touch": true,
+    "tzOffsets": null,
+    "tzShim": false,
+    "uaData": null,
+    "userAgent": null,
+    "webgl": null
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "clear": [
+    "intl.accept_languages",
+    "intl.locale.requested"
+  ],
+  "env": {},
+  "prefs": {
+    "browser.viewport.desktopWidth": 1366,
+    "dom.maxtouchpoints.testing.value": 0,
+    "dom.w3c_touch_events.enabled": 0,
+    "general.appversion.override": "5.0 (Windows)",
+    "general.oscpu.override": "Windows NT 10.0; Win64; x64",
+    "general.platform.override": "Win32",
+    "general.useragent.override": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+    "layout.accessiblecaret.enabled": true,
+    "ui.allPointerCapabilities": 6,
+    "ui.primaryPointerCapabilities": 6
+  },
+  "shim": {
+    "appVersion": "5.0 (Windows)",
+    "chromeLike": false,
+    "desktop": true,
+    "enabled": true,
+    "geolocation": null,
+    "hardwareConcurrency": 8,
+    "languages": [
+      "en-US",
+      "en"
+    ],
+    "layoutWidth": 1366,
+    "locale": "en-US",
+    "oscpu": "Windows NT 10.0; Win64; x64",
+    "platform": "Win32",
+    "screen": {
+      "availHeight": 1040,
+      "availWidth": 1920,
+      "colorDepth": 24,
+      "dpr": 1.0,
+      "height": 1080,
+      "width": 1920
+    },
+    "timeZone": null,
+    "touch": false,
+    "tzOffsets": null,
+    "tzShim": false,
+    "uaData": null,
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+    "webgl": {
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1660 SUPER Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "vendor": "Google Inc. (NVIDIA)"
+    }
+  }
+}

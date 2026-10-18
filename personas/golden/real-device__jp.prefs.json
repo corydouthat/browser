@@ -1,0 +1,55 @@
+{
+  "clear": [
+    "browser.viewport.desktopWidth",
+    "dom.maxtouchpoints.testing.value",
+    "dom.w3c_touch_events.enabled",
+    "general.appversion.override",
+    "general.oscpu.override",
+    "general.platform.override",
+    "general.useragent.override",
+    "layout.accessiblecaret.enabled",
+    "ui.allPointerCapabilities",
+    "ui.primaryPointerCapabilities"
+  ],
+  "env": {
+    "TZ": "Asia/Tokyo"
+  },
+  "prefs": {
+    "intl.accept_languages": "ja-JP, ja, en",
+    "intl.locale.requested": "ja-JP"
+  },
+  "shim": {
+    "appVersion": null,
+    "chromeLike": false,
+    "desktop": false,
+    "enabled": true,
+    "geolocation": {
+      "accuracyMeters": 50.0,
+      "latitude": 35.6762,
+      "longitude": 139.6503
+    },
+    "hardwareConcurrency": null,
+    "languages": [
+      "ja-JP",
+      "ja",
+      "en"
+    ],
+    "layoutWidth": 0,
+    "locale": "ja-JP",
+    "oscpu": null,
+    "platform": null,
+    "screen": null,
+    "timeZone": "Asia/Tokyo",
+    "touch": true,
+    "tzOffsets": [
+      {
+        "fromEpochMs": 1735689600000,
+        "offsetMinutes": 540
+      }
+    ],
+    "tzShim": false,
+    "uaData": null,
+    "userAgent": null,
+    "webgl": null
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "clear": [],
+  "env": {
+    "TZ": "Europe/London"
+  },
+  "prefs": {
+    "browser.viewport.desktopWidth": 1366,
+    "dom.maxtouchpoints.testing.value": 0,
+    "dom.w3c_touch_events.enabled": 0,
+    "general.appversion.override": "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+    "general.oscpu.override": "Windows NT 10.0; Win64; x64",
+    "general.platform.override": "Win32",
+    "general.useragent.override": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+    "intl.accept_languages": "en-GB, en",
+    "intl.locale.requested": "en-GB",
+    "layout.accessiblecaret.enabled": true,
+    "ui.allPointerCapabilities": 6,
+    "ui.primaryPointerCapabilities": 6
+  },
+  "shim": {
+    "appVersion": "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+    "chromeLike": true,
+    "desktop": true,
+    "enabled": true,
+    "geolocation": {
+      "accuracyMeters": 50.0,
+      "latitude": 51.5074,
+      "longitude": -0.1278
+    },
+    "hardwareConcurrency": 8,
+    "languages": [
+      "en-GB",
+      "en"
+    ],
+    "layoutWidth": 1366,
+    "locale": "en-GB",
+    "oscpu": "Windows NT 10.0; Win64; x64",
+    "platform": "Win32",
+    "screen": {
+      "availHeight": 1040,
+      "availWidth": 1920,
+      "colorDepth": 24,
+      "dpr": 1.0,
+      "height": 1080,
+      "width": 1920
+    },
+    "timeZone": "Europe/London",
+    "touch": false,
+    "tzOffsets": [
+      {
+        "fromEpochMs": 1735689600000,
+        "offsetMinutes": 0
+      },
+      {
+        "fromEpochMs": 1743296400000,
+        "offsetMinutes": 60
+      },
+      {
+        "fromEpochMs": 1761440400000,
+        "offsetMinutes": 0
+      },
+      {
+        "fromEpochMs": 1774746000000,
+        "offsetMinutes": 60
+      },
+      {
+        "fromEpochMs": 1792890000000,
+        "offsetMinutes": 0
+      }
+    ],
+    "tzShim": false,
+    "uaData": {
+      "architecture": "x86",
+      "bitness": "64",
+      "brands": [
+        {
+          "brand": "Google Chrome",
+          "version": "141"
+        },
+        {
+          "brand": "Not?A_Brand",
+          "version": "8"
+        },
+        {
+          "brand": "Chromium",
+          "version": "141"
+        }
+      ],
+      "mobile": false,
+      "model": "",
+      "platform": "Windows",
+      "platformVersion": "15.0.0"
+    },
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+    "webgl": {
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1660 SUPER (0x000021C4) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "vendor": "Google Inc. (NVIDIA)"
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "clear": [],
+  "env": {
+    "TZ": "Asia/Tokyo"
+  },
+  "prefs": {
+    "browser.viewport.desktopWidth": 1366,
+    "dom.maxtouchpoints.testing.value": 0,
+    "dom.w3c_touch_events.enabled": 0,
+    "general.appversion.override": "5.0 (X11)",
+    "general.oscpu.override": "Linux x86_64",
+    "general.platform.override": "Linux x86_64",
+    "general.useragent.override": "Mozilla/5.0 (X11; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0",
+    "intl.accept_languages": "ja-JP, ja, en",
+    "intl.locale.requested": "ja-JP",
+    "layout.accessiblecaret.enabled": true,
+    "ui.allPointerCapabilities": 6,
+    "ui.primaryPointerCapabilities": 6
+  },
+  "shim": {
+    "appVersion": "5.0 (X11)",
+    "chromeLike": false,
+    "desktop": true,
+    "enabled": true,
+    "geolocation": {
+      "accuracyMeters": 50.0,
+      "latitude": 35.6762,
+      "longitude": 139.6503
+    },
+    "hardwareConcurrency": 8,
+    "languages": [
+      "ja-JP",
+      "ja",
+      "en"
+    ],
+    "layoutWidth": 1366,
+    "locale": "ja-JP",
+    "oscpu": "Linux x86_64",
+    "platform": "Linux x86_64",
+    "screen": {
+      "availHeight": 1053,
+      "availWidth": 1920,
+      "colorDepth": 24,
+      "dpr": 1.0,
+      "height": 1080,
+      "width": 1920
+    },
+    "timeZone": "Asia/Tokyo",
+    "touch": false,
+    "tzOffsets": [
+      {
+        "fromEpochMs": 1735689600000,
+        "offsetMinutes": 540
+      }
+    ],
+    "tzShim": false,
+    "uaData": null,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0",
+    "webgl": {
+      "renderer": "Mesa Intel(R) UHD Graphics 620 (KBL GT2)",
+      "vendor": "Mesa"
+    }
+  }
+}

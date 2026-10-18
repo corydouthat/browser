@@ -1,0 +1,42 @@
+[
+  {
+    "id": "device",
+    "name": "Device (no override)",
+    "languages": ["en-US", "en"],
+    "locale": "en-US",
+    "timeZone": null,
+    "geolocation": null
+  },
+  {
+    "id": "us-east",
+    "name": "United States (New York)",
+    "languages": ["en-US", "en"],
+    "locale": "en-US",
+    "timeZone": "America/New_York",
+    "geolocation": { "latitude": 40.7128, "longitude": -74.006, "accuracyMeters": 50.0 }
+  },
+  {
+    "id": "uk",
+    "name": "United Kingdom (London)",
+    "languages": ["en-GB", "en"],
+    "locale": "en-GB",
+    "timeZone": "Europe/London",
+    "geolocation": { "latitude": 51.5074, "longitude": -0.1278, "accuracyMeters": 50.0 }
+  },
+  {
+    "id": "de",
+    "name": "Germany (Berlin)",
+    "languages": ["de-DE", "de", "en"],
+    "locale": "de-DE",
+    "timeZone": "Europe/Berlin",
+    "geolocation": { "latitude": 52.52, "longitude": 13.405, "accuracyMeters": 50.0 }
+  },
+  {
+    "id": "jp",
+    "name": "Japan (Tokyo)",
+    "languages": ["ja-JP", "ja", "en"],
+    "locale": "ja-JP",
+    "timeZone": "Asia/Tokyo",
+    "geolocation": { "latitude": 35.6762, "longitude": 139.6503, "accuracyMeters": 50.0 }
+  }
+]

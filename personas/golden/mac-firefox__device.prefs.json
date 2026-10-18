@@ -1,0 +1,53 @@
+{
+  "clear": [
+    "intl.accept_languages",
+    "intl.locale.requested"
+  ],
+  "env": {},
+  "prefs": {
+    "browser.viewport.desktopWidth": 1366,
+    "dom.maxtouchpoints.testing.value": 0,
+    "dom.w3c_touch_events.enabled": 0,
+    "general.appversion.override": "5.0 (Macintosh)",
+    "general.oscpu.override": "Intel Mac OS X 10.15",
+    "general.platform.override": "MacIntel",
+    "general.useragent.override": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:158.0) Gecko/20100101 Firefox/158.0",
+    "layout.accessiblecaret.enabled": true,
+    "ui.allPointerCapabilities": 6,
+    "ui.primaryPointerCapabilities": 6
+  },
+  "shim": {
+    "appVersion": "5.0 (Macintosh)",
+    "chromeLike": false,
+    "desktop": true,
+    "enabled": true,
+    "geolocation": null,
+    "hardwareConcurrency": 8,
+    "languages": [
+      "en-US",
+      "en"
+    ],
+    "layoutWidth": 1366,
+    "locale": "en-US",
+    "oscpu": "Intel Mac OS X 10.15",
+    "platform": "MacIntel",
+    "screen": {
+      "availHeight": 875,
+      "availWidth": 1440,
+      "colorDepth": 30,
+      "dpr": 2.0,
+      "height": 900,
+      "width": 1440
+    },
+    "timeZone": null,
+    "touch": false,
+    "tzOffsets": null,
+    "tzShim": false,
+    "uaData": null,
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:158.0) Gecko/20100101 Firefox/158.0",
+    "webgl": {
+      "renderer": "Apple M1",
+      "vendor": "Apple"
+    }
+  }
+}
