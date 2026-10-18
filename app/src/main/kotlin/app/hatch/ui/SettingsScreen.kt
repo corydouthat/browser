@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -45,8 +46,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import app.hatch.BuildConfig
 import app.hatch.Components
+import app.hatch.applinks.AppLinksMode
 import app.hatch.engine.GeckoPrefs
+import app.hatch.hostrewrites.HostRewriteFilter
 import app.hatch.persona.PersonaToPrefs
+import app.hatch.persona.UrlRewriteRules
+import app.hatch.rules.RulesUiState
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.RadioButton
 import kotlinx.coroutines.launch
 import mozilla.components.browser.state.action.WebExtensionAction
 import mozilla.components.browser.state.state.extension.WebExtensionPromptRequest
@@ -88,7 +95,8 @@ fun SettingsScreen(
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 16.dp)
-                    .navigationBarsPadding(),
+                    .navigationBarsPadding()
+                    .imePadding(), // UXP-13: the bottom text fields (Home URL, add-on URL) stay above the keyboard
             ) {
                 Section("Engine")
                 SwitchRow(
@@ -123,6 +131,59 @@ fun SettingsScreen(
                     scope.launch { components.personaManager.reapplyPrefs(); components.sessionUseCases.reload() }
                 }
 
+                Section("Toolbar")
+                var hideToolbar by remember(tick) { mutableStateOf(settings.hideToolbarOnScroll) }
+                SwitchRow(
+                    title = "Hide toolbar when scrolling",
+                    subtitle = "Scroll-to-hide like Chrome/Firefox for Android. Off by default until validated on a device; the page gains the toolbar height while it is hidden.",
+                    checked = hideToolbar,
+                ) { on -> hideToolbar = on; settings.hideToolbarOnScroll = on }
+
+                Section("App links")
+                Text("What happens when an installed app (YouTube, Reddit, Maps…) claims a link.", style = MaterialTheme.typography.bodySmall)
+                val appLinksMode = remember(tick) { settings.appLinksMode }
+                AppLinksMode.entries.forEach { mode ->
+                    Row(
+                        Modifier.fillMaxWidth().clickable { settings.appLinksMode = mode }.padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(selected = appLinksMode == mode, onClick = { settings.appLinksMode = mode })
+                        Column(Modifier.weight(1f)) {
+                            Text(mode.title, style = MaterialTheme.typography.bodyLarge)
+                            Text(mode.description, style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+
+                Section("Host rewrites (mobile → desktop)")
+                Text(
+                    "While a desktop persona is active, main-frame requests to these mobile hosts are redirected to the desktop host (10 s per-tab loop guard). Switch one off if a site needs its mobile host.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                val disabledHosts = remember(tick) { settings.disabledHostRewrites }
+                UrlRewriteRules.extensionHostRewrites.forEach { rule ->
+                    Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            HostRewriteFilter.label(rule),
+                            style = if (HostRewriteFilter.isRegex(rule)) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+                            modifier = Modifier.weight(1f),
+                        )
+                        Switch(
+                            checked = rule.from !in disabledHosts,
+                            onCheckedChange = { on ->
+                                settings.disabledHostRewrites = HostRewriteFilter.toggle(UrlRewriteRules.extensionHostRewrites, settings.disabledHostRewrites, rule.from, on)
+                                components.bridge.sendHostRewrites(components.effectiveHostRewrites())
+                            },
+                        )
+                    }
+                }
+                Text(
+                    "Switches apply to followed links and to typed or pasted URLs alike. The generic strip is a catch-all: to keep a mobile host that it matches, switch it off too. " +
+                        "Typed URLs also get Amazon /gp/aw/ and mf_useformat / app=m query rewrites (address bar only).",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+
                 Section("Default persona")
                 Text("Used on first start and when the saved selection no longer exists.", style = MaterialTheme.typography.bodySmall)
                 Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -147,6 +208,52 @@ fun SettingsScreen(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 )
+                OutlinedButton(onClick = { components.rulesUi.show(RulesUiState.Screen.PersonaEditor) }, modifier = Modifier.padding(top = 8.dp)) {
+                    Text("Personas: identities & regions…")
+                }
+
+                // hatch:credentials begin — in-app logins store (docs/research/google-signin-autofill.md Path 2)
+                Section("Logins & passkeys")
+                var loginAutofill by remember(tick) { mutableStateOf(settings.loginAutofill) }
+                var saveLogins by remember(tick) { mutableStateOf(settings.saveLogins) }
+                SwitchRow(
+                    title = "Autofill saved logins",
+                    subtitle = "Hatch's own store (not Google Password Manager). One match fills silently; several show a picker above the keyboard.",
+                    checked = loginAutofill,
+                ) { on ->
+                    loginAutofill = on
+                    settings.loginAutofill = on
+                    components.engine.settings.loginAutofillEnabled = on
+                }
+                SwitchRow(
+                    title = "Offer to save logins",
+                    subtitle = "Ask after a sign-in form is submitted. \"Never save\" answers are kept per site.",
+                    checked = saveLogins,
+                ) { on -> saveLogins = on; settings.saveLogins = on }
+                val neverSave by components.logins.exceptions.origins.collectAsState()
+                Row(Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedButton(onClick = { components.loginsUi.savedLoginsOpen = true }) { Text("Saved logins…") }
+                    Spacer(Modifier.width(8.dp))
+                    if (neverSave.isNotEmpty()) {
+                        TextButton(onClick = { components.logins.exceptions.clear() }) { Text("Forget ${neverSave.size} \"never save\" site(s)") }
+                    }
+                }
+                Text(
+                    "Passkeys: wired through Android Credential Manager / Google Play services, but Google only serves " +
+                        "allow-listed browsers (request pending for the release signature; debug builds never). " +
+                        "Until then use \"Open in another browser\" for passkey logins.",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+                // hatch:credentials end
+
+                Section("Sites")
+                Text("Per-site userscripts / userstyles and the permissions sites were granted.", style = MaterialTheme.typography.bodySmall)
+                Row(Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedButton(onClick = { components.rulesUi.show(RulesUiState.Screen.SiteRules) }) { Text("Site rules…") }
+                    Spacer(Modifier.width(8.dp))
+                    OutlinedButton(onClick = { components.rulesUi.show(RulesUiState.Screen.SitePermissions) }) { Text("Site permissions…") }
+                }
 
                 Section("Add-ons")
                 AddonsSection(components, snackbar)

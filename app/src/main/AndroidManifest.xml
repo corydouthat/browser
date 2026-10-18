@@ -4,7 +4,13 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Requested at runtime by AC's FetchDownloadManager on the first download (API 33+); see MainActivity. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- HatchDownloadService is a dataSync foreground service (what AC AbstractFetchDownloadService expects;
+         FOREGROUND_SERVICE_DATA_SYNC is also declared by feature-downloads' own manifest). On API 35+ dataSync
+         services get at most 6 h per 24 h; AbstractFetchDownloadService.onTimeout stops itself and logs
+         (AbstractFetchDownloadService.kt:479-483), so a >6 h download ends as a cancelled download, not a crash.
+         Documented in docs/limitations.md. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -13,6 +19,14 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Saved logins screen: biometric / device-credential gate (androidx.biometric declares it too). -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <!-- WebAuthn / passkeys (docs/research/passkeys-webauthn.md). GeckoView's WebAuthnTokenManager calls the
+         framework Credential Manager with an explicit origin; AOSP guards that with CREDENTIAL_MANAGER_SET_ORIGIN
+         (normal-level, but the geckoview AAR does not declare it; Fenix does, fenix AndroidManifest.xml:50-52).
+         Without it the request falls through to the GMS FIDO2 privileged API, which needs Google's allowlist. -->
+    <uses-permission android:name="android.permission.CREDENTIAL_MANAGER_SET_ORIGIN" />
+    <uses-permission android:name="android.permission.CREDENTIAL_MANAGER_QUERY_CANDIDATE_CREDENTIALS" />
     <!-- Legacy storage for the downloads feature on API < 29 / < 33 -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
@@ -25,9 +39,14 @@
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
 
+    <!-- Backup posture (SEC-2): allowBackup="false" covers API < 31; from Android 12 the platform reads
+         dataExtractionRules for cloud backup AND device-to-device transfer (some OEM builds ignore allowBackup for
+         D2D), so the Fenix rules file excludes every domain under both. fullBackupContent="false" is the pre-12 form. -->
     <application
         android:name=".HatchApplication"
         android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="false"
         android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
         android:supportsRtl="true"
@@ -37,23 +56,61 @@
         android:theme="@style/Theme.Hatch"
         tools:replace="android:allowBackup">
 
+        <!-- configChanges is Fenix's list (HomeActivity, FIREFOX_158_0_RELEASE): uiMode / locale / density are NOT
+             handled in place (UXP-09), so a runtime theme switch recreates the Activity and the system-bar contrast
+             (enableEdgeToEdge), GeckoView's first-paint cover and AC's DialogFragments all pick up the new theme.
+             Session restore is process-scoped (Components.sessionRestore), so a recreation costs nothing. -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:configChanges="orientation|screenSize|keyboardHidden|keyboard|uiMode|smallestScreenSize|screenLayout|locale|layoutDirection|density"
+            android:configChanges="keyboard|keyboardHidden|mcc|mnc|orientation|screenSize|layoutDirection|smallestScreenSize|screenLayout"
             android:windowSoftInputMode="adjustResize"
             android:supportsPictureInPicture="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Intent.makeMainSelectorActivity(ACTION_MAIN, CATEGORY_APP_BROWSER): "open a browser" from other apps
+                 (Fenix IntentReceiverActivity). TabIntentProcessor treats ACTION_MAIN like VIEW. -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.APP_BROWSER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <!-- Scheme-only web filter: what makes Hatch selectable as a browser. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="http" />
                 <data android:scheme="https" />
+            </intent-filter>
+            <!-- Typed web links (a VIEW intent carrying a MIME type does not match a scheme-only filter); the
+                 same list as Fenix. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:mimeType="text/html" />
+                <data android:mimeType="text/plain" />
+                <data android:mimeType="application/xhtml+xml" />
+            </intent-filter>
+            <!-- SEC-4: no content:/file: HTML filter. Gecko registers content: with URI_IS_POTENTIALLY_TRUSTWORTHY
+                 (GeckoViewContentProtocolHandler, mobile/android/components/geckoview/components.conf), so any
+                 installed app could have pushed its own HTML+JS into a Hatch tab as a secure-context origin where the
+                 persona shim, site rules and the bridge port attach, and a file: filter let Hatch render its own
+                 private files. External surface = Fenix 158: content: for application/pdf only (m1-inventory risk 10
+                 is closed the other way; docs/limitations.md). -->
+            <!-- PDFs via content: (Gecko's built-in pdf.js), as Fenix does. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" />
+                <data android:mimeType="application/pdf" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -74,6 +131,20 @@
             android:name=".downloads.HatchDownloadService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+
+        <!-- PERF-06: no automatic WorkManager initialisation at cold start (Fenix AndroidManifest.xml:847-857).
+             androidx.work rides in through service-sync-logins; Hatch enqueues no work. HatchApplication implements
+             Configuration.Provider for on-demand initialisation should an AC module ever need it. -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
 
         <provider
             android:name="androidx.core.content.FileProvider"

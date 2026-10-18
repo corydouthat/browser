@@ -38,8 +38,20 @@ import mozilla.components.feature.session.SessionFeature
 import mozilla.components.feature.sitepermissions.SitePermissionsFeature
 import mozilla.components.feature.sitepermissions.SitePermissionsRules
 import mozilla.components.feature.tabs.WindowFeature
+// hatch:credentials begin
+import mozilla.components.feature.webauthn.WebAuthnFeature
+// hatch:credentials end
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import app.hatch.downloads.HatchDownloadService
+// hatch:rules begin
+import app.hatch.applinks.AppLinksPolicy
+// hatch:rules end
+// hatch:chrome begin
+import androidx.core.view.ViewCompat
+import app.hatch.ui.keys.KeyShortcuts
+import mozilla.components.browser.thumbnails.BrowserThumbnails
+import mozilla.components.browser.thumbnails.facts.BrowserThumbnailsFacts
+// hatch:chrome end
 
 /**
  * The one Activity. AppCompatActivity (not ComponentActivity) because the Android Components prompt /
@@ -61,6 +73,12 @@ class MainActivity : AppCompatActivity() {
     private val sitePermissionsFeature = ViewBoundFeatureWrapper<SitePermissionsFeature>()
     private val appLinksFeature = ViewBoundFeatureWrapper<AppLinksFeature>()
     private var pipFeature: PictureInPictureFeature? = null
+    // hatch:chrome begin — captures a thumbnail on load-complete; the tray calls requestScreenshot before opening
+    private val thumbnailsFeature = ViewBoundFeatureWrapper<BrowserThumbnails>()
+    // hatch:chrome end
+    // hatch:credentials begin — passkeys: GeckoView hands the GMS/Credential Manager PendingIntent to this delegate
+    private val webAuthnFeature = ViewBoundFeatureWrapper<WebAuthnFeature>()
+    // hatch:credentials end
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +88,12 @@ class MainActivity : AppCompatActivity() {
         engineView.setActivityContext(this)
         lifecycle.addObserver(LifecycleObserver(engineView))
         selfCheck = SelfCheckController(applicationContext, c, lifecycleScope)
+        // hatch:credentials begin — POST_NOTIFICATIONS (API 33+) is requested at the first download:
+        // FetchDownloadManager.download() calls notificationsDelegate.requestNotificationPermission()
+        // (FetchDownloadManager.kt:77-79), which only works once the delegate has a bound Activity. Must run
+        // before STARTED (registerForActivityResult). m1-inventory risk 4.
+        c.notificationsDelegate.bindToActivity(this)
+        // hatch:credentials end
 
         setContent {
             HatchTheme {
@@ -80,6 +104,9 @@ class MainActivity : AppCompatActivity() {
                     uiEvents = uiEvents,
                     selfCheck = selfCheck,
                     onRestart = { AppRestart.restart(this) },
+                    requestScreenshot = { // hatch:chrome
+                        thumbnailsFeature.get()?.requestScreenshot(BrowserThumbnailsFacts.CaptureAttemptedTriggers.TAB_COUNTER_CLICK)
+                    },
                 )
             }
         }
@@ -90,15 +117,22 @@ class MainActivity : AppCompatActivity() {
             override fun handleOnBackPressed() {
                 if (fullScreenFeature.onBackPressed()) return
                 if (promptFeature.onBackPressed()) return
+                // Compose surfaces in z-order (HatchApp draws them in this order, topmost last): rules overlays
+                // (site rules / editor / site permissions / persona editor) above the Saved logins screen above the
+                // chrome's own overlays (the login picker bar is dismissed by promptFeature above).
+                if (c.rulesUi.onBack()) return
+                if (c.loginsUi.onBack()) return
                 if (uiState.onBack()) return
                 if (sessionFeature.onBackPressed()) return
                 moveTaskToBack(true)
             }
         })
 
-        if (savedInstanceState == null) {
-            restoreOrOpenFirstTab(intent)
-        }
+        // hatch:chrome begin — risk 1: restore + autosave are process-scoped (Components.sessionRestore) and run
+        // whenever the browser UI starts, not only when savedInstanceState == null; the launch intent is processed
+        // once per Activity instance (a recreated Activity must not re-open its VIEW URL).
+        ensureSession(launchIntent = if (savedInstanceState == null) intent else null)
+        // hatch:chrome end
     }
 
     private fun installFeatures(root: View) {
@@ -115,6 +149,14 @@ class MainActivity : AppCompatActivity() {
                 fragmentManager = supportFragmentManager,
                 tabsUseCases = c.tabsUseCases,
                 fileUploadsDirCleaner = c.fileUploadsDirCleaner,
+                // hatch:credentials begin — in-app logins (Fenix BaseBrowserFragment.kt:1048-1063, 1097-1105;
+                // every parameter verified against feature-prompts 158 PromptFeature.kt:250-284)
+                loginValidationDelegate = c.logins.validationDelegate,
+                isLoginAutofillEnabled = { c.settings.loginAutofill },
+                isSaveLoginEnabled = { c.settings.saveLogins },
+                loginExceptionStorage = c.logins.exceptions,
+                loginDelegate = c.logins.loginDelegate(c.loginsUi.picker) { uiEvents.emit(UiEvent.OpenSavedLogins) },
+                // hatch:credentials end
                 isSuggestEmailMaskEnabled = { false },
                 isEmailMaskFeatureEnabled = { false },
                 onNeedToRequestPermissions = { permissions -> askPermissions(permissions, REQUEST_PROMPT) },
@@ -167,6 +209,9 @@ class MainActivity : AppCompatActivity() {
             SitePermissionsFeature(
                 context = this,
                 fragmentManager = supportFragmentManager,
+                // hatch:rules begin — the storage the Site permissions screen reads/revokes (SitePermissionsFeature.kt:110)
+                storage = c.sitePermissionsStorage,
+                // hatch:rules end
                 sitePermissionsRules = SitePermissionsRules(
                     camera = SitePermissionsRules.Action.ASK_TO_ALLOW,
                     location = SitePermissionsRules.Action.ASK_TO_ALLOW,
@@ -191,30 +236,47 @@ class MainActivity : AppCompatActivity() {
                 context = this,
                 store = c.store,
                 fragmentManager = supportFragmentManager,
-                launchInApp = { true },
+                // hatch:rules begin — AppSettings.appLinksMode → AppLinksPolicy (AppLinksFeature.kt:99,105; risk 3)
+                launchInApp = { AppLinksPolicy.of(c.settings.appLinksMode).launchInApp },
+                shouldPrompt = { AppLinksPolicy.of(c.settings.appLinksMode).shouldPrompt },
+                // hatch:rules end
                 loadUrlUseCase = c.sessionUseCases.loadUrl,
             ),
             owner = this, view = root,
         )
         pipFeature = PictureInPictureFeature(c.store, this)
+        // hatch:chrome begin
+        thumbnailsFeature.set(BrowserThumbnails(this, engineView, c.store), owner = this, view = root)
+        // hatch:chrome end
+        // hatch:credentials begin — WebAuthn (docs/research/passkeys-webauthn.md): registers the engine
+        // ActivityDelegate (GeckoEngine.kt:912-926) and launches the PendingIntent GeckoView gets from
+        // Credential Manager / GMS FIDO2. Fenix BaseBrowserFragment.kt:1373-1385 (Fenix gates it on
+        // MOZILLA_OFFICIAL; Hatch installs it unconditionally so it works the day the allowlist lands).
+        webAuthnFeature.set(
+            WebAuthnFeature(
+                engine = c.engine,
+                activity = this,
+                exitFullScreen = c.sessionUseCases.exitFullscreen::invoke,
+                currentTab = { c.store.state.selectedTabId },
+            ),
+            owner = this, view = root,
+        )
+        // hatch:credentials end
     }
 
-    private fun restoreOrOpenFirstTab(launchIntent: Intent?) {
+    // hatch:chrome begin
+    /** Waits for the process-wide restore, then handles the launch intent and guarantees at least one tab. */
+    private fun ensureSession(launchIntent: Intent?) {
         val c = components
-        lifecycleScope.launch(Dispatchers.IO) {
-            c.tabsUseCases.restore(c.sessionStorage)
-            launch(Dispatchers.Main) {
-                c.sessionStorage.autoSave(c.store)
-                    .periodicallyInForeground(interval = 30, unit = java.util.concurrent.TimeUnit.SECONDS)
-                    .whenGoingToBackground()
-                    .whenSessionsChange()
-                val handledIntent = launchIntent != null && processIntent(launchIntent)
-                if (!handledIntent && c.store.state.tabs.isEmpty()) {
-                    c.tabsUseCases.addTab(c.settings.homeUrl)
-                }
+        lifecycleScope.launch(Dispatchers.Main) {
+            c.sessionRestore.join()
+            val handledIntent = launchIntent != null && processIntent(launchIntent)
+            if (!handledIntent && c.store.state.tabs.isEmpty()) {
+                c.tabsUseCases.addTab(c.settings.homeUrl)
             }
         }
     }
+    // hatch:chrome end
 
     private fun processIntent(intent: Intent): Boolean {
         if (intent.action != Intent.ACTION_VIEW && intent.action != Intent.ACTION_SEND) return false
@@ -233,6 +295,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun fullScreenChanged(enabled: Boolean) {
         val controller = WindowCompat.getInsetsController(window, window.decorView)
+        // hatch:chrome begin — Fenix BaseBrowserFragment.expandBrowserView: the chrome goes away, Gecko gets the
+        // whole surface (no dynamic-toolbar reservation, no bottom clipping); the find bar closes with it.
+        uiState.fullScreen = enabled
+        if (enabled) {
+            uiState.findBar = false
+            engineView.setDynamicToolbarMaxHeight(0)
+            engineView.setVerticalClipping(0)
+        }
+        // hatch:chrome end
         if (enabled) {
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             controller.hide(WindowInsetsCompat.Type.systemBars())
@@ -280,33 +351,42 @@ class MainActivity : AppCompatActivity() {
     @Deprecated("AC PromptFeature uses the classic file-picker result path")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (promptFeature.onActivityResult(requestCode, data, resultCode)) return
+        // hatch:credentials begin — after PromptFeature, like Fenix BaseBrowserFragment.kt:2117-2123
+        if (webAuthnFeature.onActivityResult(requestCode, data, resultCode)) return
+        // hatch:credentials end
         super.onActivityResult(requestCode, resultCode, data)
     }
 
     // ---- hardware keyboard -----------------------------------------------------------------------------
 
+    // hatch:chrome begin — table in ui/keys/KeyShortcuts.kt (JVM-tested). Esc/F5/Ctrl+R/Ctrl+L reach the page
+    // unless a Hatch surface is open; "page input focused" = engine view focused + IME visible (best effort).
+    // A surface is any of the chrome's (AppUiState.hasOverlay), the rules overlays or the Saved logins screen.
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (event.action == KeyEvent.ACTION_DOWN) {
-            val ctrl = event.isCtrlPressed
-            val shift = event.isShiftPressed
-            val handled = when {
-                ctrl && shift && event.keyCode == KeyEvent.KEYCODE_I -> { uiEvents.emit(UiEvent.ToggleEruda); true }
-                ctrl && shift && event.keyCode == KeyEvent.KEYCODE_P -> { uiEvents.emit(UiEvent.PersonaSheet); true }
-                ctrl && !shift && event.keyCode == KeyEvent.KEYCODE_L -> { uiEvents.emit(UiEvent.FocusUrl); true }
-                ctrl && !shift && event.keyCode == KeyEvent.KEYCODE_R -> { uiEvents.emit(UiEvent.Reload); true }
-                event.keyCode == KeyEvent.KEYCODE_F5 -> { uiEvents.emit(UiEvent.Reload); true }
-                ctrl && !shift && event.keyCode == KeyEvent.KEYCODE_T -> { uiEvents.emit(UiEvent.NewTab); true }
-                ctrl && !shift && event.keyCode == KeyEvent.KEYCODE_W -> { uiEvents.emit(UiEvent.CloseTab); true }
-                event.keyCode == KeyEvent.KEYCODE_ESCAPE -> { uiEvents.emit(UiEvent.Escape); true }
-                else -> false
+            val view = engineView.asView()
+            val c = components
+            val imeVisible = ViewCompat.getRootWindowInsets(view)?.isVisible(WindowInsetsCompat.Type.ime()) == true
+            val overlayOpen = uiState.hasOverlay() || c.rulesUi.isOpen || c.loginsUi.savedLoginsOpen
+            val ctx = KeyShortcuts.Context(
+                overlayOpen = overlayOpen,
+                pageInputFocused = view.hasFocus() && imeVisible && !overlayOpen,
+            )
+            val mapped = KeyShortcuts.map(event.keyCode, event.isCtrlPressed, event.isShiftPressed, event.isAltPressed, ctx)
+            if (mapped != null) {
+                uiEvents.emit(mapped)
+                return true
             }
-            if (handled) return true
         }
         return super.dispatchKeyEvent(event)
     }
+    // hatch:chrome end
 
     override fun onDestroy() {
         engineView.setActivityContext(null)
+        // hatch:credentials begin
+        components.notificationsDelegate.unBindActivity(this)
+        // hatch:credentials end
         super.onDestroy()
     }
 
