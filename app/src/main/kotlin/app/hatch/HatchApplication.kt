@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Build
 import android.os.StrictMode
 import androidx.work.Configuration
+import app.hatch.crash.CrashCapture
 import app.hatch.memory.MemoryTrim
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,6 +29,10 @@ class HatchApplication : Application(), Configuration.Provider {
         super.onCreate()
         // The ":restart" process (AppRestart) must never initialise Gecko or the store.
         if (isMainProcess()) {
+            // Startup-crash capture first: a leftover marker from the previous start puts this one in safe mode,
+            // in which nothing below runs and MainActivity shows CrashRecoveryActivity instead of the browser.
+            CrashCapture.install(this)
+            if (CrashCapture.safeMode) return
             installDebugStrictMode()
             components.rulesRepository // creates the bundled example rules on first run
             // PERF-03: ThumbnailStorage's constructor clears the private disk cache (DiskLruCache open + delete);
@@ -46,6 +51,7 @@ class HatchApplication : Application(), Configuration.Provider {
      */
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
+        if (CrashCapture.safeMode) return
         val actions = MemoryTrim.actionsFor(
             level = level,
             isMainProcess = isMainProcess(),

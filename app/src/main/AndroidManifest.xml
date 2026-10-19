@@ -121,6 +121,10 @@
 
         <!-- Relaunch trampoline in its own process (AppRestart); never initialises Gecko. -->
         <activity
+            android:name=".crash.CrashRecoveryActivity"
+            android:exported="false"
+            android:excludeFromRecents="true" />
+        <activity
             android:name=".persona.AppRestart$RestartActivity"
             android:process=":restart"
             android:exported="false"

@@ -63,6 +63,10 @@ mkdir -p dist
 out="dist/hatch-${name}-${number}-${sha}-${mode}.apk"
 cp "$apk" "$out"
 ls -l "$out"
+# Keep the R8 mapping next to every minified APK so a crash trace from the phone can be de-obfuscated:
+#   $ANDROID_HOME/cmdline-tools/latest/bin/retrace dist/<apk>.mapping.txt trace.txt
+mapping=app/build/outputs/mapping/release/mapping.txt
+if [ "${mode#release}" != "$mode" ] && [ -f "$mapping" ]; then cp "$mapping" "${out%.apk}.mapping.txt"; fi
 
 if [ "$mode" = install ]; then
   if adb get-state >/dev/null 2>&1; then adb install -r "$out"; else echo "No device attached; sideload $out"; fi

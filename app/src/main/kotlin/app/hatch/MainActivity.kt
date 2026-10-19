@@ -14,7 +14,10 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
+import app.hatch.crash.CrashCapture
+import app.hatch.crash.CrashRecoveryActivity
 import app.hatch.persona.AppRestart
+import kotlinx.coroutines.delay
 import app.hatch.selfcheck.SelfCheckController
 import app.hatch.ui.AppUiState
 import app.hatch.ui.HatchApp
@@ -82,6 +85,18 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (CrashCapture.safeMode) {
+            // The previous start crashed before the browser UI was up: recovery screen, no Gecko, no store.
+            startActivity(Intent(this, CrashRecoveryActivity::class.java))
+            finish()
+            return
+        }
+        // The marker written by CrashCapture.install is cleared once the browser UI has been up for a few
+        // seconds; a crash before that puts the next start in safe mode.
+        lifecycleScope.launch {
+            delay(STARTUP_SETTLE_MS)
+            CrashCapture.startupCompleted(applicationContext)
+        }
         enableEdgeToEdge()
         val c = components
         engineView = c.engine.createView(this)
@@ -383,14 +398,18 @@ class MainActivity : AppCompatActivity() {
     // hatch:chrome end
 
     override fun onDestroy() {
-        engineView.setActivityContext(null)
-        // hatch:credentials begin
-        components.notificationsDelegate.unBindActivity(this)
-        // hatch:credentials end
+        if (::engineView.isInitialized) { // not in safe mode (CrashCapture)
+            engineView.setActivityContext(null)
+            // hatch:credentials begin
+            components.notificationsDelegate.unBindActivity(this)
+            // hatch:credentials end
+        }
         super.onDestroy()
     }
 
     companion object {
+        /** How long the browser UI must stay up after onCreate before the start counts as successful (CrashCapture). */
+        private const val STARTUP_SETTLE_MS = 5_000L
         private const val REQUEST_PROMPT = 1
         private const val REQUEST_DOWNLOADS = 2
         private const val REQUEST_SITE_PERMISSIONS = 3
