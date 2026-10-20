@@ -108,6 +108,29 @@ flock /tmp/hatch-heavy.lock ./gradlew --no-daemon --max-workers=1 --console=plai
   `tool/check_apk_size.sh`). The on-device footprint is the APK plus ~189 MB of extracted libraries (`libxul.so`
   153 MB). Debug APKs (~140 MB, unminified dex) are not held to the budget.
 
+## Release builds, R8 and crashes on the road
+
+- **Release (R8) builds only fail on a device.** The VPS and CI build them but cannot run them; the first
+  release that ran on the Pixel (build 20, 2026-10-20) died in `GeckoRuntime.create` because R8 had moved
+  SnakeYAML (GeckoView's `geckoview-config.yaml` reader) into the unnamed package and its `TypeDescription`
+  static initialiser calls `getPackage().getName()`. `app/proguard-rules.pro` keeps the package names
+  (`-keeppackagenames org.yaml.snakeyaml.**`) and `tool/check_release_mapping.sh` (run by
+  `tool/build_apk.sh release`) fails the build if the mapping ever shows SnakeYAML outside its package. Every
+  new release-only crash gets the same treatment: rule + mapping guard + a line here.
+- **Mapping next to the APK.** `tool/build_apk.sh release` copies the R8 mapping to
+  `dist/<apk>.mapping.txt`. De-obfuscate a trace with
+  `JAVA_HOME=/opt/android-studio/jbr $ANDROID_HOME/cmdline-tools/latest/bin/retrace dist/<apk>.mapping.txt trace.txt`.
+- **Startup-crash capture** (`app/hatch/crash/`): `CrashCapture.install` runs first in
+  `HatchApplication.onCreate`; a startup marker left behind by the previous start puts the next one in safe mode,
+  where `MainActivity` opens `CrashRecoveryActivity` (Share / Copy the trace, Try again, Clear Hatch data)
+  instead of touching Gecko. The uncaught-exception handler writes `files/crashes/last.txt` and then lets the
+  system handler run. The marker clears 5 s after `MainActivity.onCreate`. Without adb, this is the only crash
+  evidence that leaves the phone; Cory shares it via Tailscale or pastes it into the chat.
+- **Build number on the remote host.** `tool/remote_build.sh` rsyncs the tree without `.git`, so Gradle's
+  `git rev-list --count` fallback would stamp `versionCode = 1`; `tool/build_apk.sh` passes
+  `-PversionCode=<commit count>` and `app/build.gradle.kts` prefers it. Builds 1–21 from the NUC carried
+  versionCode 1 (the dist file names were right); from build 22 the APK's versionCode matches the name.
+
 ## Memory budget cheatsheet
 
 | Process | Peak RSS observed |

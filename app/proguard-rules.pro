@@ -13,4 +13,9 @@
 -keep class mozilla.appservices.** { *; }
 # GeckoView reads geckoview-config.yaml into this class by field name (Fenix keeps it for the same reason).
 -keep class org.mozilla.gecko.util.DebugConfig { *; }
+# ...through SnakeYAML, whose TypeDescription static initialiser calls `TypeDescription.class.getPackage().getName()`
+# (TypeDescription.java:43). R8 flattens renamed classes into the unnamed package, where ART's getPackage() is
+# null, so every release build crashed in GeckoRuntime.create (build 20/21 on the Pixel, 2026-10-20). Keeping the
+# package names (classes may still be renamed and shrunk) is enough; tool/check_release_mapping.sh guards it.
+-keeppackagenames org.yaml.snakeyaml.**
 # hatch:credentials end

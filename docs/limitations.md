@@ -127,6 +127,12 @@ its fix pass are folded in below; vectors that were *fixed* are listed at the en
 | Site permissions storage | `SitePermissionsFeature` now writes to `Components.sitePermissionsStorage` = `GeckoSitePermissionsStorage(runtime, OnDiskSitePermissionsStorage(context))` (Fenix `Core.kt:306-307`), so "Clear" in the Site permissions screen also removes GeckoView's own persisted content permission (`removeGeckoContentPermissionBy`); M0 used the Room storage alone, where a revoke would have left Gecko's grant in place. Temporary ("don't remember") grants live in memory until the tab closes and are not listed. | `SitePermissionRowsTest` (rows / status mapping) |
 | Esc with a rules screen or Saved logins open | Closed by the integrator: `MainActivity.dispatchKeyEvent` treats `rulesUi.isOpen` and `loginsUi.savedLoginsOpen` as open surfaces, so Esc is consumed and `HatchApp.closeTopSurface()` closes the topmost one (rules → logins → chrome), the same order as system back. | `KeyShortcutsTest` (Esc only while a surface is open) |
 
+## Release-only failures (R8), 2026-10-20
+
+| Tell / cost | Detail | Tracked by |
+|---|---|---|
+| R8 flattens packages | Any library whose static state reads `Class.getPackage()` (SnakeYAML `TypeDescription`, found on the first device run of a release build) returns null under R8's default repackaging and crashes at class init. Fixed with `-keeppackagenames org.yaml.snakeyaml.**`; other libraries with the same pattern are unknown until a release build runs on the phone, which neither the VPS nor CI can do. A release build must be opened on the device before it is reported as working; the safe-mode recovery screen turns the second launch into a shareable trace. | `tool/check_release_mapping.sh`, `docs/dev-environment.md` "Release builds, R8 and crashes on the road" |
+
 ## M1 fix pass (fixer, 2026-10-18)
 
 Findings from the M1 review round (`UXP-*`, `SEC-*`, `ENG-*`, `PERF-*`) that end as a documented limit, a

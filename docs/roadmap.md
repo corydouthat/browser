@@ -72,6 +72,8 @@ Google's allowlist, wired anyway).
 - [x] Release APK after the fix pass: 100.63 MiB signed (budget 110; `resources.arsc` 0.65 MiB with the "en" locale filter), selfcheck 1.02 MiB, extension 0.05 MiB (`build/size.json`, PERF-01/02)
 - [x] M1 fix pass (fixer, 2026-10-18): UXP-01…08/10…15, SEC-1/2/3/4/6, ENG-01…06, PERF-02/03/04/06/07/08 fixed in code with JVM tests; UXP-09 by Activity recreation; ENG-07, SEC-5, PERF-01/09/10 documented; PERF-05 (narrow the app-services keep rule) deferred to M2 behind a device run of the logins flows (`docs/limitations.md` "M1 fix pass")
 
+- [x] Release build runs on the device (2026-10-20): build 20/21 crashed in `GeckoRuntime.create` (R8 vs SnakeYAML, `docs/limitations.md` "Release-only failures"); fixed in build 22 with a mapping guard in `tool/build_apk.sh`. Startup-crash capture + safe-mode recovery screen (`app/hatch/crash/`) shipped with build 21 and produced the trace; `versionCode` from the remote host fixed (was 1)
+
 ### M1 device checklist (Cory; use-case driven, ≈ 20 min; runbook sections in `docs/device-checklist.md`)
 
 Install the **release** APK from `dist/` (the debug one cannot ever do passkeys). Record results in

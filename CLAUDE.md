@@ -44,6 +44,10 @@ The approved design is the plan Cory confirmed on 2026-10-18; `docs/architecture
   `dist/hatch-<versionName>-<versionCode>-<sha>-<mode>.apk`. The Settings footer shows them.
 - Debug builds: `applicationId app.hatch.browser.debug`, `-debug` version suffix, no R8. Release: R8 +
   `shrinkResources`, signed with `key.properties` + `.jks` (git-ignored; M1).
+- A release (R8) build counts as working only after it has been opened on the phone: R8 failures (package
+  flattening, reflection) never show on the VPS or CI. `tool/check_release_mapping.sh` guards the known ones; a
+  crashing release shows the safe-mode recovery screen on its second launch (`app/hatch/crash/`), and
+  `dist/<apk>.mapping.txt` + `retrace` de-obfuscates what Cory shares.
 - Size budgets (`tool/check_apk_size.sh`, release): arm64 APK ≤ 110 MB (release measured 103.1 MB on 2026-10-18), `assets/selfcheck/` ≤ 2 MB,
   `assets/extension/` excluding `vendor/eruda.min.js` ≤ 200 KB. Debug APKs are ~240 MB (uncompressed
   `libxul.so`, unminified dex) and are not held to the APK budget.

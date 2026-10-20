@@ -9,10 +9,13 @@ plugins {
 }
 
 // Build number = git commit count, so every commit is an installable update (fitness-app convention).
-val gitCommitCount: Int = providers.exec {
-    commandLine("git", "rev-list", "--count", "HEAD")
-    isIgnoreExitValue = true
-}.standardOutput.asText.map { it.trim().toIntOrNull() ?: 1 }.get()
+// tool/build_apk.sh passes it as -PversionCode because the remote build host gets the tree without .git
+// (tool/remote_build.sh rsync excludes it); the git fallback serves IDE and CI builds.
+val gitCommitCount: Int = (project.findProperty("versionCode") as String?)?.toIntOrNull()
+    ?: providers.exec {
+        commandLine("git", "rev-list", "--count", "HEAD")
+        isIgnoreExitValue = true
+    }.standardOutput.asText.map { it.trim().toIntOrNull() ?: 1 }.get()
 
 val versionProps = Properties().apply {
     rootProject.file("version.properties").inputStream().use { load(it) }

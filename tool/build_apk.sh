@@ -29,7 +29,7 @@ number=$(git rev-list --count HEAD 2>/dev/null || echo 1)
 name=$(grep '^versionName=' version.properties | cut -d= -f2)
 when=$(date '+%Y-%m-%d %H:%M')
 
-props=(-PgitSha="$sha" -PgitBranch="$branch" -PbuildTime="$when")
+props=(-PgitSha="$sha" -PgitBranch="$branch" -PbuildTime="$when" -PversionCode="$number")
 
 echo "Hatch $name (build $number) — $sha on $branch"
 
@@ -66,7 +66,10 @@ ls -l "$out"
 # Keep the R8 mapping next to every minified APK so a crash trace from the phone can be de-obfuscated:
 #   $ANDROID_HOME/cmdline-tools/latest/bin/retrace dist/<apk>.mapping.txt trace.txt
 mapping=app/build/outputs/mapping/release/mapping.txt
-if [ "${mode#release}" != "$mode" ] && [ -f "$mapping" ]; then cp "$mapping" "${out%.apk}.mapping.txt"; fi
+if [ "${mode#release}" != "$mode" ] && [ -f "$mapping" ]; then
+  cp "$mapping" "${out%.apk}.mapping.txt"
+  tool/check_release_mapping.sh "$mapping"
+fi
 
 if [ "$mode" = install ]; then
   if adb get-state >/dev/null 2>&1; then adb install -r "$out"; else echo "No device attached; sideload $out"; fi
