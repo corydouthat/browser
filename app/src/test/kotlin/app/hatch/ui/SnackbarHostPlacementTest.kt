@@ -30,7 +30,12 @@ class SnackbarHostPlacementTest {
 
     @Test
     fun `screens that take the shared state do not host it themselves`() {
-        for (file in listOf("ui/BrowserScreen.kt", "ui/SettingsScreen.kt", "ui/logins/SavedLoginsScreen.kt", "ui/rules/RulesOverlays.kt")) {
+        // The Settings pages moved to ui/settings/ (screens redesign); the Add-ons and Developer pages get the shared state.
+        val settingsPages = listOf(
+            "ui/settings/SettingsRoot.kt", "ui/settings/SettingsPages.kt", "ui/settings/AddonsPage.kt",
+            "ui/settings/DeveloperPage.kt", "ui/settings/ScreenKit.kt",
+        )
+        for (file in listOf("ui/BrowserScreen.kt", "ui/SettingsScreen.kt", "ui/logins/SavedLoginsScreen.kt", "ui/logins/SavedLoginDetail.kt", "ui/rules/RulesOverlays.kt") + settingsPages) {
             val text = source(file)
             assertTrue("SnackbarHost(" !in text, "$file must not host the shared snackbar state")
         }

@@ -47,8 +47,60 @@ class PersonaDraftsTest {
             colorDepth = "0", dpr = "9", hardwareConcurrency = "0", webglVendor = "V", webglRenderer = "", desktop = true, touch = true,
         )
         val p = PersonaDrafts.identityProblems(bad)
-        listOf("Name is empty", "Layout width", "Screen width and height", "Available width cannot exceed", "Color depth", "Device pixel ratio", "Hardware concurrency", "WebGL vendor and renderer", "detectable")
+        listOf("Name is empty", "Layout width", "Screen width and height", "Available width cannot exceed", "Color depth", "Device pixel ratio", "CPU cores", "WebGL vendor and renderer", "detectable")
             .forEach { needle -> assertTrue(p.any { it.contains(needle) }, needle) }
+    }
+
+    @Test
+    fun `identity problems are keyed by the field that shows them, with a short hint`() {
+        val ok = IdentityDraft.from(Presets.default().identity, name = "Mine")
+        assertEquals(emptyList(), PersonaDrafts.identityFieldProblems(ok))
+
+        val cores = PersonaDrafts.byField(PersonaDrafts.identityFieldProblems(ok.copy(hardwareConcurrency = "128")))
+        assertEquals(setOf(IdentityField.Cores), cores.keys)
+        assertEquals("Use 1–64", cores.getValue(IdentityField.Cores).hint, "the mockup's helper text")
+        assertTrue(cores.getValue(IdentityField.Cores).message.contains("1–64"))
+        assertEquals(emptyList(), PersonaDrafts.identityFieldProblems(ok.copy(hardwareConcurrency = "64")))
+        assertEquals(emptyList(), PersonaDrafts.identityFieldProblems(ok.copy(hardwareConcurrency = "")), "empty = engine default")
+
+        val bad = IdentityDraft(
+            name = "", layoutWidth = "x", screenWidth = "1920", screenHeight = "", availWidth = "2000", availHeight = "1040",
+            colorDepth = "0", dpr = "0", webglVendor = "", webglRenderer = "R", desktop = true, touch = true,
+        )
+        val fields = PersonaDrafts.identityFieldProblems(bad).map { it.field }.toSet()
+        assertEquals(
+            setOf(IdentityField.Name, IdentityField.LayoutWidth, IdentityField.Screen, IdentityField.AvailSize, IdentityField.ColorDepth, IdentityField.Dpr, IdentityField.WebglVendor, IdentityField.Touch),
+            fields,
+        )
+        // The list form and the field form describe the same defects, in the same order.
+        assertEquals(PersonaDrafts.identityFieldProblems(bad).map { it.message }, PersonaDrafts.identityProblems(bad))
+        // byField keeps the first problem of a field (AvailSize has two here: not positive and wider than the screen).
+        val avail = PersonaDrafts.identityFieldProblems(bad.copy(availWidth = "2000", availHeight = "x")).filter { it.field == IdentityField.AvailSize }
+        assertTrue(avail.size >= 2)
+        assertEquals(avail.first(), PersonaDrafts.byField(PersonaDrafts.identityFieldProblems(bad.copy(availHeight = "x"))).getValue(IdentityField.AvailSize))
+        assertEquals(IdentityField.WebglRenderer, PersonaDrafts.identityFieldProblems(ok.copy(webglVendor = "V", webglRenderer = "")).single().field)
+    }
+
+    @Test
+    fun `region problems are keyed by field`() {
+        val bad = RegionDraft(name = "", languages = "english", locale = "", timeZone = "Mars/Olympus", latitude = "91", longitude = "0", accuracyMeters = "-1")
+        val byField = PersonaDrafts.byField(PersonaDrafts.regionFieldProblems(bad))
+        assertEquals(setOf(RegionField.Name, RegionField.Languages, RegionField.Locale, RegionField.TimeZone, RegionField.Latitude, RegionField.Accuracy), byField.keys)
+        assertEquals("Not a language tag: english", byField.getValue(RegionField.Languages).hint)
+        assertEquals(PersonaDrafts.regionFieldProblems(bad).map { it.message }, PersonaDrafts.regionProblems(bad))
+    }
+
+    @Test
+    fun `combined screen field round-trips width and height`() {
+        assertEquals("1920×1080", PersonaDrafts.screenText("1920", "1080"))
+        assertEquals("", PersonaDrafts.screenText("", " "))
+        assertEquals("1920" to "1080", PersonaDrafts.splitScreenText("1920×1080"))
+        assertEquals("2560" to "1440", PersonaDrafts.splitScreenText(" 2560 x 1440 "))
+        assertEquals("1366" to "", PersonaDrafts.splitScreenText("1366"))
+        assertEquals("" to "", PersonaDrafts.splitScreenText(""))
+        val d = IdentityDraft.from(Presets.default().identity)
+        val (w, h) = PersonaDrafts.splitScreenText("1366")
+        assertEquals(IdentityField.Screen, PersonaDrafts.identityFieldProblems(d.copy(screenWidth = w, screenHeight = h)).first().field)
     }
 
     @Test

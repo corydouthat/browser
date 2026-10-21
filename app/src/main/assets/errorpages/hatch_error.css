@@ -1,0 +1,103 @@
+/* Hatch error page: the "Browser · Page error" mockup. Colours are the active palette's tokens, passed by
+   ErrorPageParams as l_* (light) / d_* (dark) query parameters and set as custom properties by hatch_error.js;
+   the defaults below are Graphite. Dark follows prefers-color-scheme unless Settings > Appearance forces a mode
+   (data-theme on <html>). Text is Geist / Geist Mono like the Compose UI (DF-09): Latin subsets of the bundled
+   res/font TTFs as woff2 under fonts/ (assets keep their names; res/font is renamed by resource shrinking), with
+   the system fonts as fallback for other scripts. The CSP's default-src resource: covers the font loads. */
+@font-face { font-family: "Geist"; font-weight: 400; font-style: normal; font-display: block; src: url("fonts/geist_regular.woff2") format("woff2"); }
+@font-face { font-family: "Geist"; font-weight: 500; font-style: normal; font-display: block; src: url("fonts/geist_medium.woff2") format("woff2"); }
+@font-face { font-family: "Geist"; font-weight: 600; font-style: normal; font-display: block; src: url("fonts/geist_semibold.woff2") format("woff2"); }
+@font-face { font-family: "Geist Mono"; font-weight: 500; font-style: normal; font-display: block; src: url("fonts/geist_mono_medium.woff2") format("woff2"); }
+:root {
+  --l-ac: #2b2b30; --l-oa: #ffffff; --l-bg: #ffffff; --l-s1: #f1f1f4; --l-ink: #1b1b1f; --l-mu: #5f5f69;
+  --d-ac: #d9d9de; --d-oa: #1a1a1e; --d-bg: #121214; --d-s1: #1f1f23; --d-ink: #ececef; --d-mu: #a2a2ad;
+  --ac: var(--l-ac); --oa: var(--l-oa); --bg: var(--l-bg); --s1: var(--l-s1); --ink: var(--l-ink); --mu: var(--l-mu);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ac: var(--d-ac); --oa: var(--d-oa); --bg: var(--d-bg); --s1: var(--d-s1); --ink: var(--d-ink); --mu: var(--d-mu);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ac: var(--d-ac); --oa: var(--d-oa); --bg: var(--d-bg); --s1: var(--d-s1); --ink: var(--d-ink); --mu: var(--d-mu);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); }
+body {
+  font-family: "Geist", system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+#page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 96px 28px 32px;
+  max-width: 560px;
+}
+#tile {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--s1);
+  color: var(--mu);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon { width: 26px; height: 26px; display: none; }
+.icon.shown { display: block; }
+h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+#description {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--mu);
+  overflow-wrap: anywhere;
+}
+#code {
+  margin: 0;
+  font: 500 12px/16px "Geist Mono", ui-monospace, "Droid Sans Mono", "Roboto Mono", monospace;
+  color: var(--mu);
+  overflow-wrap: anywhere;
+}
+#code:empty { display: none; }
+#actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.pill {
+  min-height: 48px;
+  border: 0;
+  border-radius: 24px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  font-size: 15px;
+  line-height: 20px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.pill.primary { background: var(--ac); color: var(--oa); font-weight: 600; }
+.pill.secondary { background: var(--s1); color: var(--ink); font-weight: 500; }
+.pill:focus-visible { outline: 2px solid var(--ac); outline-offset: 2px; }
+.pill[hidden], #advancedPanel[hidden] { display: none; }
+#advancedPanel { display: flex; flex-direction: column; gap: 8px; }
+#techInfo { margin: 0; font-size: 13px; line-height: 18px; color: var(--mu); overflow-wrap: anywhere; }

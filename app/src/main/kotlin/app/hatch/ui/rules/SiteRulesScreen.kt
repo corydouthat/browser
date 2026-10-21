@@ -1,29 +1,19 @@
 package app.hatch.ui.rules
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
@@ -37,16 +27,38 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import app.hatch.Components
 import app.hatch.rules.RuleValidation
 import app.hatch.rules.SiteRule
+import app.hatch.ui.settings.CardDivider
+import app.hatch.ui.settings.CardRowFocusShape
+import app.hatch.ui.settings.FabClearance
+import app.hatch.ui.settings.GroupedCard
+import app.hatch.ui.settings.HatchExtendedFab
+import app.hatch.ui.settings.PageNote
+import app.hatch.ui.settings.ScreenTopBar
+import app.hatch.ui.settings.TopBarTextAction
+import app.hatch.ui.settings.hatchSwitchColors
+import app.hatch.ui.surfaces.PreviewTheme
+import app.hatch.ui.surfaces.SurfacePreviewFrame
+import app.hatch.ui.surfaces.SurfacePreviewThemes
+import app.hatch.ui.theme.HatchTheme
+import app.hatch.ui.theme.HatchType
+import app.hatch.ui.theme.hatchFocusRing
 
 /**
- * Site rules list: every rule in `SiteRulesRepository` (the three bundled examples included, tagged "Bundled")
- * with an enable switch, tap to edit, overflow menu (duplicate / test on current site / delete), FAB for a new
- * rule and an "Import" action (.user.js / .user.css from a URL or the clipboard).
+ * Site rules list (mockup "Site rules"): every rule in `SiteRulesRepository` (the bundled examples included, tagged
+ * "Example") in one grouped card, each row with name, mono match patterns, kind and an enable switch. Tap edits;
+ * long-press (or the TalkBack actions) offers Test on current site / Duplicate / Delete. "Import" in the top bar
+ * (.user.js / .user.css from a URL or the clipboard), FAB "New rule".
  */
 @Composable
 fun SiteRulesScreen(
@@ -66,46 +78,28 @@ fun SiteRulesScreen(
         title = "Site rules",
         onBack = onClose,
         snackbar = snackbar,
-        actions = { TextButton(onClick = { importOpen = true }) { Text("Import") } },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { onNew(null) }) { Icon(Icons.Default.Add, "New rule") }
-        },
+        actions = { TopBarTextAction("Import", onClick = { importOpen = true }) },
+        floatingActionButton = { HatchExtendedFab("New rule", onClick = { onNew(null) }) },
     ) { padding ->
-        if (rules.isEmpty()) {
-            Column(Modifier.fillMaxSize().padding(padding).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Spacer(Modifier.height(48.dp))
-                Text("No rules yet", style = MaterialTheme.typography.titleMedium)
-                Text(
-                    "A rule injects your JavaScript or CSS into matching pages (userscripts / userstyles). Tap + to write one or Import a .user.js file.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 8.dp),
-                )
-            }
-        } else {
-            LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
-                items(rules, key = { it.id }) { rule ->
-                    RuleRow(
-                        rule = rule,
-                        onToggle = { on -> repo.setEnabled(rule.id, on) },
-                        onClick = { onEdit(rule.id) },
-                        onDuplicate = { onNew(rule.copy(id = SiteRule.newId(), name = rule.name + " (copy)", enabled = false, source = null)) },
-                        onTest = { onTestOnSite(rule) },
-                        onDelete = { deleting = rule },
-                    )
-                    Spacer(Modifier.height(8.dp))
-                }
-                item { Spacer(Modifier.height(80.dp)) }
-            }
-        }
+        SiteRulesContent(
+            rules = rules,
+            onToggle = { rule, on -> repo.setEnabled(rule.id, on) },
+            onEdit = { onEdit(it.id) },
+            onDuplicate = { rule -> onNew(rule.copy(id = SiteRule.newId(), name = rule.name + " (copy)", enabled = false, source = null)) },
+            onTest = onTestOnSite,
+            onDelete = { deleting = it },
+            modifier = Modifier.padding(padding),
+        )
     }
 
     deleting?.let { rule ->
         AlertDialog(
             onDismissRequest = { deleting = null },
+            containerColor = HatchTheme.colors.sh,
             title = { Text("Delete \"${rule.name}\"?") },
             text = { Text(if (RuleValidation.isBundled(rule)) "This bundled example is recreated only if rules.json is deleted." else "The rule and its code are removed from this device.") },
-            confirmButton = { Button(onClick = { repo.delete(rule.id); deleting = null }) { Text("Delete") } },
-            dismissButton = { TextButton(onClick = { deleting = null }) { Text("Cancel") } },
+            confirmButton = { TextButton(onClick = { repo.delete(rule.id); deleting = null }) { Text("Delete", color = HatchTheme.colors.dg) } },
+            dismissButton = { TextButton(onClick = { deleting = null }) { Text("Cancel", color = HatchTheme.colors.acT) } },
         )
     }
 
@@ -122,14 +116,34 @@ fun SiteRulesScreen(
     }
 }
 
-/** What the row says under the name: kind, world/run-at, first match patterns. */
-internal fun ruleSummary(rule: SiteRule): String = buildString {
-    val kinds = listOfNotNull(rule.js?.let { "JS" }, rule.css?.let { "CSS" })
-    append(kinds.joinToString("+").ifEmpty { "empty" })
-    if (rule.js != null) append(" · ").append(rule.world)
-    append(" · ").append(rule.runAt.removePrefix("document_"))
-    append(" · ").append(rule.matches.take(2).joinToString(", "))
-    if (rule.matches.size > 2) append(" +${rule.matches.size - 2}")
+@Composable
+internal fun SiteRulesContent(
+    rules: List<SiteRule>,
+    onToggle: (SiteRule, Boolean) -> Unit,
+    onEdit: (SiteRule) -> Unit,
+    onDuplicate: (SiteRule) -> Unit,
+    onTest: (SiteRule) -> Unit,
+    onDelete: (SiteRule) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (rules.isEmpty()) {
+        Column(Modifier.fillMaxSize().then(modifier).padding(24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("No rules yet", style = MaterialTheme.typography.titleMedium, color = HatchTheme.colors.ink)
+            PageNote("A rule injects your JavaScript or CSS into matching pages (userscripts / userstyles). Tap New rule to write one or Import a .user.js file.")
+        }
+        return
+    }
+    LazyColumn(modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 16.dp)) {
+        item(key = "rules") {
+            GroupedCard {
+                rules.forEachIndexed { i, rule ->
+                    if (i > 0) CardDivider()
+                    RuleRow(rule, { onToggle(rule, it) }, { onEdit(rule) }, { onDuplicate(rule) }, { onTest(rule) }, { onDelete(rule) })
+                }
+            }
+        }
+        item(key = "clearance") { FabClearance() }
+    }
 }
 
 @Composable
@@ -141,32 +155,61 @@ private fun RuleRow(
     onTest: () -> Unit,
     onDelete: () -> Unit,
 ) {
+    val c = HatchTheme.colors
     var menu by remember { mutableStateOf(false) }
-    Card(Modifier.fillMaxWidth().clickable(onClick = onClick)) {
-        Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(rule.name, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                    if (RuleValidation.isBundled(rule)) {
-                        Spacer(Modifier.width(8.dp))
-                        AssistChip(onClick = onClick, label = { Text("Bundled", style = MaterialTheme.typography.labelSmall) }, modifier = Modifier.height(24.dp))
-                    }
+    Box {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = 72.dp)
+                .hatchFocusRing(CardRowFocusShape, inside = true)
+                .combinedClickable(onClick = onClick, onLongClick = { menu = true }, onLongClickLabel = "More actions")
+                .semantics {
+                    customActions = listOf(
+                        CustomAccessibilityAction("Test on current site") { onTest(); true },
+                        CustomAccessibilityAction("Duplicate") { onDuplicate(); true },
+                        CustomAccessibilityAction("Delete") { onDelete(); true },
+                    )
                 }
-                Text(ruleSummary(rule), style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                rule.source?.takeIf { it != RuleValidation.BUNDLED_SOURCE }?.let {
-                    Text("from $it", style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(rule.name, style = MaterialTheme.typography.bodyLarge, color = c.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(RuleText.patternLine(rule), style = HatchType.mono, color = c.mu, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(RuleText.kindLine(rule), style = MaterialTheme.typography.bodySmall, color = c.mu)
             }
-            Switch(checked = rule.enabled, onCheckedChange = onToggle)
-            IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, "More") }
-            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                DropdownMenuItem(text = { Text("Test on current site") }, onClick = { menu = false; onTest() })
-                DropdownMenuItem(text = { Text("Duplicate") }, onClick = { menu = false; onDuplicate() })
-                DropdownMenuItem(
-                    text = { Text("Delete") },
-                    leadingIcon = { Icon(Icons.Default.Delete, null) },
-                    onClick = { menu = false; onDelete() },
-                )
+            Switch(
+                checked = rule.enabled,
+                onCheckedChange = onToggle,
+                colors = hatchSwitchColors(),
+                modifier = Modifier.semantics { contentDescription = "Enable ${rule.name}" },
+            )
+        }
+        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+            DropdownMenuItem(text = { Text("Test on current site") }, onClick = { menu = false; onTest() })
+            DropdownMenuItem(text = { Text("Duplicate") }, onClick = { menu = false; onDuplicate() })
+            DropdownMenuItem(text = { Text("Delete", color = c.dg) }, onClick = { menu = false; onDelete() })
+        }
+    }
+}
+
+@Preview(name = "Site rules", widthDp = 360, heightDp = 760)
+@Composable
+internal fun SiteRulesPreview(@PreviewParameter(SurfacePreviewThemes::class) theme: PreviewTheme) {
+    val rules = listOf(
+        SiteRule("r1", "Docs: desktop editor", listOf("*://docs.google.com/*"), js = "void 0", enabled = true),
+        SiteRule("r2", "Hide app-install banners", listOf("*://*/*"), css = "a{}", enabled = true),
+        SiteRule("r3", "Maps: keep satellite toggle", listOf("*://maps.google.com/*"), js = "void 0"),
+        SiteRule("r4", "Example: dark reader lite", listOf("*://*.wikipedia.org/*"), css = "a{}", source = RuleValidation.BUNDLED_SOURCE),
+    )
+    SurfacePreviewFrame(theme) {
+        Column {
+            ScreenTopBar("Site rules", onNav = {}, actions = { TopBarTextAction("Import", onClick = {}) })
+            Box {
+                SiteRulesContent(rules, { _, _ -> }, {}, {}, {}, {})
+                HatchExtendedFab("New rule", onClick = {}, modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp))
             }
         }
     }

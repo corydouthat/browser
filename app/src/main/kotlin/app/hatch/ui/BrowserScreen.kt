@@ -4,21 +4,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -46,12 +42,14 @@ import app.hatch.selfcheck.SelfCheckController
 import app.hatch.ui.find.FindBarPolicy
 import app.hatch.ui.find.FindInPageBar
 import app.hatch.ui.home.HomeContent
+import app.hatch.ui.home.ContentCrashedState // hatch:surfaces
 import app.hatch.ui.toolbar.DynamicToolbarPlan
 import app.hatch.ui.toolbar.HatchToolbar
 import app.hatch.ui.toolbar.HatchToolbarController
-import app.hatch.ui.toolbar.PersonaStrip
 import app.hatch.ui.toolbar.ToolbarState
+import app.hatch.ui.toolbar.ToolbarColors
 import app.hatch.ui.toolbar.rememberDynamicToolbar
+import app.hatch.ui.toolbar.rememberToolbarColors
 import mozilla.components.browser.state.action.CrashAction
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.store.BrowserStore
@@ -59,8 +57,10 @@ import mozilla.components.compose.browser.toolbar.store.Mode
 import mozilla.components.lib.state.ext.observeAsComposableState
 
 /**
- * The browser: edge-to-edge, Chrome-style TOP chrome (compose-browser-toolbar + persona strip + find bar +
- * self-check bar) over the single EngineView. Layout is a [SubcomposeLayout] so the `AndroidView` hosting the
+ * The browser: edge-to-edge, Chrome-style TOP chrome over the single EngineView. The chrome is the status-bar strip
+ * and the 56 dp toolbar row in one tint (`rememberToolbarColors`: primaryContainer for a desktop persona, surface for
+ * the real device, crossfading 200 ms), the row showing the display / edit toolbar or, while find in page is open, the
+ * find row instead; the self-check bar hangs below it. Layout is a [SubcomposeLayout] so the `AndroidView` hosting the
  * EngineView keeps one stable node whether the toolbar is static (content laid out below it) or dynamic (content
  * below the status bar at full height, translated with the toolbar; see `DynamicToolbarController`). The IME is
  * applied as a bottom inset together with the navigation bar (HATCH-WC-04), the display cutout's horizontal sides
@@ -75,6 +75,9 @@ fun BrowserScreen(
     selfCheck: SelfCheckController,
     onApplyPersona: (Persona) -> Unit,
     onSitePermissions: () -> Unit,
+    // hatch:surfaces begin — the crashed tab's "Close tab": HatchApp.closeSelectedTab (one close path + undo, UXP-04)
+    onCloseTab: () -> Unit,
+    // hatch:surfaces end
 ) {
     val store = components.store
     // PERF-04: only the facts the chrome reads; progress ticks and other ContentState copies do not recompose here.
@@ -91,6 +94,7 @@ fun BrowserScreen(
     val density = LocalDensity.current
     val imeVisible = WindowInsets.ime.getBottom(density) > 0
     val statusBarPx = WindowInsets.statusBars.getTop(density)
+    val chromeColors = rememberToolbarColors(desktop = persona.desktop)
 
     // The Hatch home: typing starts immediately (toolbar in edit mode), like a desktop browser's new tab.
     LaunchedEffect(isHome, tab?.id) { if (isHome) toolbar.enterEditMode("") }
@@ -137,18 +141,13 @@ fun BrowserScreen(
                             .onSizeChanged { chromeHeightPx = it.height }
                             .graphicsLayer { translationY = -dynamic.hidden.value },
                     ) {
-                        Surface(tonalElevation = 2.dp) {
-                            Column(Modifier.windowInsetsPadding(WindowInsets.statusBars.union(cutoutSides))) {
-                                HatchToolbar(toolbar)
-                                if (uiState.findBar && tab != null) {
-                                    FindBarSlot(store = store, onClose = { uiState.findBar = false })
-                                } else if (!editing) {
-                                    PersonaStrip(
-                                        persona = persona,
-                                        onPersona = { uiState.personaSheet = true },
-                                        onToggleDesktop = ::toggleDesktop,
-                                    )
-                                }
+                        // The status-bar strip takes the toolbar's tint (the mockups' 32 dp strip); the background
+                        // is drawn before the inset padding so it also fills the landscape cutout sides.
+                        Column(Modifier.fillMaxWidth().background(chromeColors.background).windowInsetsPadding(WindowInsets.statusBars.union(cutoutSides))) {
+                            if (uiState.findBar && tab != null) {
+                                FindBarSlot(store = store, colors = chromeColors, onClose = { uiState.findBar = false })
+                            } else {
+                                HatchToolbar(toolbar, colors = chromeColors, desktop = persona.desktop)
                             }
                         }
                         if (uiState.selfCheck) {
@@ -178,7 +177,12 @@ fun BrowserScreen(
                     }
                     when {
                         tab == null -> EmptyState()
-                        crashed -> CrashedState(onRestore = { tab?.id?.let { store.dispatch(CrashAction.RestoreCrashedSessionAction(it)) } })
+                        // hatch:surfaces begin — "Browser · Content crashed" (ui/home/ContentCrashed.kt)
+                        crashed -> ContentCrashedState(
+                            onRestore = { tab?.id?.let { store.dispatch(CrashAction.RestoreCrashedSessionAction(it)) } },
+                            onCloseTab = onCloseTab,
+                        )
+                        // hatch:surfaces end
                         isHome -> HomeSlot(
                             components = components,
                             persona = persona,
@@ -198,7 +202,16 @@ fun BrowserScreen(
             }
         }
         if (uiState.siteInfo) {
-            SiteInfoSlot(store = store, onSitePermissions = onSitePermissions, onDismiss = { uiState.siteInfo = false })
+            // hatch:surfaces begin — the site-info card is anchored under the chrome (its measured height)
+            SiteInfoSlot(
+                store = store,
+                persona = persona,
+                top = with(density) { chromeHeightPx.toDp() },
+                onChangePersona = { uiState.personaSheet = true },
+                onSitePermissions = onSitePermissions,
+                onDismiss = { uiState.siteInfo = false },
+            )
+            // hatch:surfaces end
         }
     }
 }
@@ -207,19 +220,37 @@ private enum class Slot { Chrome, Content }
 
 /** Observes the full selected tab only while the find bar is open (it needs `findResults` + the engine session). */
 @Composable
-private fun FindBarSlot(store: BrowserStore, onClose: () -> Unit) {
+private fun FindBarSlot(store: BrowserStore, colors: ToolbarColors, onClose: () -> Unit) {
     val tab by store.observeAsComposableState { it.selectedTab }
-    FindInPageBar(store = store, tab = tab, onClose = onClose)
+    FindInPageBar(store = store, tab = tab, colors = colors, onClose = onClose)
 }
 
-/** Observes the full selected tab only while the site-info dialog is open. */
+// hatch:surfaces begin
+/** Observes the full selected tab only while the site-info card is open. */
 @Composable
-private fun SiteInfoSlot(store: BrowserStore, onSitePermissions: () -> Unit, onDismiss: () -> Unit) {
+private fun SiteInfoSlot(
+    store: BrowserStore,
+    persona: Persona,
+    top: androidx.compose.ui.unit.Dp,
+    onChangePersona: () -> Unit,
+    onSitePermissions: () -> Unit,
+    onDismiss: () -> Unit,
+) {
     val tab by store.observeAsComposableState { it.selectedTab }
     val t = tab
     LaunchedEffect(t == null) { if (t == null) onDismiss() }
-    if (t != null) SiteInfoDialog(tab = t, onSitePermissions = onSitePermissions, onDismiss = onDismiss)
+    if (t != null) {
+        SiteInfoCard(
+            tab = t,
+            persona = persona,
+            top = top,
+            onChangePersona = onChangePersona,
+            onSitePermissions = onSitePermissions,
+            onDismiss = onDismiss,
+        )
+    }
 }
+// hatch:surfaces end
 
 /**
  * The home surface: observes the tab list and the thumbnail generation only while shown. Every control leaves URL
@@ -239,6 +270,10 @@ private fun HomeSlot(
     val generation by components.thumbnailGeneration.generation.collectAsState()
     HomeContent(
         persona = persona,
+        // hatch:surfaces begin — the Desktop card names what forceDesktop() would apply; favicons via BrowserIcons
+        desktopPersona = remember(persona) { components.personaManager.forceDesktop() },
+        icons = components.icons,
+        // hatch:surfaces end
         tabs = tabs,
         currentTabId = currentTabId,
         thumbnails = components.thumbnailStorage,
@@ -260,24 +295,6 @@ private fun EmptyState() {
     Surface(Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("No tabs. Tap the address bar or press Ctrl+T.", style = MaterialTheme.typography.bodyLarge)
-        }
-    }
-}
-
-/** `tab.engineState.crashed`: SessionFeature released the view; Restore re-creates the session from its state. */
-@Composable
-private fun CrashedState(onRestore: () -> Unit) {
-    Surface(Modifier.fillMaxSize()) {
-        Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center) {
-            Text("This tab crashed", style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.height(8.dp))
-            Text(
-                "The content process for this tab stopped. Restore reloads it from the last saved state.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(16.dp))
-            Button(onClick = onRestore) { Text("Restore tab") }
         }
     }
 }

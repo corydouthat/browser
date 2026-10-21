@@ -12,6 +12,7 @@ lifecycle = "2.11.0"
 core-ktx = "1.19.1"
 junit-jupiter = "5.13.4"
 biometric = "1.1.0"            # hatch:credentials — what Fenix 158 pins (gradle/libs.versions.toml: biometric = "1.1.0")
+paparazzi = "2.0.0-alpha05.1"  # hatch:integrator — design-render screenshot tests only (AGP 9 + compileSdk 37 support, 2026-09-28)
 work = "2.11.2"                # hatch:fixer — the version service-sync-logins 158.0 pulls at runtime scope (PERF-06)
 
 [libraries]
@@ -72,6 +73,9 @@ mozilla-service-sync-logins = { module = "org.mozilla.components:service-sync-lo
 mozilla-feature-webauthn = { module = "org.mozilla.components:feature-webauthn", version.ref = "mozilla" }
 mozilla-concept-storage = { module = "org.mozilla.components:concept-storage", version.ref = "mozilla" }
 mozilla-lib-dataprotect = { module = "org.mozilla.components:lib-dataprotect", version.ref = "mozilla" }
+# hatch:fixer — the saved-login title is the registrable domain (DF-11). Already in the APK as support-ktx's runtime
+# dependency (assets/publicsuffixes); declared so the app can compile against PublicSuffixList.
+mozilla-lib-publicsuffixlist = { module = "org.mozilla.components:lib-publicsuffixlist", version.ref = "mozilla" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 # hatch:credentials end
 # hatch:fixer begin — PERF-06: the manifest removes WorkManagerInitializer; HatchApplication is the Configuration.Provider
@@ -88,6 +92,7 @@ mozilla-core = [
   "mozilla-support-ktx", "mozilla-support-utils", "mozilla-feature-search",
   # hatch:credentials begin
   "mozilla-service-sync-logins", "mozilla-feature-webauthn", "mozilla-concept-storage", "mozilla-lib-dataprotect",
+  "mozilla-lib-publicsuffixlist",
   # hatch:credentials end
 ]
 # hatch:chrome begin
@@ -103,3 +108,4 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+paparazzi = { id = "app.cash.paparazzi", version.ref = "paparazzi" } # hatch:integrator — test-only renders

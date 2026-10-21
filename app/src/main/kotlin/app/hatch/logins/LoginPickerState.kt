@@ -66,8 +66,19 @@ class LoginsUiState {
     val lock = SavedLoginsLock()
 
     /** True when the Saved logins screen consumed the back press. */
+    // hatch:screens begin — the Saved login detail page (guid of the login shown, null = the list). Back and Esc
+    // return from the detail to the list before they close the screen.
+    var detailGuid: String? by mutableStateOf(null)
+    // hatch:screens end
+
     fun onBack(): Boolean {
         if (!savedLoginsOpen) return false
+        // hatch:screens begin
+        if (detailGuid != null) {
+            detailGuid = null
+            return true
+        }
+        // hatch:screens end
         savedLoginsOpen = false
         return true
     }

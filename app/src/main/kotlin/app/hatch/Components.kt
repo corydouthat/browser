@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.core.app.NotificationManagerCompat
 import app.hatch.downloads.HatchDownloadService
 import app.hatch.engine.GeckoRuntimeFactory
+import app.hatch.engine.PageColorScheme
 import app.hatch.engine.HatchRequestInterceptor
 import app.hatch.ext.BridgeExtension
 // hatch:credentials begin
@@ -61,6 +62,7 @@ import mozilla.components.feature.prompts.file.FileUploadsDirCleaner
 import mozilla.components.feature.search.SearchUseCases
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.tabs.TabsUseCases
+import mozilla.components.lib.publicsuffixlist.PublicSuffixList
 import mozilla.components.support.base.android.NotificationsDelegate
 import mozilla.components.support.utils.DefaultDateTimeProvider
 import mozilla.components.support.utils.DefaultDownloadFileUtils
@@ -100,11 +102,18 @@ class Components(private val context: Context) {
     val loginsUi: LoginsUiState by lazy { LoginsUiState() }
     // hatch:credentials end
 
+    // hatch:fixer begin — DF-11: registrable domains for the Saved logins titles (AC's PSL, loaded from
+    // assets/publicsuffixes on first use, off the main thread).
+    val publicSuffixList: PublicSuffixList by lazy { PublicSuffixList(context) }
+    // hatch:fixer end
+
     val runtime: GeckoRuntime by lazy {
         GeckoRuntimeFactory.create(context, personaManager.current.value, settings, logins.geckoStorageDelegate(applicationScope)) // hatch:credentials
     }
 
-    val engine: Engine by lazy { GeckoEngine(context, engineSettings, runtime) }
+    // hatch:fixer begin — RS-02: pages see the system's prefers-color-scheme, never Hatch's Appearance override.
+    val engine: Engine by lazy { GeckoEngine(context, engineSettings, runtime).also { PageColorScheme.install(context, it) } }
+    // hatch:fixer end
 
     val client: Client by lazy { GeckoViewFetchClient(context, runtime) }
 

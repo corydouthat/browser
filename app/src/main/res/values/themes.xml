@@ -1,4 +1,39 @@
 <resources>
-    <!-- Material3 parent: Android Components dialog fragments (prompts, context menu) inflate Material layouts. -->
-    <style name="Theme.Hatch" parent="Theme.Material3.DayNight.NoActionBar" />
+    <!--
+      Material3 parent: Android Components dialog fragments (prompts, context menu, permission dialogs) inflate
+      Material layouts. They cannot follow the runtime palette, so they get the default Graphite palette of the
+      "Signal" design (colours in values/colors_theme.xml and values-night/colors_theme.xml; light/dark follows
+      AppCompatDelegate's night mode, which MainActivity sets from Settings › Appearance). The Compose UI is themed
+      by app.hatch.ui.theme.HatchTheme.
+    -->
+    <style name="Theme.Hatch" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/hatch_primary</item>
+        <item name="colorOnPrimary">@color/hatch_on_primary</item>
+        <item name="colorPrimaryContainer">@color/hatch_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/hatch_on_primary_container</item>
+        <item name="colorSecondary">@color/hatch_primary</item>
+        <item name="colorOnSecondary">@color/hatch_on_primary</item>
+        <item name="colorSecondaryContainer">@color/hatch_primary</item>
+        <item name="colorOnSecondaryContainer">@color/hatch_on_primary</item>
+        <item name="colorTertiary">@color/hatch_primary</item>
+        <item name="colorOnTertiary">@color/hatch_on_primary</item>
+        <item name="colorTertiaryContainer">@color/hatch_primary_container</item>
+        <item name="colorOnTertiaryContainer">@color/hatch_on_primary_container</item>
+        <item name="android:colorBackground">@color/hatch_surface</item>
+        <item name="colorOnBackground">@color/hatch_on_surface</item>
+        <item name="colorSurface">@color/hatch_surface</item>
+        <item name="colorOnSurface">@color/hatch_on_surface</item>
+        <item name="colorSurfaceVariant">@color/hatch_surface_container</item>
+        <item name="colorOnSurfaceVariant">@color/hatch_on_surface_variant</item>
+        <item name="colorSurfaceContainerLowest">@color/hatch_surface</item>
+        <item name="colorSurfaceContainerLow">@color/hatch_surface_container_high</item>
+        <item name="colorSurfaceContainer">@color/hatch_surface_container</item>
+        <item name="colorSurfaceContainerHigh">@color/hatch_surface_container_high</item>
+        <item name="colorSurfaceContainerHighest">@color/hatch_surface_container_highest</item>
+        <item name="colorOutline">@color/hatch_outline</item>
+        <item name="colorOutlineVariant">@color/hatch_outline</item>
+        <item name="colorError">@color/hatch_error</item>
+        <item name="colorOnError">@color/hatch_on_error</item>
+        <item name="android:windowBackground">@color/hatch_surface</item>
+    </style>
 </resources>
