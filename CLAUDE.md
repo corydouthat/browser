@@ -19,7 +19,8 @@ The approved design is the plan Cory confirmed on 2026-10-18; `docs/architecture
 | `docs/limitations.md` | every known tell and web-compat cost, what tracks it |
 | `docs/roadmap.md` | M0/M1/M2 with the M0 device checklist (a–k) for Cory |
 | `docs/device-checklist.md` | the runbook: Self-check protocol, 15-site audit, gates |
-| `docs/icon.md`, `THIRD_PARTY.md` | icon provenance, vendored third-party code (incl. the four Fenix tab-tray files) |
+| `docs/icon.md`, `THIRD_PARTY.md` | icon provenance, vendored third-party code (the four Fenix tab-tray files, the ported AC `InlineAutocompleteTextField`, Geist fonts) |
+| `docs/design/hatch-screens.dc.html` | the design source of truth (22 mockups, tokens, type, sizes) |
 | `docs/research/m1-inventory.md`, `browser-chrome.md`, `google-signin-autofill.md`, `passkeys-webauthn.md` | the M1 research: app-module audit after M0 with the risks M1 fixed; toolbar/tab tray/find/menu design (adopt vs hand-roll); why GPM/Chrome's account chooser cannot work and the in-app logins store; GeckoView 158 WebAuthn path and Google's privileged-browser allowlist |
 | `harness/README.md`, `personas/README.md`, `tool/bin/README.md` | local READMEs for those trees |
 
@@ -64,10 +65,24 @@ The approved design is the plan Cory confirmed on 2026-10-18; `docs/architecture
   reads the goldens and never recomputes prefs.
 - Live switches via `GeckoPreferenceController` (only in `GeckoPrefs.kt`); yaml + restart is the full
   fallback; only `TZ` needs a restart (`AppRestart`, a `:restart` trampoline process).
-- M1 chrome: `compose-browser-toolbar` (top, Chrome-style) + hand-rolled tab tray / find bar / menu; AC
-  `SessionFeature` is the only owner of `EngineView.render/release`; session restore is process-scoped
-  (`Components.sessionRestore`). Overlay z-order and back/Esc order: rules overlays → Saved logins → chrome
-  (`AppUiState.onBack`); every `UiEvent` has exactly one handler, the `when` in `HatchApp`.
+- Chrome (M1 + design pass): top, Chrome-style toolbar. `compose-browser-toolbar` is a dependency for its
+  `BrowserToolbarStore`, actions and concept types only: the toolbar is drawn by Hatch (`ui/toolbar/DisplayToolbar.kt`,
+  `EditToolbar.kt`; never call AC's `BrowserToolbar` composable, it hard-codes 64 dp / 48 dp) and the edit field is
+  a port of AC 158 `InlineAutocompleteTextField` (MPL header, re-diff on AC upgrades). Find replaces the toolbar
+  in its row. Hand-rolled tab tray / menu; AC `SessionFeature` is the only owner of `EngineView.render/release`;
+  session restore is process-scoped (`Components.sessionRestore`). One back/Esc chain, `AppUiState.onBack(rulesBack,
+  loginsBack)`: site info → find → tray → menu → persona sheet → rules → logins → settings page → settings search →
+  settings → URL edit → self-check (no Compose `BackHandler` for these); every `UiEvent` has exactly one handler,
+  the `when` in `HatchApp`. Full-screen overlays are `Modifier.overlayPane(title)` roots and the browser under them
+  is `coveredByOverlay` (`ui/OverlayPane.kt`).
+- Theme: fixed brand palettes (`ui/theme/`, Graphite default) and Geist; no dynamic colour; use the design token
+  names (`HatchTheme.colors.tb`, `.pl`, `.acT`, …), `HatchShapes` / `HatchDimens`, and `LocalIsDark` instead of
+  `isSystemInDarkTheme()` outside `ui/theme`. Every Hatch-drawn focus target gets `Modifier.hatchFocusRing`
+  (`inside = true` in clipped cards), switch rows use `toggleable`, and `DesignReviewGuardsTest` enforces both.
+  Pages see the system `prefers-color-scheme` (`engine/PageColorScheme`), never the app theme. Redesigned
+  composables keep `@Preview`s; `DesignScreenshotTest`
+  (Paparazzi, `app/src/screenshots`, applied only for Paparazzi tasks) renders them: `tool/remote_build.sh
+  :app:recordPaparazziDebug --no-configuration-cache`.
 - Credentials: Hatch's own logins store (`service-sync-logins`, key in AndroidKeyStore) fills forms; Google
   Password Manager and Chrome's account chooser cannot work in a third-party browser; passkeys are wired
   (`WebAuthnFeature`) but blocked on Google's allowlist (release cert only; never on debug builds). Never shim
@@ -102,5 +117,5 @@ The approved design is the plan Cory confirmed on 2026-10-18; `docs/architecture
   persona(s), repro, evidence, expected vs actual, root-cause hypothesis, proposed fix, regression test.
 - Red-team pages live in `harness/redteam/<n>-<name>.html` and print `DETECTED`; a successful detector
   becomes a harness signal or a `docs/limitations.md` entry.
-- Do not add `geckoview` (non-omni), `feature-webcompat`, `compose-browser-toolbar` or `feature-addons`.
+- Do not add `geckoview` (non-omni), `feature-webcompat` or `feature-addons`; do not render AC's `BrowserToolbar`.
 - Keep `docs/limitations.md` and `docs/roadmap.md` current when behaviour changes.
