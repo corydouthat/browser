@@ -71,11 +71,12 @@ reports/     headless reports per milestone (reports/headless/m0/), device repor
 1. `HatchApplication.onCreate` (main process only) touches `rulesRepository` so the bundled example rules
    exist.
 2. `MainActivity.onCreate` → `components.engine.createView` → `Components.engine` → `Components.runtime` →
-   `GeckoRuntimeFactory.create`: writes `filesDir/geckoview-config.yaml` from the **active persona** (atomic
-   rename), builds `GeckoRuntimeSettings` (`configFilePath`, `remoteDebuggingEnabled`, `extensionsProcessEnabled`,
+   `GeckoRuntimeFactory.create`: writes `filesDir/geckoview-config.yaml` with the **active persona's** `env`
+   (`TZ` only; persona prefs never go in the yaml, which GeckoView loads on the *default* branch), builds `GeckoRuntimeSettings` (`configFilePath`, `remoteDebuggingEnabled`, `extensionsProcessEnabled`,
    `locales`, `fontInflation(false)`, `automaticFontSizeAdjustment(false)`, `forceUserScalableEnabled(true)`,
-   `inputAutoZoomEnabled(!desktop)`, `aboutConfigEnabled(true)`), `GeckoRuntime.create`. The first page load is
-   therefore already correct, before any live API is used.
+   `inputAutoZoomEnabled(!desktop)`, `aboutConfigEnabled(true)`), `GeckoRuntime.create`. `Components.sessionRestore`
+   then sets the persona prefs on the user branch (`PersonaManager.reapplyPrefs`, 5 s cap; the profile's
+   `prefs.js` already holds them from the last switch) before restoring tabs, so the first load is correct.
 3. `Components.store` → `WebExtensionSupport.initialize` (extension popups/options as tabs, install prompts into
    the store) → `bridge.install()` → built-in extension installed; on its background port connect the app pushes
    the full state (persona shim config, rules, host rewrites minus the disabled hosts) → `icons.install()` (AC's
@@ -119,7 +120,7 @@ Fenix main menu; only pulled transitively), `compose-awesomebar` / `feature-awes
 
 `Persona` → `PersonaToPrefs` (the single field→mechanism table) → three outputs applied by `PersonaManager`:
 Gecko prefs (live, `GeckoPrefs`), per-session settings (UA override, desktop mode), and the shim config pushed to
-the extension (`BridgeExtension.sendPersona`), plus the yaml rewrite for the next cold start. Details and the
+the extension (`BridgeExtension.sendPersona`), plus the yaml rewrite (`TZ` only) for the next cold start. Details and the
 table: `docs/persona-model.md`. Shim behaviour: `docs/extension.md`.
 
 ## Verification pipeline
@@ -139,6 +140,8 @@ SKIPPED.
    (`GeckoPrefs.kt` is the only caller), `DebugConfig` yaml keys, `contentScripts.register` `world: "MAIN"`,
    `rust_prepare_accept_languages` (header q-values), the `ui.*PointerCapabilities` / `dom.w3c_touch_events`
    prefs still exist.
+   On the phone, cold-start in a desktop persona, switch to Phone and load a UA echo page: it must show the
+   phone UA (persona prefs live only on the user branch; see `docs/limitations.md`, 2026-10-22).
 3. Update the UA strings in `personas/identities.json` to the new Firefox major (and the Chrome major for
    `win-chrome`), regenerate goldens and expectations, bump `tool/headless/setup.sh` `FIREFOX_VERSION` and
    `REQUIRED_VERSION_PREFIX` in `run.mjs`.
@@ -151,7 +154,7 @@ SKIPPED.
 |---|---|---|
 | Engine | GeckoView 158 stable | engine-native, undetectable desktop forcing; pinned |
 | UI | Kotlin + Compose, native | direct access to all Gecko/AC APIs; no Flutter wrapper exists for GeckoView |
-| Live switches | `GeckoPreferenceController` + per-session settings | no restart except `TZ`; yaml + restart is the fallback |
+| Live switches | `GeckoPreferenceController` + per-session settings | no restart except `TZ`; prefs live on the user branch only (`prefs.js` persists them), never in the yaml (default branch; see "Persona prefs and the yaml", 2026-10-22) |
 | Persona delivery to pages | MV2 built-in extension, `contentScripts.register` MAIN world | only synchronous `document_start` path; MV3 `userScripts` is the documented fallback |
 | Devtools | Eruda in-page + Gecko remote debugging over adb | GeckoView has no in-app toolbox |
 | Testing | headless Firefox 158 on the VPS + in-app Self-check + 15-site audit | no emulator/device on the VPS |

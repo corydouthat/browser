@@ -63,8 +63,10 @@ The approved design is the plan Cory confirmed on 2026-10-18; `docs/architecture
   undetectable; engine pinned in the APK.
 - `PersonaToPrefs` (`:persona`) is the single field → mechanism table; goldens lock it; the headless runner
   reads the goldens and never recomputes prefs.
-- Live switches via `GeckoPreferenceController` (only in `GeckoPrefs.kt`); yaml + restart is the full
-  fallback; only `TZ` needs a restart (`AppRestart`, a `:restart` trampoline process).
+- Live switches via `GeckoPreferenceController` (only in `GeckoPrefs.kt`), user branch only, re-applied before
+  the session restore; only `TZ` needs a restart (`AppRestart`, a `:restart` trampoline process). Never put
+  persona prefs in `geckoview-config.yaml`: GeckoView loads its `prefs:` on the DEFAULT branch, so clearing a
+  user pref (Phone / device region) falls back to the startup persona's desktop value.
 - Chrome (M1 + design pass): top, Chrome-style toolbar. `compose-browser-toolbar` is a dependency for its
   `BrowserToolbarStore`, actions and concept types only: the toolbar is drawn by Hatch (`ui/toolbar/DisplayToolbar.kt`,
   `EditToolbar.kt`; never call AC's `BrowserToolbar` composable, it hard-codes 64 dp / 48 dp) and the edit field is

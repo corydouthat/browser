@@ -1,6 +1,7 @@
 package app.hatch
 
 import android.content.Context
+import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import app.hatch.downloads.HatchDownloadService
 import app.hatch.engine.GeckoRuntimeFactory
@@ -33,6 +34,7 @@ import app.hatch.ui.toolbar.OpenTabsAutocompleteProvider
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import mozilla.components.browser.domains.autocomplete.ShippedDomainsProvider
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.thumbnails.ThumbnailsMiddleware
@@ -179,6 +181,12 @@ class Components(private val context: Context) {
      */
     val sessionRestore: Job by lazy {
         applicationScope.launch {
+            // Persona prefs live on the user branch only (PersonaToPrefs.yaml); set them before any tab loads.
+            // prefs.js normally already holds them, so a Gecko that never answers only delays the restore.
+            runtime // created first: GeckoPreferenceController talks to a running Gecko
+            withTimeoutOrNull(STARTUP_PREFS_TIMEOUT_MS) {
+                runCatching { personaManager.reapplyPrefs() }.onFailure { Log.w(TAG, "startup persona prefs failed", it) }
+            } ?: Log.w(TAG, "startup persona prefs timed out")
             withContext(Dispatchers.IO) { tabsUseCases.restore(sessionStorage) }
             sessionStorage.autoSave(store)
                 .periodicallyInForeground(interval = 30, unit = TimeUnit.SECONDS)
@@ -246,3 +254,8 @@ class Components(private val context: Context) {
         }
     }
 }
+
+private const val TAG = "Components"
+
+/** Upper bound for the startup prefs call before the restore goes ahead anyway (prefs.js already has them). */
+private const val STARTUP_PREFS_TIMEOUT_MS = 5_000L
