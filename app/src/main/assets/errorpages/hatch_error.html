@@ -1,0 +1,49 @@
+<!doctype html>
+<!-- Hatch error page ("Browser · Page error" in docs/design/hatch-screens.dc.html). Built by
+     app/hatch/engine/ErrorPageChannel.kt through AC's ErrorPages.createUrlEncodedErrorPage; every value arrives in
+     the query string and is set with textContent by hatch_error.js. Shown only for failed loads. -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src resource:; script-src resource:; style-src resource:; img-src resource:; object-src 'none'; form-action 'none'; base-uri 'none'"
+    />
+    <link rel="stylesheet" type="text/css" href="hatch_error.css" />
+    <title></title>
+  </head>
+  <body>
+    <main id="page">
+      <div id="tile" aria-hidden="true">
+        <svg id="icon-net" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M4 4l16 16"></path>
+        </svg>
+        <svg id="icon-lock" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="5" y="11" width="14" height="9" rx="2"></rect>
+          <path d="M8 11V8a4 4 0 0 1 8 0v3"></path>
+        </svg>
+        <svg id="icon-warn" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+          <path d="M12 3l10 18H2z"></path>
+          <path d="M12 10v5M12 18h.01"></path>
+        </svg>
+      </div>
+      <h1 id="title"></h1>
+      <p id="description"></p>
+      <p id="code"></p>
+      <div id="actions">
+        <button id="retry" class="pill primary" type="button"></button>
+        <button id="continueHttp" class="pill primary" type="button" hidden></button>
+        <a id="personaOff" class="pill secondary" hidden>Try with persona off</a>
+        <button id="advanced" class="pill secondary" type="button" hidden></button>
+      </div>
+      <section id="advancedPanel" hidden>
+        <p id="techInfo"></p>
+        <button id="acceptRisk" class="pill secondary" type="button" hidden></button>
+      </section>
+    </main>
+    <script src="hatch_error.js"></script>
+  </body>
+</html>

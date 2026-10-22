@@ -1,18 +1,21 @@
 package app.hatch.ui.find
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,15 +26,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.hatch.R
+import app.hatch.ui.theme.HatchDimens
+import app.hatch.ui.theme.HatchPalette
+import app.hatch.ui.theme.HatchShapes
+import app.hatch.ui.theme.HatchType
+import app.hatch.ui.toolbar.ToolbarColors
+import app.hatch.ui.toolbar.ToolbarIconButton
+import app.hatch.ui.toolbar.ToolbarIcons
+import app.hatch.ui.toolbar.ToolbarPreviewFrame
+import app.hatch.ui.toolbar.ToolbarRow
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.content.FindResultState
 import mozilla.components.browser.state.store.BrowserStore
-import mozilla.components.ui.icons.R as iconsR
 
 /** "3/17" from the last [FindResultState]; empty query → nothing; no match → "0/0". */
 internal fun findCounter(query: String, results: List<FindResultState>): String {
@@ -42,24 +59,23 @@ internal fun findCounter(query: String, results: List<FindResultState>): String 
 }
 
 /**
- * Hand-rolled find bar (feature-findinpage is View-based). Engine API: `EngineSession.findAll/findNext/
- * clearFindMatches` (concept-engine `EngineSession.kt:1022-1032`); results arrive as
- * `ContentAction.AddFindResultAction` → `tab.content.findResults`. Closing clears the engine highlights and the
- * store's results (what `FindInPageFeature.unbind` does).
+ * Hand-rolled find bar (feature-findinpage is View-based), drawn in the toolbar row instead of the toolbar (mockup
+ * "Browser · Find + undo"). Engine API: `EngineSession.findAll/findNext/clearFindMatches` (concept-engine
+ * `EngineSession.kt:1022-1032`); results arrive as `ContentAction.AddFindResultAction` → `tab.content.findResults`.
+ * Closing clears the engine highlights and the store's results (what `FindInPageFeature.unbind` does).
  */
 @Composable
 fun FindInPageBar(
     store: BrowserStore,
     tab: TabSessionState?,
+    colors: ToolbarColors,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var query by remember { mutableStateOf("") }
-    val focus = remember { FocusRequester() }
     val session = tab?.engineState?.engineSession
     val counter = findCounter(query, tab?.content?.findResults ?: emptyList())
 
-    LaunchedEffect(Unit) { focus.requestFocus() }
     DisposableEffect(session) {
         onDispose {
             session?.clearFindMatches()
@@ -67,42 +83,119 @@ fun FindInPageBar(
         }
     }
 
-    Surface(tonalElevation = 2.dp, modifier = modifier.fillMaxWidth()) {
-        Row(Modifier.fillMaxWidth().padding(start = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextField(
-                value = query,
-                onValueChange = { text ->
-                    query = text
-                    if (text.isEmpty()) {
-                        session?.clearFindMatches()
-                        tab?.id?.let { store.dispatch(ContentAction.ClearFindResultsAction(it)) }
-                    } else {
-                        session?.findAll(text)
-                    }
-                },
-                modifier = Modifier.weight(1f).focusRequester(focus),
-                singleLine = true,
-                placeholder = { Text("Find in page") },
-                textStyle = MaterialTheme.typography.bodyMedium,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = { session?.findNext(forward = true) }),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                ),
-            )
-            Text(counter, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 4.dp))
-            IconButton(onClick = { session?.findNext(forward = false) }, enabled = query.isNotEmpty()) {
-                Icon(painterResource(iconsR.drawable.mozac_ic_chevron_up_24), contentDescription = "Previous match")
+    FindRow(
+        query = query,
+        counter = counter,
+        colors = colors,
+        onQueryChange = { text ->
+            query = text
+            if (text.isEmpty()) {
+                session?.clearFindMatches()
+                tab?.id?.let { store.dispatch(ContentAction.ClearFindResultsAction(it)) }
+            } else {
+                session?.findAll(text)
             }
-            IconButton(onClick = { session?.findNext(forward = true) }, enabled = query.isNotEmpty()) {
-                Icon(painterResource(iconsR.drawable.mozac_ic_chevron_down_24), contentDescription = "Next match")
+        },
+        onPrevious = { session?.findNext(forward = false) },
+        onNext = { session?.findNext(forward = true) },
+        onClose = onClose,
+        modifier = modifier,
+    )
+}
+
+/**
+ * The find row's layout, stateless: pill (the toolbar's pill colour with a 2 dp primary outline) holding the query
+ * field (bodyLarge) and the mono "3/12" counter, then up / down / close as 44 dp buttons (48 dp touch targets, so
+ * the pill is `ToolbarTouchTargets.FIND_PILL_NARROWER_DP` = 12 dp narrower than the mockup's 210 dp at 360 dp; DF-02).
+ * The row keeps the toolbar's tint and shows the `ln` hairline in phone mode, as in the mockup.
+ */
+@Composable
+internal fun FindRow(
+    query: String,
+    counter: String,
+    colors: ToolbarColors,
+    onQueryChange: (String) -> Unit,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier,
+    requestFocus: Boolean = true,
+) {
+    val focus = remember { FocusRequester() }
+    if (requestFocus) LaunchedEffect(Unit) { focus.requestFocus() }
+    val hint = stringResource(R.string.find_hint)
+    val counterLabel = stringResource(R.string.find_counter, counter)
+    ToolbarRow(colors, modifier, showDivider = true) {
+        Row(
+            Modifier
+                .weight(1f)
+                .heightIn(min = HatchDimens.Pill)
+                .background(colors.pill, HatchShapes.Pill)
+                .border(2.dp, colors.outline, HatchShapes.Pill)
+                .padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            val textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.text)
+            CompositionLocalProvider(
+                LocalTextSelectionColors provides TextSelectionColors(colors.outline, colors.outline.copy(alpha = 0.4f)),
+            ) {
+                BasicTextField(
+                    value = query,
+                    onValueChange = onQueryChange,
+                    modifier = Modifier
+                        .weight(1f)
+                        .focusRequester(focus)
+                        .semantics { contentDescription = hint },
+                    singleLine = true,
+                    textStyle = textStyle,
+                    cursorBrush = SolidColor(colors.outline),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(onSearch = { onNext() }),
+                    decorationBox = { inner ->
+                        Box(contentAlignment = Alignment.CenterStart) {
+                            if (query.isEmpty()) Text(hint, style = textStyle.copy(color = colors.hint), maxLines = 1)
+                            inner()
+                        }
+                    },
+                )
             }
-            IconButton(onClick = onClose) {
-                Icon(painterResource(iconsR.drawable.mozac_ic_cross_24), contentDescription = "Close find bar")
+            if (counter.isNotEmpty()) {
+                Text(
+                    counter,
+                    style = HatchType.mono,
+                    color = colors.hint,
+                    maxLines = 1,
+                    modifier = Modifier.semantics {
+                        contentDescription = counterLabel
+                        liveRegion = LiveRegionMode.Polite
+                    },
+                )
             }
         }
+        val enabled = query.isNotEmpty()
+        ToolbarIconButton(ToolbarIcons.ChevronUp, stringResource(R.string.find_previous), colors.content, onPrevious, enabled = enabled)
+        ToolbarIconButton(ToolbarIcons.ChevronDown, stringResource(R.string.find_next), colors.content, onNext, enabled = enabled)
+        ToolbarIconButton(ToolbarIcons.Close, stringResource(R.string.find_close), colors.content, onClose)
     }
+}
+
+// ---- previews ------------------------------------------------------------------------------------------------------
+
+@Preview(name = "Find · phone · Graphite light", widthDp = 360)
+@Composable
+internal fun FindGraphiteLight() = ToolbarPreviewFrame(HatchPalette.Graphite, dark = false, desktop = false) {
+    FindRow("invoice", "3/12", it, {}, {}, {}, {}, requestFocus = false)
+}
+
+@Preview(name = "Find · phone · Graphite dark", widthDp = 360)
+@Composable
+internal fun FindGraphiteDark() = ToolbarPreviewFrame(HatchPalette.Graphite, dark = true, desktop = false) {
+    FindRow("invoice", "3/12", it, {}, {}, {}, {}, requestFocus = false)
+}
+
+@Preview(name = "Find · desktop · Amber light · empty", widthDp = 360)
+@Composable
+internal fun FindAmberLight() = ToolbarPreviewFrame(HatchPalette.Amber, dark = false, desktop = true) {
+    FindRow("", "", it, {}, {}, {}, {}, requestFocus = false)
 }

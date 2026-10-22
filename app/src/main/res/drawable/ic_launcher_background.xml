@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Graphite launcher background of the "Signal" design (docs/design/hatch-icon-gray.svg). See docs/icon.md. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="#1F3D3A" />
+    <solid android:color="#3A3A3F" />
 </shape>

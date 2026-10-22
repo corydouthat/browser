@@ -21,7 +21,14 @@ import kotlinx.coroutines.delay
 import app.hatch.selfcheck.SelfCheckController
 import app.hatch.ui.AppUiState
 import app.hatch.ui.HatchApp
-import app.hatch.ui.HatchTheme
+// hatch:theme begin
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import app.hatch.ui.theme.HatchTheme
+// hatch:theme end
 import app.hatch.ui.UiEvent
 import app.hatch.ui.UiEvents
 import kotlinx.coroutines.Dispatchers
@@ -84,6 +91,11 @@ class MainActivity : AppCompatActivity() {
     // hatch:credentials end
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // hatch:theme begin — Settings › Appearance → AppCompat night mode before the delegate applies it in
+        // super.onCreate, so this start already has the right uiMode (AC XML dialogs, system bars). Skipped in safe
+        // mode: the recovery screen reads no settings.
+        if (!CrashCapture.safeMode) AppCompatDelegate.setDefaultNightMode(components.settings.themeMode.nightMode)
+        // hatch:theme end
         super.onCreate(savedInstanceState)
         if (CrashCapture.safeMode) {
             // The previous start crashed before the browser UI was up: recovery screen, no Gecko, no store.
@@ -111,7 +123,18 @@ class MainActivity : AppCompatActivity() {
         // hatch:credentials end
 
         setContent {
-            HatchTheme {
+            // hatch:theme begin — palette + mode are read live; a mode change also moves AppCompat's night mode,
+            // which recreates the Activity (as a system dark-mode switch does; uiMode is not in configChanges).
+            val themeTick by c.settings.changes.collectAsState()
+            val palette = remember(themeTick) { c.settings.palette }
+            val themeMode = remember(themeTick) { c.settings.themeMode }
+            LaunchedEffect(themeMode) {
+                if (AppCompatDelegate.getDefaultNightMode() != themeMode.nightMode) {
+                    AppCompatDelegate.setDefaultNightMode(themeMode.nightMode)
+                }
+            }
+            HatchTheme(palette = palette, mode = themeMode) {
+            // hatch:theme end
                 HatchApp(
                     components = c,
                     engineView = engineView,
@@ -132,12 +155,9 @@ class MainActivity : AppCompatActivity() {
             override fun handleOnBackPressed() {
                 if (fullScreenFeature.onBackPressed()) return
                 if (promptFeature.onBackPressed()) return
-                // Compose surfaces in z-order (HatchApp draws them in this order, topmost last): rules overlays
-                // (site rules / editor / site permissions / persona editor) above the Saved logins screen above the
-                // chrome's own overlays (the login picker bar is dismissed by promptFeature above).
-                if (c.rulesUi.onBack()) return
-                if (c.loginsUi.onBack()) return
-                if (uiState.onBack()) return
+                // Compose surfaces, topmost first: one chain shared with Esc (AppUiState.onBack), the rules overlays
+                // and Saved logins slotted in by z-order (the login picker bar is dismissed by promptFeature above).
+                if (uiState.onBack(c.rulesUi::onBack, c.loginsUi::onBack)) return
                 if (sessionFeature.onBackPressed()) return
                 moveTaskToBack(true)
             }

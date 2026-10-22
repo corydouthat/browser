@@ -2,21 +2,18 @@ package app.hatch.ui.rules
 
 import android.content.ClipboardManager
 import android.content.Context
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -25,12 +22,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import app.hatch.Components
 import app.hatch.rules.SiteRule
+import app.hatch.ui.settings.FormField
+import app.hatch.ui.settings.PrimaryPill
+import app.hatch.ui.settings.TonalPill
+import app.hatch.ui.theme.HatchTheme
+import app.hatch.ui.theme.HatchType
 import app.hatch.rules.UserscriptImport
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -85,56 +88,60 @@ fun ImportRuleDialog(
         if (text.isNullOrBlank()) error = "Clipboard is empty" else preview(text, null)
     }
 
+    val c = HatchTheme.colors
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = c.sh,
+        titleContentColor = c.ink,
+        textContentColor = c.ink,
         title = { Text(if (result == null) "Import userscript / userstyle" else "Import preview") },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()).heightIn(max = 460.dp)) {
                 val r = result
                 if (r == null) {
-                    OutlinedTextField(
-                        value = url,
-                        onValueChange = { url = it },
-                        label = { Text(".user.js / .user.css URL (https)") },
-                        singleLine = true,
-                        enabled = !busy,
-                        modifier = Modifier.fillMaxWidth(),
+                    FormField(
+                        ".user.js / .user.css URL (https)",
+                        url,
+                        { if (!busy) url = it },
+                        valueStyle = HatchType.monoMedium,
+                        keyboardType = KeyboardType.Uri,
+                        placeholder = "https://…/script.user.js",
                     )
-                    Row(Modifier.fillMaxWidth().padding(top = 8.dp)) {
-                        Button(onClick = ::fetchUrl, enabled = !busy && url.isNotBlank()) { Text("Fetch") }
-                        Spacer(Modifier.width(8.dp))
-                        OutlinedButton(onClick = ::pasteClipboard, enabled = !busy) { Text("From clipboard") }
-                        if (busy) { Spacer(Modifier.width(12.dp)); CircularProgressIndicator(Modifier.padding(top = 8.dp).width(20.dp)) }
+                    Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        PrimaryPill("Fetch", onClick = ::fetchUrl, enabled = !busy && url.isNotBlank(), height = 40.dp, horizontalPadding = 18.dp)
+                        TonalPill("From clipboard", onClick = ::pasteClipboard, enabled = !busy, height = 40.dp)
+                        if (busy) CircularProgressIndicator(Modifier.size(20.dp), color = c.ac, strokeWidth = 2.dp)
                     }
                     Text(
                         "Allowed: @match / @include patterns, @run-at, and the GM subset (GM_addStyle, GM_get/setValue, GM_log, GM_info). " +
                             "Refused: @require, GM_xmlhttpRequest.",
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = c.mu,
                         modifier = Modifier.padding(top = 12.dp),
                     )
                 } else {
                     PreviewBody(r)
                 }
-                error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 8.dp)) }
+                error?.let { Text(it, color = c.dg, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 8.dp)) }
             }
         },
         confirmButton = {
             val r = result
             if (r?.rule != null && r.ok) {
-                Button(onClick = { onAdd(r.rule) }) { Text("Add (disabled)") }
+                PrimaryPill("Add (disabled)", onClick = { onAdd(r.rule) }, height = 40.dp, horizontalPadding = 18.dp)
             } else if (r != null) {
-                TextButton(onClick = { result = null }) { Text("Back") }
+                TextButton(onClick = { result = null }) { Text("Back", color = c.acT) }
             }
         },
         dismissButton = {
             val r = result
             if (r?.rule != null && r.ok) {
                 Row {
-                    TextButton(onClick = { result = null }) { Text("Back") }
-                    TextButton(onClick = { onEdit(r.rule) }) { Text("Edit…") }
+                    TextButton(onClick = { result = null }) { Text("Back", color = c.acT) }
+                    TextButton(onClick = { onEdit(r.rule) }) { Text("Edit…", color = c.acT) }
                 }
             } else {
-                TextButton(onClick = onDismiss) { Text("Cancel") }
+                TextButton(onClick = onDismiss) { Text("Cancel", color = c.acT) }
             }
         },
     )
@@ -142,11 +149,12 @@ fun ImportRuleDialog(
 
 @Composable
 private fun PreviewBody(r: UserscriptImport.Result) {
-    val mono = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace)
+    val mono = HatchType.mono
+    val dg = HatchTheme.colors.dg
     Text(if (r.kind == UserscriptImport.Kind.USER_JS) "Userscript (.user.js)" else "User style (.user.css)", style = MaterialTheme.typography.labelLarge)
     r.rule?.let { rule ->
         Text("Name: ${rule.name}", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
-        Text("Runs at ${rule.runAt.removePrefix("document_")} in the ${rule.world} world", style = MaterialTheme.typography.bodySmall)
+        Text("Runs at ${RuleText.runAtLabel(rule.runAt)} in the ${RuleText.worldLabel(rule.world)} world", style = MaterialTheme.typography.bodySmall)
     }
     r.meta?.let { m ->
         m.version?.let { Text("Version: $it", style = MaterialTheme.typography.bodySmall) }
@@ -167,12 +175,12 @@ private fun PreviewBody(r: UserscriptImport.Result) {
         grants.forEach { Text(it, style = mono) }
     }
     r.meta?.requires?.takeIf { it.isNotEmpty() }?.let { reqs ->
-        Text("@require", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp))
-        reqs.forEach { Text(it, style = mono, color = MaterialTheme.colorScheme.error) }
+        Text("@require", style = MaterialTheme.typography.labelMedium, color = dg, modifier = Modifier.padding(top = 8.dp))
+        reqs.forEach { Text(it, style = mono, color = dg) }
     }
     if (r.problems.isNotEmpty()) {
-        Text("Refused", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp))
-        r.problems.forEach { Text("• $it", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
+        Text("Refused", style = MaterialTheme.typography.labelMedium, color = dg, modifier = Modifier.padding(top = 8.dp))
+        r.problems.forEach { Text("• $it", color = dg, style = MaterialTheme.typography.bodySmall) }
     }
     if (r.warnings.isNotEmpty()) {
         Text("Notes", style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 8.dp))

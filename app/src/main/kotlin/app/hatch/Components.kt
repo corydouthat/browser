@@ -1,9 +1,11 @@
 package app.hatch
 
 import android.content.Context
+import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import app.hatch.downloads.HatchDownloadService
 import app.hatch.engine.GeckoRuntimeFactory
+import app.hatch.engine.PageColorScheme
 import app.hatch.engine.HatchRequestInterceptor
 import app.hatch.ext.BridgeExtension
 // hatch:credentials begin
@@ -32,6 +34,7 @@ import app.hatch.ui.toolbar.OpenTabsAutocompleteProvider
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import mozilla.components.browser.domains.autocomplete.ShippedDomainsProvider
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.thumbnails.ThumbnailsMiddleware
@@ -61,6 +64,7 @@ import mozilla.components.feature.prompts.file.FileUploadsDirCleaner
 import mozilla.components.feature.search.SearchUseCases
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.tabs.TabsUseCases
+import mozilla.components.lib.publicsuffixlist.PublicSuffixList
 import mozilla.components.support.base.android.NotificationsDelegate
 import mozilla.components.support.utils.DefaultDateTimeProvider
 import mozilla.components.support.utils.DefaultDownloadFileUtils
@@ -96,15 +100,22 @@ class Components(private val context: Context) {
     }
 
     // hatch:credentials begin — in-app logins store + Compose picker/overlay state (docs/research/google-signin-autofill.md Path 2)
-    val logins: LoginsStorageProvider by lazy { LoginsStorageProvider(context, settings) }
+    val logins: LoginsStorageProvider by lazy { LoginsStorageProvider(context, settings, applicationScope) }
     val loginsUi: LoginsUiState by lazy { LoginsUiState() }
     // hatch:credentials end
 
+    // hatch:fixer begin — DF-11: registrable domains for the Saved logins titles (AC's PSL, loaded from
+    // assets/publicsuffixes on first use, off the main thread).
+    val publicSuffixList: PublicSuffixList by lazy { PublicSuffixList(context) }
+    // hatch:fixer end
+
     val runtime: GeckoRuntime by lazy {
-        GeckoRuntimeFactory.create(context, personaManager.current.value, settings, logins.geckoStorageDelegate(applicationScope)) // hatch:credentials
+        GeckoRuntimeFactory.create(context, personaManager.current.value, settings, logins.geckoStorageDelegate()) // hatch:credentials
     }
 
-    val engine: Engine by lazy { GeckoEngine(context, engineSettings, runtime) }
+    // hatch:fixer begin — RS-02: pages see the system's prefers-color-scheme, never Hatch's Appearance override.
+    val engine: Engine by lazy { GeckoEngine(context, engineSettings, runtime).also { PageColorScheme.install(context, it) } }
+    // hatch:fixer end
 
     val client: Client by lazy { GeckoViewFetchClient(context, runtime) }
 
@@ -170,6 +181,12 @@ class Components(private val context: Context) {
      */
     val sessionRestore: Job by lazy {
         applicationScope.launch {
+            // Persona prefs live on the user branch only (PersonaToPrefs.yaml); set them before any tab loads.
+            // prefs.js normally already holds them, so a Gecko that never answers only delays the restore.
+            runtime // created first: GeckoPreferenceController talks to a running Gecko
+            withTimeoutOrNull(STARTUP_PREFS_TIMEOUT_MS) {
+                runCatching { personaManager.reapplyPrefs() }.onFailure { Log.w(TAG, "startup persona prefs failed", it) }
+            } ?: Log.w(TAG, "startup persona prefs timed out")
             withContext(Dispatchers.IO) { tabsUseCases.restore(sessionStorage) }
             sessionStorage.autoSave(store)
                 .periodicallyInForeground(interval = 30, unit = TimeUnit.SECONDS)
@@ -237,3 +254,8 @@ class Components(private val context: Context) {
         }
     }
 }
+
+private const val TAG = "Components"
+
+/** Upper bound for the startup prefs call before the restore goes ahead anyway (prefs.js already has them). */
+private const val STARTUP_PREFS_TIMEOUT_MS = 5_000L

@@ -240,3 +240,18 @@ be filed against it in `docs/m1-results.md`. Any build unless stated.
 - **PERF-05 (M2, release build)**: only after the narrowed keep rule lands: save / fill / list / delete / "Forget
   never-save" all work.
 
+
+## 9. Design-review gates (fixer, 2026-10-21)
+
+The design pass's own checklist is in `docs/roadmap.md` ("Design pass"); these are the review findings that only a
+device can close.
+
+- **RS-09 error-page principal**: serve a page from a host you control whose `/reset` path resets the connection;
+  from that page, `const w = window.open('/reset')`, wait for the Hatch error page in the popup, then in the
+  opener's console run `w.document.documentURI`: it must throw a `SecurityError` (the error document is
+  `resource://android`, not the opener's origin). Then `w.location = 'hatch-internal://persona-off?u=x'`: nothing
+  happens (no persona switch, no reload).
+- **RS-02 colour scheme**: system light, Settings › Appearance › Dark: a page reads
+  `matchMedia('(prefers-color-scheme: dark)').matches === false` before and after a rotation; system dark: `true`.
+- **A11Y-03 / A11Y-04**: see the roadmap's design-pass accessibility items (overlay focus with a keyboard and
+  TalkBack; landscape with a punch-hole camera).
