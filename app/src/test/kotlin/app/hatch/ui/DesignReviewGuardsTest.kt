@@ -226,4 +226,13 @@ class DesignReviewGuardsTest {
         assertEquals(listOf("Loading page"), cfg[SemanticsProperties.ContentDescription])
         assertFalse("\"\$progress%\"" in source("ui/toolbar/DisplayToolbar.kt"))
     }
+
+    // ---- WC-07: the keyboard resizes the web content once ---------------------------------------------------------------
+
+    @Test
+    fun `the browser root pads for the keyboard's target inset, never the per-frame animated one`() {
+        val code = source("ui/BrowserScreen.kt").lines().filterNot { it.trimStart().startsWith("//") }.joinToString("\n")
+        assertFalse(Regex("""WindowInsets\.ime\b(?!AnimationTarget)""").containsMatchIn(code), "BrowserScreen uses the animated WindowInsets.ime")
+        assertTrue("navigationBars.union(imeTarget)" in code && "WindowInsets.imeAnimationTarget" in code)
+    }
 }

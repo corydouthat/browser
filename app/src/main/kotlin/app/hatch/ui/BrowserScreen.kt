@@ -4,12 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imeAnimationTarget
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.statusBars
@@ -66,6 +67,7 @@ import mozilla.components.lib.state.ext.observeAsComposableState
  * applied as a bottom inset together with the navigation bar (HATCH-WC-04), the display cutout's horizontal sides
  * are kept clear in landscape (UXP-10), fullscreen removes the chrome and every inset.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BrowserScreen(
     components: Components,
@@ -92,7 +94,12 @@ fun BrowserScreen(
     val isHome = tab != null && ToolbarState.isHome(tab?.url, tab?.canGoBack == true)
     val loading = tab?.loading == true
     val density = LocalDensity.current
-    val imeVisible = WindowInsets.ime.getBottom(density) > 0
+    // WC-07: the web content follows the keyboard's *target* inset, not the animated one. `WindowInsets.ime` changes
+    // on every frame of the keyboard animation, and each change resized the GeckoView surface; Gecko paints a frame
+    // or more behind, so the page squashed and overshot. One resize at the start of the animation is what Chrome and
+    // Fenix do; the keyboard slides over the surface background (opening) or over the page (closing).
+    val imeTarget = WindowInsets.imeAnimationTarget
+    val imeVisible = imeTarget.getBottom(density) > 0
     val statusBarPx = WindowInsets.statusBars.getTop(density)
     val chromeColors = rememberToolbarColors(desktop = persona.desktop)
 
@@ -128,7 +135,7 @@ fun BrowserScreen(
     }
 
     val cutoutSides = WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal)
-    val rootInsets = if (fullScreen) Modifier else Modifier.windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime).union(cutoutSides))
+    val rootInsets = if (fullScreen) Modifier else Modifier.windowInsetsPadding(WindowInsets.navigationBars.union(imeTarget).union(cutoutSides))
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).then(rootInsets)) {
         SubcomposeLayout(Modifier.fillMaxSize()) { constraints ->
             val chromePlaceables = if (fullScreen) {
