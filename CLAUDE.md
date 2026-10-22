@@ -85,6 +85,9 @@ The approved design is the plan Cory confirmed on 2026-10-18; `docs/architecture
   composables keep `@Preview`s; `DesignScreenshotTest`
   (Paparazzi, `app/src/screenshots`, applied only for Paparazzi tasks) renders them: `tool/remote_build.sh
   :app:recordPaparazziDebug --no-configuration-cache`.
+- `AppServicesInitializer.init` runs first in `HatchApplication.onCreate` (main process): without it any
+  app-services call (logins, db_crypto) throws "NSS has not initialized". AC logins delegates run on
+  `LoginsStorageProvider.scope` (exception handler), never on the bare `applicationScope`.
 - Credentials: Hatch's own logins store (`service-sync-logins`, key in AndroidKeyStore) fills forms; Google
   Password Manager and Chrome's account chooser cannot work in a third-party browser; passkeys are wired
   (`WebAuthnFeature`) but blocked on Google's allowlist (release cert only; never on debug builds). Never shim

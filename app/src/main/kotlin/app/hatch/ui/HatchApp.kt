@@ -214,7 +214,7 @@ fun HatchApp(
     val persona by components.personaManager.current.collectAsState()
     // PERF-04: a value snapshot, so progress ticks and other ContentState copies do not recompose the app.
     val tab by components.store.observeAsComposableState { it.selectedTab?.let(SelectedTabFacts::of) }
-    val keyLossNotice by components.logins.keyLossNotice.collectAsState()
+    val loginsNotice by components.logins.notice.collectAsState()
 
     // The status bar shows the toolbar's tint (desktop: primaryContainer, phone: surface) unless a full-screen Hatch
     // surface covers it; its icons take the contrasting appearance. The navigation bar sits on surface.
@@ -325,10 +325,10 @@ fun HatchApp(
     /** The rules overlays / Saved logins sit above the chrome: toolbar and find shortcuts are ignored under them. */
     fun otherModuleCovers(): Boolean = components.rulesUi.isOpen || components.loginsUi.savedLoginsOpen
 
-    // SEC-6: the logins store found its database without its key (KeyStore loss) and had to reset it.
-    LaunchedEffect(keyLossNotice) {
-        val notice = keyLossNotice ?: return@LaunchedEffect
-        components.logins.keyLossNotice.value = null
+    // SEC-6 key loss, or the first logins storage failure (LoginsStorageProvider.scope).
+    LaunchedEffect(loginsNotice) {
+        val notice = loginsNotice ?: return@LaunchedEffect
+        components.logins.notice.value = null
         snackbar.showSnackbar(notice, duration = SnackbarDuration.Long)
     }
 

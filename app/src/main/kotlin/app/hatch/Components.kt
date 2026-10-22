@@ -100,7 +100,7 @@ class Components(private val context: Context) {
     }
 
     // hatch:credentials begin — in-app logins store + Compose picker/overlay state (docs/research/google-signin-autofill.md Path 2)
-    val logins: LoginsStorageProvider by lazy { LoginsStorageProvider(context, settings) }
+    val logins: LoginsStorageProvider by lazy { LoginsStorageProvider(context, settings, applicationScope) }
     val loginsUi: LoginsUiState by lazy { LoginsUiState() }
     // hatch:credentials end
 
@@ -110,7 +110,7 @@ class Components(private val context: Context) {
     // hatch:fixer end
 
     val runtime: GeckoRuntime by lazy {
-        GeckoRuntimeFactory.create(context, personaManager.current.value, settings, logins.geckoStorageDelegate(applicationScope)) // hatch:credentials
+        GeckoRuntimeFactory.create(context, personaManager.current.value, settings, logins.geckoStorageDelegate()) // hatch:credentials
     }
 
     // hatch:fixer begin — RS-02: pages see the system's prefers-color-scheme, never Hatch's Appearance override.

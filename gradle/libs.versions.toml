@@ -76,6 +76,9 @@ mozilla-lib-dataprotect = { module = "org.mozilla.components:lib-dataprotect", v
 # hatch:fixer — the saved-login title is the registrable domain (DF-11). Already in the APK as support-ktx's runtime
 # dependency (assets/publicsuffixes); declared so the app can compile against PublicSuffixList.
 mozilla-lib-publicsuffixlist = { module = "org.mozilla.components:lib-publicsuffixlist", version.ref = "mozilla" }
+# AppServicesInitializer (RustComponentsInitializer + RustLog): must run before any app-services call. Already on the
+# runtime classpath (feature-search / service-sync-logins); declared so the app can call it.
+mozilla-support-appservices = { module = "org.mozilla.components:support-appservices", version.ref = "mozilla" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 # hatch:credentials end
 # hatch:fixer begin — PERF-06: the manifest removes WorkManagerInitializer; HatchApplication is the Configuration.Provider
@@ -92,7 +95,7 @@ mozilla-core = [
   "mozilla-support-ktx", "mozilla-support-utils", "mozilla-feature-search",
   # hatch:credentials begin
   "mozilla-service-sync-logins", "mozilla-feature-webauthn", "mozilla-concept-storage", "mozilla-lib-dataprotect",
-  "mozilla-lib-publicsuffixlist",
+  "mozilla-lib-publicsuffixlist", "mozilla-support-appservices",
   # hatch:credentials end
 ]
 # hatch:chrome begin

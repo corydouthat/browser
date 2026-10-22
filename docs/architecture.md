@@ -68,6 +68,8 @@ reports/     headless reports per milestone (reports/headless/m0/), device repor
 
 ### Startup order
 
+0. `HatchApplication.onCreate` (main process only, after `CrashCapture.install` and the safe-mode return):
+   `AppServicesInitializer.init` (NSS + megazord + RustLog, Fenix's `setupMegazordInitial`) before any Rust call.
 1. `HatchApplication.onCreate` (main process only) touches `rulesRepository` so the bundled example rules
    exist.
 2. `MainActivity.onCreate` → `components.engine.createView` → `Components.engine` → `Components.runtime` →
@@ -140,6 +142,7 @@ SKIPPED.
    (`GeckoPrefs.kt` is the only caller), `DebugConfig` yaml keys, `contentScripts.register` `world: "MAIN"`,
    `rust_prepare_accept_languages` (header q-values), the `ui.*PointerCapabilities` / `dom.w3c_touch_events`
    prefs still exist.
+   Compare Fenix's `FenixApplication.setupMegazordInitial` with `HatchApplication.onCreate` (app-services init).
    On the phone, cold-start in a desktop persona, switch to Phone and load a UA echo page: it must show the
    phone UA (persona prefs live only on the user branch; see `docs/limitations.md`, 2026-10-22).
 3. Update the UA strings in `personas/identities.json` to the new Firefox major (and the Chrome major for
