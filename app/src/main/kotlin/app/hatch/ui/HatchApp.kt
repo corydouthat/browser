@@ -32,6 +32,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import app.hatch.Components
+import app.hatch.crash.CrashCapture
+import app.hatch.crash.CrashRecoveryActivity
 import app.hatch.persona.Persona
 import app.hatch.persona.PersonaManager
 import app.hatch.rules.RulesUiState
@@ -328,6 +330,14 @@ fun HatchApp(
         val notice = keyLossNotice ?: return@LaunchedEffect
         components.logins.keyLossNotice.value = null
         snackbar.showSnackbar(notice, duration = SnackbarDuration.Long)
+    }
+
+    // A crash after startup left last.txt behind: offer it once, so the trace can be shared without adb.
+    LaunchedEffect(Unit) {
+        val report = CrashCapture.unseenReport ?: return@LaunchedEffect
+        CrashCapture.acknowledge(context)
+        val r = snackbar.showSnackbar("Hatch closed unexpectedly", actionLabel = "View report", withDismissAction = true, duration = SnackbarDuration.Long)
+        if (r == SnackbarResult.ActionPerformed) context.startActivity(CrashRecoveryActivity.reportIntent(context, report))
     }
 
     // UXP-15: nothing in this collector suspends; every handler is a state flip or a launch of its own.

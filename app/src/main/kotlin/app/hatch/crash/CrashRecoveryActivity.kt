@@ -58,14 +58,17 @@ import app.hatch.ui.theme.HatchType
 import app.hatch.ui.theme.ThemeMode
 
 /**
- * Safe-mode screen shown by `MainActivity` when [CrashCapture.safeMode] is set (mockup "Crash recovery").
+ * Safe-mode screen shown by `MainActivity` when [CrashCapture.safeMode] is set (mockup "Crash recovery"), and the
+ * same screen in report mode ([reportIntent]) for a crash after startup, opened from the "Hatch closed
+ * unexpectedly" snackbar: then the primary button only closes it and "Clear Hatch data" is not offered.
  * Deliberately minimal: [HatchStaticTheme] (Graphite following the system light / dark flag; no settings read),
  * no Gecko, no store, no storage; the only state it reads is the text [CrashCapture] loaded before anything else ran.
  */
 class CrashRecoveryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val report = CrashCapture.lastReport
+        val reportMode = intent.hasExtra(EXTRA_REPORT)
+        val report = if (reportMode) intent.getStringExtra(EXTRA_REPORT) else CrashCapture.lastReport
         val text = buildString {
             appendLine("app: ${CrashCapture.appLine()}")
             appendLine("device: ${CrashCapture.deviceLine()}")
@@ -78,9 +81,10 @@ class CrashRecoveryActivity : ComponentActivity() {
                     RecoveryScreen(
                         text = text,
                         hasTrace = report != null,
+                        reportMode = reportMode,
                         onShare = { share(text) },
                         onCopy = { copy(text) },
-                        onTryAgain = { tryAgain() },
+                        onTryAgain = { if (reportMode) finish() else tryAgain() },
                         onClearData = { clearData() },
                     )
                 }
@@ -112,12 +116,21 @@ class CrashRecoveryActivity : ComponentActivity() {
         val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         am.clearApplicationUserData()
     }
+
+    companion object {
+        private const val EXTRA_REPORT = "app.hatch.crash.REPORT"
+
+        /** Report mode: shows [report] (a crash after startup) with Share / Copy and a Close button. */
+        fun reportIntent(context: Context, report: String): Intent =
+            Intent(context, CrashRecoveryActivity::class.java).putExtra(EXTRA_REPORT, report)
+    }
 }
 
 @Composable
 private fun RecoveryScreen(
     text: String,
     hasTrace: Boolean,
+    reportMode: Boolean = false,
     onShare: () -> Unit,
     onCopy: () -> Unit,
     onTryAgain: () -> Unit,
@@ -139,13 +152,15 @@ private fun RecoveryScreen(
             modifier = Modifier.size(48.dp).clip(HatchShapes.Mark),
         )
         Text(
-            "Hatch did not start last time",
+            if (reportMode) "Hatch closed unexpectedly" else "Hatch did not start last time",
             style = MaterialTheme.typography.headlineSmall.copy(letterSpacing = (-0.01).em),
             color = c.ink,
             modifier = Modifier.semantics { heading() },
         )
         Text(
-            if (hasTrace) {
+            if (reportMode) {
+                "Hatch stopped while you were browsing. Share the report below so it can be fixed."
+            } else if (hasTrace) {
                 "Something failed during startup. You can try again, or share the report below so it can be fixed."
             } else {
                 "Something failed during startup, but no Java crash was captured. You can try again, or share the report below so it can be fixed."
@@ -153,7 +168,7 @@ private fun RecoveryScreen(
             style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 22.5.sp),
             color = c.mu,
         )
-        RecoveryButton("Try again", onTryAgain, Modifier.fillMaxWidth().padding(top = 4.dp), height = 48.dp, container = c.ac, content = c.oa, style = MaterialTheme.typography.titleSmall)
+        RecoveryButton(if (reportMode) "Close" else "Try again", onTryAgain, Modifier.fillMaxWidth().padding(top = 4.dp), height = 48.dp, container = c.ac, content = c.oa, style = MaterialTheme.typography.titleSmall)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             RecoveryButton("Share", onShare, Modifier.weight(1f), height = 44.dp, container = c.s1, content = c.ink)
             RecoveryButton("Copy", onCopy, Modifier.weight(1f), height = 44.dp, container = c.s1, content = c.ink)
@@ -170,7 +185,9 @@ private fun RecoveryScreen(
         ) {
             Text(text = text, style = HatchType.mono.copy(fontSize = 10.5.sp, lineHeight = 16.8.sp), color = c.ink, softWrap = false)
         }
-        RecoveryButton("Clear Hatch data…", { confirmClear = true }, Modifier.fillMaxWidth(), height = 44.dp, container = Color.Transparent, content = c.dg)
+        if (!reportMode) {
+            RecoveryButton("Clear Hatch data…", { confirmClear = true }, Modifier.fillMaxWidth(), height = 44.dp, container = Color.Transparent, content = c.dg)
+        }
     }
     if (confirmClear) {
         AlertDialog(
