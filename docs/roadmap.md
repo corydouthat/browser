@@ -93,11 +93,39 @@ Install the **release** APK from `dist/` (the debug one cannot ever do passkeys)
 - [ ] **Memory**: three tabs + tray opened (thumbnails loaded) → Self-check → Share report → `meminfo.json` PSS ≤ 600 MB
 - [ ] **Fix-pass gates** (`docs/device-checklist.md` §8): home controls respond on the first tap; snackbars visible over Settings / Saved logins; Saved logins refuses screenshots and re-locks after Home; Ctrl+W / long-press "Close tab" offer Undo; the tray's current-tab card is fresh on first open; chips not clipped at the largest font size; landscape toolbar clear of the cutout; theme switch consistent after recreation; `am send-trim-memory` suspends tabs; TZ restart keeps the last-opened tab; cold start / PSS / persona-switch numbers recorded
 
+## Design pass — "Signal" (build 23+)
+
+Status: **code complete on the VPS / NUC (2026-10-21): debug + release build, unit tests, Android lint (0 errors),
+headless harness identical to `reports/headless/m1`, red-team 01/03/07/13 clean; nothing verified on the device
+yet.** Source of truth: `docs/design/hatch-screens.dc.html`; renders of every mockup come from
+`DesignScreenshotTest` (Paparazzi, see `docs/architecture.md` "Design pass").
+
+- [x] Theme: six fixed palettes × light/dark (Graphite default), Settings › Appearance (palette + System/Light/Dark), Geist / Geist Mono bundled (OFL), launcher background `#3A3A3F`
+- [x] Toolbar hand-rolled over the AC store (persona chip, 44 dp pill, 3 dp progress, 200 ms tint crossfade); edit mode on the ported `InlineAutocompleteTextField`; find in the toolbar row; persona strip removed
+- [x] Home, site-info card, content-crashed state, login picker bar, tab tray (selection, empty), main menu, Hatch error page with "Try with persona off"
+- [x] Persona sheet / editor (field-keyed errors, Save disabled while invalid), Settings root + sub-pages (Developer holds Self-check and Eruda), site rules / editor, site permissions, Saved logins + detail, crash recovery
+- [ ] Device checklist (Cory, build ≥ 23):
+  - [ ] **Toolbar tint flip**: switch Desktop ↔ Phone from the menu and from the home cards; the status strip, toolbar and persona chip crossfade together (≈ 200 ms) and the status-bar icons keep their contrast in all six palettes, light and dark
+  - [ ] **Edit mode IME**: type `goo` (inline suggestion appears highlighted), backspace once (the suggestion goes, the text stays), keep typing, tap inside the suggestion (accepted), paste a URL from the long-press menu and with the keyboard's paste, Enter / "Go" loads; tap outside leaves edit mode; Ctrl+L and Esc with a hardware keyboard
+  - [ ] **Find in toolbar**: Ctrl+F and menu › Find in page replace the toolbar with the find row; the counter reads "3/12"-style, up / down move, back / Esc / × close it and the toolbar returns; a navigation closes it
+  - [ ] **Settings navigation / back**: open every row of the four groups; system back and the top-bar arrow pop the sub-page, then close Settings; the search action filters and back closes the search first; menu › Add-ons opens straight on the Add-ons page; Developer › Self-check › Run closes Settings and starts the check
+  - [ ] **Error page in airplane mode** with a desktop persona: "Can't reach this site", the error code in mono, Try again, **Try with persona off** switches the persona off (toolbar turns surface) and retries the same URL; with the persona already off the button is absent
+  - [ ] **Saved-login detail**: behind the device credential, open a login, reveal / hide the password, copy username and password (snackbar), Edit saves, Delete login removes it; back returns to the list, then closes; the screen stays black in recents / screenshots
+  - [ ] **Palette / dark switch**: Settings › Appearance, every palette applies live; System / Light / Dark recreates the activity (Settings closes; known gap) and AC's XML dialogs (e.g. a site's `alert()`) follow the mode
+- [x] Design-review fixes (2026-10-21): Saved-logins dialogs gated on the unlock (RS-01), pages pinned to the system `prefers-color-scheme` (RS-02), userinfo-safe hosts (RS-03), app-wide add-on prompts (RS-04), Settings search in the back chain (RS-05), focus rings / switch semantics / overlay focus and insets / RTL glyphs / plural and progress semantics / 48 dp close and clear targets / contrast tokens (A11Y-01…12), and the fidelity items in `docs/architecture.md` "Design-review fixes"
+- [ ] Accessibility pass on the device: TalkBack labels on every icon button, 200 % font scale on the toolbar, home, menu and Settings (no clipped text), keyboard focus ring visible on the toolbar and Settings rows, plus:
+  - [ ] **Overlay focus (A11Y-03)**: with a hardware keyboard, open Settings from the menu: the first Tab lands on Settings' back arrow, Tab never reaches the toolbar or the page behind; with TalkBack, swiping through Settings / the tray / Saved logins never reads "Site information…" or the page; opening site info announces "Site information" and focuses its first control
+  - [ ] **Landscape cutout (A11Y-04)**: on a punch-hole phone in landscape (both rotations, 3-button navigation), Settings, the tray, Saved logins and the rules screens keep their back / close and trailing buttons clear of the camera and the navigation bar
+  - [ ] **`prefers-color-scheme` (RS-02)**: system light + Hatch Dark: Self-check / a test page reads `matchMedia('(prefers-color-scheme: dark)').matches === false`, unchanged after a rotation; switch the system to dark: it reads `true` (and the reverse with Hatch Light)
+  - [ ] **Saved-logins lock (RS-01)**: Saved logins › a login › Edit, press Home, return, cancel the prompt: no dialog is visible and nothing can be revealed or saved until the credential succeeds
+  - [ ] **Add-on prompts (RS-04)**: with Settings closed, tap "Add to Firefox" on addons.mozilla.org: the permission dialog appears over the page
+
 ## M2 — polish
 
 - [ ] PERF-05: try the narrow app-services keep rule (`UniffiLib`, `RustBuffer*`, `uniffi*` members instead of `-keep class mozilla.appservices.** { *; }`) on a release build and run the logins flows on the phone; record the dex delta next to the rule either way
 - [ ] Compose UI tests (Robolectric + `compose-ui-test`) for the UXP findings that only have pure-helper locks today (`docs/limitations.md` "M1 fix pass")
 - [ ] Harness `/echo`: record the favicon request's `Sec-Fetch-Dest` as an info signal (ENG-07) so the app-originated fetch is measured, not assumed
+- [ ] Harness / Self-check: a `prefers-color-scheme` info signal compared with the system setting (RS-02; today only the device checklist covers it)
 
 - [ ] Per-site persona overrides (sites that genuinely need touch)
 - [x] `.user.js` / `.user.css` import with header parsing (done in M1 by rules, 2026-10-18)

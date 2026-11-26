@@ -12,22 +12,23 @@ import org.mozilla.geckoview.GeckoRuntimeSettings
 import java.io.File
 
 /**
- * Creates the single [GeckoRuntime]. Before creation the active persona is written to
- * `filesDir/geckoview-config.yaml` (prefs + `env: TZ`), which GeckoView reads once at
- * `GeckoRuntime.create` via `configFilePath` (read regardless of `debuggable`; verified in
- * GeckoRuntime.java at FIREFOX_158_0_RELEASE, lines 512-531). Live persona switches go through [GeckoPrefs]
- * and rewrite the yaml so the next cold start is already correct.
+ * Creates the single [GeckoRuntime]. Before creation the active persona's process environment (`env: TZ`) is
+ * written to `filesDir/geckoview-config.yaml`, which GeckoView reads once at `GeckoRuntime.create` via
+ * `configFilePath` (read regardless of `debuggable`; verified in GeckoRuntime.java at FIREFOX_158_0_RELEASE,
+ * lines 512-531). Persona prefs are NOT in the yaml (it would put them on the default branch, see
+ * [PersonaToPrefs.yaml]); they are set on the user branch through [GeckoPrefs], at startup by
+ * `Components.sessionRestore` and live by `PersonaManager.apply`.
  */
 object GeckoRuntimeFactory {
     const val CONFIG_FILE = "geckoview-config.yaml"
 
     fun configFile(context: Context): File = File(context.filesDir, CONFIG_FILE)
 
-    /** Atomic write (temp file + rename) of the yaml for [persona] (with the "keep touch events" setting). */
-    fun writeConfig(context: Context, persona: Persona, keepTouchEvents: Boolean = false): File {
+    /** Atomic write (temp file + rename) of the yaml for [persona]. */
+    fun writeConfig(context: Context, persona: Persona): File {
         val target = configFile(context)
         val tmp = File(target.parentFile, "$CONFIG_FILE.tmp")
-        val yaml = PersonaToPrefs.yaml(persona, keepTouchEvents)
+        val yaml = PersonaToPrefs.yaml(persona)
         tmp.writeText(yaml)
         if (!tmp.renameTo(target)) {
             // rename across the same directory should never fail; fall back to a plain overwrite
@@ -53,7 +54,7 @@ object GeckoRuntimeFactory {
         settings: AppSettings,
         autocompleteStorageDelegate: Autocomplete.StorageDelegate? = null,
     ): GeckoRuntime {
-        val config = writeConfig(context, persona, settings.keepTouchEvents)
+        val config = writeConfig(context, persona)
         // Every builder method below exists in GeckoRuntimeSettings.Builder at FIREFOX_158_0_RELEASE.
         val runtimeSettings = GeckoRuntimeSettings.Builder()
             .configFilePath(config.absolutePath)

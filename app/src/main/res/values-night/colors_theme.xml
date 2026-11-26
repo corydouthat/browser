@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Graphite dark (docs/design/hatch-screens.dc.html, P.Graphite.D + N dark). Kept equal to HatchPalette.kt. -->
+<resources>
+    <color name="hatch_primary">#D9D9DE</color>
+    <color name="hatch_on_primary">#1A1A1E</color>
+    <color name="hatch_primary_container">#313136</color>
+    <color name="hatch_on_primary_container">#ECECEF</color>
+    <color name="hatch_surface">#121214</color>
+    <color name="hatch_on_surface">#ECECEF</color>
+    <color name="hatch_on_surface_variant">#A2A2AD</color>
+    <color name="hatch_surface_container">#1F1F23</color>
+    <color name="hatch_surface_container_high">#1B1B1F</color>
+    <color name="hatch_surface_container_highest">#2A2A2F</color>
+    <color name="hatch_outline">#45454D</color>
+    <color name="hatch_error">#F2B8B5</color>
+    <color name="hatch_on_error">#601410</color>
+</resources>

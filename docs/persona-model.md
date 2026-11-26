@@ -51,7 +51,7 @@ which pref a field maps to; the goldens lock the table.
 | `platform` / `oscpu` / `appVersion` | `general.platform.override` / `general.oscpu.override` / `general.appversion.override` | global, live |
 | `touch = false` | `dom.w3c_touch_events.enabled = 0` (no `TouchEvent`, no `ontouch*`; taps still arrive as pointer/mouse events, the shim masks their input source), `dom.maxtouchpoints.testing.value = 0`, `ui.primaryPointerCapabilities = 6`, `ui.allPointerCapabilities = 6` (bits: 1 coarse, 2 fine, 4 hover → fine+hover, drives CSS `pointer`/`hover`), `layout.accessiblecaret.enabled = true` (long-press word selection + handles stay available although the touch pref is off, HATCH-WC-03) | global, live |
 | `touch = true` (`real-device`) | the five prefs above are **cleared** | global, live |
-| app setting "Keep touch events" | `PersonaToPrefs.prefs(p, keepTouchEvents = true)`: `dom.w3c_touch_events.enabled` is **cleared** (engine default) instead of 0 for a `touch = false` identity, nothing else changes; for gesture sites (maps, drawing, carousels). Goldens and `yaml()` default to `false`. | global, live |
+| app setting "Keep touch events" | `PersonaToPrefs.prefs(p, keepTouchEvents = true)`: `dom.w3c_touch_events.enabled` is **cleared** (engine default) instead of 0 for a `touch = false` identity, nothing else changes; for gesture sites (maps, drawing, carousels). Goldens default to `false`. | global, live |
 | `languages` | `intl.accept_languages` in Gecko's own format (`"en-US, en"`); drives both the `Accept-Language` header and `navigator.languages` | global, live |
 | `locale` | `intl.locale.requested` + `GeckoRuntimeSettings.locales` (Intl default locale, UI strings) | runtime, live |
 | `timeZone` | `env: TZ` in `geckoview-config.yaml` → read once at `GeckoRuntime.create` → **restart** (the app offers "Restart now"); optional JS `Date`/`Intl` shim (`tzShim`, Settings) with a `java.time` offset table as fallback | process |
@@ -84,7 +84,7 @@ as "do not touch".
 |---|---|---|
 | `prefs(p): PrefSet(set, clear)` | typed prefs to set on the user branch and prefs to clear | `GeckoPrefs.apply` (live), goldens, headless runner |
 | `env(p)` | `{"TZ": zone}` or empty | yaml, headless runner (driver env), `needsRestart` |
-| `yaml(p)` | `geckoview-config.yaml` (`prefs:`, `env:`, `args: []`; strings always double-quoted) parsed by `org.mozilla.gecko.util.DebugConfig` | `GeckoRuntimeFactory` (written atomically before `GeckoRuntime.create` and after every switch) |
+| `yaml(p)` | `geckoview-config.yaml` (`prefs: {}`, `env:`, `args: []`; strings always double-quoted) parsed by `org.mozilla.gecko.util.DebugConfig`. Never carries prefs: GeckoView passes them as `MOZ_DEFAULT_PREFS` (default branch, `GeckoLoader.setupInitialPrefs`), so a cleared user pref would fall back to the startup persona's value | `GeckoRuntimeFactory` (written atomically before `GeckoRuntime.create` and after every switch) |
 | `shimConfig(p, clock, tzShim)` | the JSON object below | `BridgeExtension.sendPersona` → `background.js` → inlined as `__PERSONA__` |
 | `needsRestart(old, new)` | `env(old) != env(new)` | persona sheet / snackbar |
 | `goldenJson(p)` | `{"prefs","clear","env","shim"}`, keys sorted, 2-space indent, fixed clock | `personas/golden/*.prefs.json` |
@@ -170,12 +170,12 @@ node tool/headless/gen-expectations.mjs      # harness/personas/*.json follow th
 
 1. `GeckoPrefs.apply(PersonaToPrefs.prefs(new))` — `GeckoPreferenceController.setGeckoPrefs` for the set
    half, `clearGeckoUserPref` for the clear half (Gecko UI thread, awaited). `GeckoPrefs.kt` is the only file
-   that touches this `@ExperimentalGeckoViewApi`; if it ever breaks, yaml + restart is the full fallback.
+   that touches this `@ExperimentalGeckoViewApi`; the same call runs once per process before the session restore (`reapplyPrefs`).
 2. Per tab: `session.settings.userAgentString`, `toggleDesktopMode(desktop, reload = false)`,
    `ContentAction.UpdateTabDesktopMode`; store-wide `DefaultDesktopModeAction`.
 3. `engine.settings.userAgentString` (new tabs), `runtime.settings.locales`, `inputAutoZoomEnabled`.
 4. `bridge.sendPersona(shimConfig(new))` — the extension re-registers the MAIN-world shim.
-5. Rewrite `geckoview-config.yaml` (atomic rename) so the next cold start is already right; persist the
+5. Rewrite `geckoview-config.yaml` (atomic rename, `env` only) so the next cold start has the right `TZ`; persist the
    selection; reload the selected tab.
 6. If `env` changed (`TZ`): return `NeedsRestart`; the UI offers a restart (`AppRestart`, a `:restart`
    trampoline process — see `docs/architecture.md`).

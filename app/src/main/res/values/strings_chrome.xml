@@ -1,15 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Browser chrome strings (toolbar action content descriptions need @StringRes for compose-browser-toolbar). -->
+<!-- Browser chrome strings: the hand-rolled display / edit / find toolbar (ui/toolbar, ui/find). -->
 <resources>
     <string name="toolbar_search_hint">Search or enter address</string>
     <string name="toolbar_site_info">Site information</string>
-    <string name="toolbar_reload">Reload</string>
-    <string name="toolbar_stop">Stop loading</string>
-    <string name="toolbar_desktop_on">Desktop persona on: tap for real device</string>
-    <string name="toolbar_desktop_off">Real device: tap to force desktop</string>
+    <string name="toolbar_security_secure">Connection is secure</string>
+    <string name="toolbar_security_insecure">Connection is not secure</string>
+    <string name="toolbar_security_broken">Certificate problem</string>
+    <string name="toolbar_persona_desktop">Desktop persona</string>
+    <string name="toolbar_persona_phone">Real device</string>
+    <string name="toolbar_address">Address bar</string>
+    <string name="toolbar_address_actions">Copy or paste address</string>
+    <string name="toolbar_copy">Copy</string>
+    <string name="toolbar_paste">Paste</string>
+    <string name="toolbar_paste_go">Paste &amp; go</string>
     <string name="toolbar_tabs">Open tabs</string>
+    <plurals name="toolbar_tabs_count">
+        <item quantity="one">%1$d open tab</item>
+        <item quantity="other">%1$d open tabs</item>
+    </plurals>
+    <string name="toolbar_tab_actions">New or close tab</string>
     <string name="toolbar_menu">Menu</string>
     <string name="toolbar_new_tab">New tab</string>
     <string name="toolbar_close_tab">Close tab</string>
     <string name="toolbar_clear">Clear</string>
+    <string name="find_hint">Find in page</string>
+    <string name="find_previous">Previous match</string>
+    <string name="find_next">Next match</string>
+    <string name="find_close">Close find bar</string>
+    <string name="find_counter">Match %1$s</string>
+    <string name="toolbar_loading">Loading page</string>
 </resources>

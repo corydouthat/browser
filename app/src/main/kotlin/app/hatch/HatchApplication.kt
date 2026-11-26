@@ -10,6 +10,7 @@ import app.hatch.memory.MemoryTrim
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import mozilla.components.browser.state.action.SystemAction
+import mozilla.components.support.AppServicesInitializer
 import java.io.File
 
 /**
@@ -33,6 +34,9 @@ class HatchApplication : Application(), Configuration.Provider {
             // in which nothing below runs and MainActivity shows CrashRecoveryActivity instead of the browser.
             CrashCapture.install(this)
             if (CrashCapture.safeMode) return
+            // Before any Rust call (logins/db_crypto, sync15, search): NSS and the megazord, exactly as Fenix 158's
+            // setupMegazordInitial. Without it the logins store throws "NSS has not initialized" on its first key.
+            AppServicesInitializer.init(AppServicesInitializer.Config(crashReporting = null))
             installDebugStrictMode()
             components.rulesRepository // creates the bundled example rules on first run
             // PERF-03: ThumbnailStorage's constructor clears the private disk cache (DiskLruCache open + delete);

@@ -8,6 +8,15 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+// Design renders (app/src/screenshots/kotlin, Paparazzi): layoutlib screenshots of the redesigned screens. Test-only,
+// nothing reaches the APK. The plugin wires its resource task into every unit-test run (and that task cannot be stored
+// in the configuration cache next to the generated self-check assets), and the tests boot layoutlib (~1.5 GB heap, a
+// large download), so plugin and sources are only added when a Paparazzi task is requested or -Phatch.snapshots=true:
+//   tool/remote_build.sh :app:recordPaparazziDebug --no-configuration-cache
+val snapshotRun: Boolean = providers.gradleProperty("hatch.snapshots").orNull == "true" ||
+    gradle.startParameter.taskNames.any { it.contains("Paparazzi", ignoreCase = true) }
+if (snapshotRun) pluginManager.apply("app.cash.paparazzi")
+
 // Build number = git commit count, so every commit is an installable update (fitness-app convention).
 // tool/build_apk.sh passes it as -PversionCode because the remote build host gets the tree without .git
 // (tool/remote_build.sh rsync excludes it); the git fallback serves IDE and CI builds.
@@ -99,8 +108,13 @@ android {
         // Plain-JVM unit tests (app/src/test) touch android.util.Log only through injected loggers; the
         // default-values mode keeps any stray framework call from throwing "Method ... not mocked".
         unitTests.isReturnDefaultValues = true
-        unitTests.all { it.useJUnitPlatform(); it.maxHeapSize = "512m" }
+        unitTests.all {
+            it.useJUnitPlatform()
+            it.maxHeapSize = if (snapshotRun) "2g" else "512m"
+        }
     }
+
+    if (snapshotRun) sourceSets.getByName("test").kotlin.srcDir("src/screenshots/kotlin")
 
     androidResources {
         // aapt2 asset ignore list: the defaults plus the extension's node tests (assets/extension/test/**).

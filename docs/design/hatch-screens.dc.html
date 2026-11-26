@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E7E8EA;font-family:'Geist',system-ui,sans-serif;color:#1B1D1F;-webkit-font-smoothing:antialiased}a{color:#3A3A3F}a:hover{color:#1B1D1F}</style>
+</helmet>
+<div style="padding:72px 80px 160px;display:flex;flex-direction:column;gap:64px">
+  <div style="display:flex;gap:48px;align-items:flex-end;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:760px">
+      <div style="font:500 13px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5E6266">Hatch · Signal · full screen set</div>
+      <div style="font-size:44px;font-weight:600;letter-spacing:-.02em;line-height:1.05">Every screen, every state</div>
+      <div style="font-size:18px;line-height:1.5;color:#4A4E52;text-wrap:pretty">The toolbar tints in desktop mode; everything else stays neutral and uses the accent only for primary actions, selection and switches. Switch the palette and theme here or in Tweaks.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border-radius:20px;padding:16px">
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <sc-for list="{{ choices }}" as="c" hint-placeholder-count="6">
+          <div onClick="{{ c.pick }}" style="height:36px;border-radius:18px;padding:0 14px 0 6px;display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;font-weight:500;background:{{ c.bg }};color:{{ c.fg }}"><div style="width:24px;height:24px;border-radius:12px;background:{{ c.color }};box-shadow:0 0 0 2px #FFFFFF"></div>{{ c.name }}</div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:6px">
+        <sc-for list="{{ modes }}" as="m" hint-placeholder-count="2">
+          <div onClick="{{ m.pick }}" style="height:36px;border-radius:18px;padding:0 16px;display:flex;align-items:center;cursor:pointer;font-size:14px;font-weight:500;background:{{ m.bg }};color:{{ m.fg }}">{{ m.name }}</div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div data-screen-label="Spec" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px;max-width:1600px">
+    <div style="background:#FFFFFF;border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:14px">
+      <div style="font-size:20px;font-weight:600">Colour roles · {{ palName }} · {{ modeName }}</div>
+      <sc-for list="{{ roles }}" as="r" hint-placeholder-count="10">
+        <div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;border-radius:8px;background:{{ r.c }};box-shadow:inset 0 0 0 1px rgba(0,0,0,.1);flex-shrink:0"></div><div style="flex:1;display:flex;flex-direction:column"><div style="font:500 13px 'Geist Mono',monospace">{{ r.k }}</div><div style="font-size:12px;color:#5E6266">{{ r.use }}</div></div><div style="font:500 12px 'Geist Mono',monospace;color:#5E6266">{{ r.c }}</div></div>
+      </sc-for>
+    </div>
+    <div style="background:#FFFFFF;border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:16px">
+      <div style="font-size:20px;font-weight:600">Type · Geist / Geist Mono (OFL, bundled)</div>
+      <div style="display:flex;align-items:baseline;gap:16px"><div style="font:500 11px 'Geist Mono',monospace;color:#5E6266;width:110px">titleLarge 22/28 · 500</div><div style="font-size:22px;font-weight:500">Settings</div></div>
+      <div style="display:flex;align-items:baseline;gap:16px"><div style="font:500 11px 'Geist Mono',monospace;color:#5E6266;width:110px">titleMedium 17/24 · 600</div><div style="font-size:17px;font-weight:600">Persona</div></div>
+      <div style="display:flex;align-items:baseline;gap:16px"><div style="font:500 11px 'Geist Mono',monospace;color:#5E6266;width:110px">bodyLarge 15/22 · 400</div><div style="font-size:15px">console.aws.amazon.com</div></div>
+      <div style="display:flex;align-items:baseline;gap:16px"><div style="font:500 11px 'Geist Mono',monospace;color:#5E6266;width:110px">bodyMedium 13/18 · 400</div><div style="font-size:13px;color:#5E6266">Desktop identity, touch events off</div></div>
+      <div style="display:flex;align-items:baseline;gap:16px"><div style="font:500 11px 'Geist Mono',monospace;color:#5E6266;width:110px">labelLarge 14/20 · 600</div><div style="font-size:14px;font-weight:600">Apply (restart)</div></div>
+      <div style="display:flex;align-items:baseline;gap:16px"><div style="font:500 11px 'Geist Mono',monospace;color:#5E6266;width:110px">mono 12/16 · 500</div><div style="font:500 12px 'Geist Mono',monospace">Europe/London · 1920×1080</div></div>
+      <div style="font-size:13px;line-height:1.5;color:#5E6266;text-wrap:pretty">All sizes in sp; layouts must reflow at 200% font scale. Mono is used only for machine values: UAs, patterns, time zones, codes.</div>
+    </div>
+    <div style="background:#FFFFFF;border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:20px;font-weight:600">Size, shape, motion</div>
+      <div style="font:500 13px/1.9 'Geist Mono',monospace;color:#2E3135">toolbar 56dp · pill 44dp r22<br>persona chip 36dp r18 · start of pill<br>progress 3dp · primary on track<br>touch targets ≥ 48dp<br>list row 56dp (1-line 48dp) · inset 16dp<br>grouped card r20 · sheet r28 · dialog r28<br>chips r10 · buttons 40dp r20 · FAB 56dp r16<br>screen padding 16dp · gaps 8 / 12 / 20dp<br>focus ring 2dp primary, 2dp offset</div>
+      <div style="font-size:13px;line-height:1.5;color:#5E6266;text-wrap:pretty">Motion: toolbar tint crossfades 200 ms (emphasized-decelerate) when the persona flips; there is no other decorative motion. Sheets and predictive back use M3 defaults.</div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:24px">
+    <div style="display:flex;align-items:baseline;gap:16px"><div style="font:600 14px 'Geist Mono',monospace;color:#5E6266">01</div><div style="font-size:30px;font-weight:600;letter-spacing:-.01em">Browser states</div></div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+      <div data-screen-label="Browser · Find + undo" style="display:flex;flex-direction:column;gap:12px">
+        <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Find in page · snackbar</div>
+        <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+          <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ink }};background:{{ t.bg }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ink }}"></div></div>
+          <div style="height:56px;flex-shrink:0;display:flex;align-items:center;gap:2px;padding:0 4px 0 8px;background:{{ t.bg }};border-bottom:1px solid {{ t.ln }}">
+            <div style="flex:1;height:44px;border-radius:22px;background:{{ t.s1 }};box-shadow:inset 0 0 0 2px {{ t.ac }};display:flex;align-items:center;gap:8px;padding:0 14px;min-width:0"><div style="flex:1;font-size:15px;color:{{ t.ink }}">invoice</div><div style="font:500 12px 'Geist Mono',monospace;color:{{ t.mu }}">3/12</div></div>
+            <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:{{ t.ink }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 15l6-6 6 6"></path></svg></div>
+            <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:{{ t.ink }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+            <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:{{ t.ink }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></div>
+          </div>
+          <div style="flex:1;background:#F4F5F6;display:flex;flex-direction:column">
+            <div style="height:26px;background:#232A33"></div>
+            <div style="flex:1;padding:12px;display:flex;flex-direction:column;gap:8px">
+              <div style="height:9px;width:50%;background:#B9BFC6;border-radius:2px"></div>
+              <div style="background:#FFFFFF;border:1px solid #E3E5E8;border-radius:3px;display:flex;flex-direction:column;font-size:10px;color:#3A434E">
+                <div style="height:22px;display:flex;align-items:center;padding:0 8px;border-bottom:1px solid #EEF0F2">Invoice #4410 · Sep</div>
+                <div style="height:22px;display:flex;align-items:center;padding:0 8px;border-bottom:1px solid #EEF0F2;gap:4px"><span style="background:#FFE58A">Invoice</span> #4411 · Sep</div>
+                <div style="height:22px;display:flex;align-items:center;padding:0 8px;border-bottom:1px solid #EEF0F2;gap:4px"><span style="background:#FF9F43;color:#1B1D1F">Invoice</span> #4412 · Oct</div>
+                <div style="height:22px;display:flex;align-items:center;padding:0 8px;border-bottom:1px solid #EEF0F2;gap:4px"><span style="background:#FFE58A">Invoice</span> #4413 · Oct</div>
+                <div style="height:22px;display:flex;align-items:center;padding:0 8px">Credit note #88</div>
+              </div>
+              <div style="flex:1;background:#FFFFFF;border:1px solid #E3E5E8;border-radius:3px"></div>
+            </div>
+          </div>
+          <div style="position:absolute;left:12px;right:12px;bottom:32px;min-height:48px;border-radius:12px;background:{{ t.inv }};display:flex;align-items:center;gap:8px;padding:0 8px 0 16px;box-shadow:0 6px 20px rgba(0,0,0,.2)"><div style="flex:1;font-size:14px;color:{{ t.oinv }}">Tab closed</div><div style="height:40px;padding:0 12px;display:flex;align-items:center;font-size:14px;font-weight:600;color:{{ t.invAc }}">Undo</div></div>
+          <div style="height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:{{ t.bg }}"><div style="width:108px;height:4px;border-radius:2px;background:{{ t.ink }}"></div></div>
+        </div>
+      </div>
+
+      <div data-screen-label="Browser · Login picker" style="display:flex;flex-direction:column;gap:12px">
+        <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Login picker above keyboard</div>
+        <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+          <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ti }};background:{{ t.tb }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ti }}"></div></div>
+          <div style="height:56px;flex-shrink:0;display:flex;align-items:center;gap:2px;padding:0 4px 0 8px;background:{{ t.tb }}">
+            <div style="flex:1;height:44px;border-radius:22px;background:{{ t.pl }};display:flex;align-items:center;gap:8px;padding:0 14px 0 4px;min-width:0"><div style="height:36px;border-radius:18px;background:{{ t.ac }};color:{{ t.oa }};display:flex;align-items:center;gap:6px;padding:0 10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg><div style="width:1px;height:14px;background:{{ t.sep }}"></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M9 20h6M12 16v4"></path></svg></div><div style="flex:1;font-size:15px;color:{{ t.ti }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">secure.chase.com</div></div>
+            <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><div style="width:20px;height:20px;border:2px solid {{ t.ti }};border-radius:6px;box-sizing:border-box;font-size:11px;font-weight:700;color:{{ t.ti }};display:flex;align-items:center;justify-content:center">4</div></div>
+            <div style="width:36px;height:44px;display:flex;align-items:center;justify-content:center;color:{{ t.ti }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5h.01M12 12h.01M12 19h.01"></path></svg></div>
+          </div>
+          <div style="flex:1;background:#FFFFFF;display:flex;flex-direction:column;align-items:center;padding:40px 60px;gap:10px">
+            <div style="width:80px;height:14px;background:#1A4C8C;border-radius:2px"></div>
+            <div style="width:100%;height:28px;border:1px solid #9AA3AD;border-radius:3px;box-shadow:0 0 0 2px #1A4C8C"></div>
+            <div style="width:100%;height:28px;border:1px solid #C9CED4;border-radius:3px"></div>
+            <div style="width:100%;height:28px;background:#1A4C8C;border-radius:3px"></div>
+          </div>
+          <div style="flex-shrink:0;background:{{ t.s1 }};border-top:1px solid {{ t.ln }};display:flex;align-items:center;gap:8px;padding:8px 8px 8px 14px">
+            <div style="color:{{ t.mu }};display:flex"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l9-9M17 6l3 3"></path></svg></div>
+            <div style="flex:1;display:flex;gap:6px;overflow:hidden">
+              <div style="height:36px;border-radius:10px;background:{{ t.ac2 }};color:{{ t.oc2 }};padding:0 12px;display:flex;align-items:center;font-size:14px;font-weight:500;white-space:nowrap">alex.r</div>
+              <div style="height:36px;border-radius:10px;box-shadow:inset 0 0 0 1px {{ t.ln2 }};color:{{ t.ink }};padding:0 12px;display:flex;align-items:center;font-size:14px;white-space:nowrap">travel-acct</div>
+            </div>
+            <div style="height:36px;padding:0 10px;display:flex;align-items:center;font-size:14px;font-weight:600;color:{{ t.acT }}">Manage</div>
+          </div>
+          <div style="height:250px;flex-shrink:0;background:{{ t.s2 }};display:grid;grid-template-columns:repeat(10,1fr);grid-auto-rows:42px;gap:8px 4px;padding:12px 6px;box-sizing:border-box">
+            <sc-for list="{{ keys }}" as="k" hint-placeholder-count="30"><div style="border-radius:6px;background:{{ t.bg }};display:flex;align-items:center;justify-content:center;font-size:16px;color:{{ t.ink }}">{{ k }}</div></sc-for>
+          </div>
+          <div style="height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:{{ t.s2 }}"><div style="width:108px;height:4px;border-radius:2px;background:{{ t.ink }}"></div></div>
+        </div>
+      </div>
+
+      <div data-screen-label="Browser · Page error" style="display:flex;flex-direction:column;gap:12px">
+        <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Page error · weak signal</div>
+        <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+          <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ti }};background:{{ t.tb }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ti }}"></div></div>
+          <div style="height:56px;flex-shrink:0;display:flex;align-items:center;gap:2px;padding:0 4px 0 8px;background:{{ t.tb }}">
+            <div style="flex:1;height:44px;border-radius:22px;background:{{ t.pl }};display:flex;align-items:center;gap:8px;padding:0 14px 0 4px;min-width:0"><div style="height:36px;border-radius:18px;background:{{ t.ac }};color:{{ t.oa }};display:flex;align-items:center;gap:6px;padding:0 10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg><div style="width:1px;height:14px;background:{{ t.sep }}"></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M9 20h6M12 16v4"></path></svg></div><div style="flex:1;font-size:15px;color:{{ t.ti }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">maps.google.com</div></div>
+            <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><div style="width:20px;height:20px;border:2px solid {{ t.ti }};border-radius:6px;box-sizing:border-box;font-size:11px;font-weight:700;color:{{ t.ti }};display:flex;align-items:center;justify-content:center">4</div></div>
+            <div style="width:36px;height:44px;display:flex;align-items:center;justify-content:center;color:{{ t.ti }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5h.01M12 12h.01M12 19h.01"></path></svg></div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:16px;padding:96px 28px 0">
+            <div style="width:56px;height:56px;border-radius:16px;background:{{ t.s1 }};display:flex;align-items:center;justify-content:center;color:{{ t.mu }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M4 4l16 16"></path></svg></div>
+            <div style="font-size:24px;font-weight:600;letter-spacing:-.01em;color:{{ t.ink }}">Can't reach this site</div>
+            <div style="font-size:15px;line-height:1.5;color:{{ t.mu }};text-wrap:pretty">maps.google.com took too long to respond. Your connection looks weak.</div>
+            <div style="font:500 12px 'Geist Mono',monospace;color:{{ t.mu }}">NS_ERROR_NET_TIMEOUT</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+              <div style="height:48px;border-radius:24px;background:{{ t.ac }};color:{{ t.oa }};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600">Try again</div>
+              <div style="height:48px;border-radius:24px;background:{{ t.s1 }};color:{{ t.ink }};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500">Try with persona off</div>
+            </div>
+          </div>
+          <div style="height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:{{ t.bg }}"><div style="width:108px;height:4px;border-radius:2px;background:{{ t.ink }}"></div></div>
+        </div>
+      </div>
+
+      <div data-screen-label="Browser · Content crashed" style="display:flex;flex-direction:column;gap:12px">
+        <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Content crashed · phone mode</div>
+        <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+          <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ink }};background:{{ t.bg }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ink }}"></div></div>
+          <div style="height:56px;flex-shrink:0;display:flex;align-items:center;gap:2px;padding:0 4px 0 8px;background:{{ t.bg }}">
+            <div style="flex:1;height:44px;border-radius:22px;background:{{ t.s1 }};display:flex;align-items:center;gap:8px;padding:0 14px 0 4px;min-width:0"><div style="height:36px;border-radius:18px;color:{{ t.mu }};display:flex;align-items:center;gap:6px;padding:0 10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg><div style="width:1px;height:14px;background:{{ t.ln2 }}"></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="7" y="3" width="10" height="18" rx="2"></rect></svg></div><div style="flex:1;font-size:15px;color:{{ t.ink }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">docs.google.com</div></div>
+            <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><div style="width:20px;height:20px;border:2px solid {{ t.ink }};border-radius:6px;box-sizing:border-box;font-size:11px;font-weight:700;color:{{ t.ink }};display:flex;align-items:center;justify-content:center">4</div></div>
+            <div style="width:36px;height:44px;display:flex;align-items:center;justify-content:center;color:{{ t.ink }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5h.01M12 12h.01M12 19h.01"></path></svg></div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:16px;padding:96px 28px 0">
+            <div style="width:56px;height:56px;border-radius:16px;background:{{ t.s1 }};display:flex;align-items:center;justify-content:center;color:{{ t.mu }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18h.01"></path></svg></div>
+            <div style="font-size:24px;font-weight:600;letter-spacing:-.01em;color:{{ t.ink }}">This tab stopped working</div>
+            <div style="font-size:15px;line-height:1.5;color:{{ t.mu }};text-wrap:pretty">The page's content process crashed. Your other tabs are fine.</div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <div style="flex:1;height:48px;border-radius:24px;background:{{ t.ac }};color:{{ t.oa }};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600">Restore</div>
+              <div style="flex:1;height:48px;border-radius:24px;background:{{ t.s1 }};color:{{ t.ink }};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500">Close tab</div>
+            </div>
+          </div>
+          <div style="height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:{{ t.bg }}"><div style="width:108px;height:4px;border-radius:2px;background:{{ t.ink }}"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:24px">
+    <div style="display:flex;align-items:baseline;gap:16px"><div style="font:600 14px 'Geist Mono',monospace;color:#5E6266">02</div><div style="font-size:30px;font-weight:600;letter-spacing:-.01em">New tab, tabs, menu</div></div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+      <div data-screen-label="New tab" style="display:flex;flex-direction:column;gap:12px">
+        <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">New tab · edit mode</div>
+        <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+          <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ti }};background:{{ t.tb }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ti }}"></div></div>
+          <div style="height:56px;flex-shrink:0;display:flex;align-items:center;gap:2px;padding:0 4px 0 8px;background:{{ t.tb }}">
+            <div style="flex:1;height:44px;border-radius:22px;background:{{ t.pl }};box-shadow:inset 0 0 0 2px {{ t.ac }};display:flex;align-items:center;gap:8px;padding:0 14px;min-width:0"><div style="color:{{ t.mu }};display:flex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg></div><div style="width:2px;height:20px;background:{{ t.ac }}"></div><div style="flex:1;font-size:15px;color:{{ t.mu }}">Search or enter address</div></div>
+            <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><div style="width:20px;height:20px;border:2px solid {{ t.ti }};border-radius:6px;box-sizing:border-box;font-size:11px;font-weight:700;color:{{ t.ti }};display:flex;align-items:center;justify-content:center">5</div></div>
+            <div style="width:36px;height:44px;display:flex;align-items:center;justify-content:center;color:{{ t.ti }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5h.01M12 12h.01M12 19h.01"></path></svg></div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:24px;padding:40px 16px 0">
+            <div style="display:flex;align-items:center;gap:12px;padding:0 4px"><img src="assets/hatch-icon-gray.svg" style="width:44px;height:44px;border-radius:14px" alt="Hatch"><div style="display:flex;flex-direction:column"><div style="font-size:24px;font-weight:600;letter-spacing:-.02em;color:{{ t.ink }}">Hatch</div><div style="font-size:13px;color:{{ t.mu }}">Desktop web, on the road.</div></div></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div style="height:104px;border-radius:20px;background:{{ t.ac2 }};box-shadow:inset 0 0 0 2px {{ t.ac }};padding:14px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;color:{{ t.oc2 }}"><div style="display:flex;justify-content:space-between"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M9 20h6M12 16v4"></path></svg><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12l5 5 9-10"></path></svg></div><div style="display:flex;flex-direction:column"><div style="font-size:14px;font-weight:600">Desktop</div><div style="font-size:12px">Windows · Firefox · US East</div></div></div>
+              <div style="height:104px;border-radius:20px;background:{{ t.s1 }};padding:14px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;color:{{ t.mu }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="3" width="10" height="18" rx="2"></rect></svg><div style="display:flex;flex-direction:column"><div style="font-size:14px;font-weight:600;color:{{ t.ink }}">Phone</div><div style="font-size:12px">Real device</div></div></div>
+            </div>
+            <div style="display:flex;gap:8px;padding:0 4px"><div style="height:36px;border-radius:10px;box-shadow:inset 0 0 0 1px {{ t.ln2 }};padding:0 12px;display:flex;align-items:center;gap:6px;font-size:14px;color:{{ t.ink }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9H4z"></path></svg>Homepage</div><div style="height:36px;border-radius:10px;box-shadow:inset 0 0 0 1px {{ t.ln2 }};padding:0 12px;display:flex;align-items:center;font-size:14px;color:{{ t.ink }}">Change persona</div></div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="font-size:13px;font-weight:600;color:{{ t.mu }};padding:0 4px">Recently open</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div style="border-radius:16px;overflow:hidden;background:{{ t.s1 }}"><div style="height:96px;background:#F4F5F6;display:flex;flex-direction:column"><div style="height:12px;background:#232A33"></div></div><div style="height:40px;display:flex;align-items:center;gap:8px;padding:0 10px;font-size:13px;color:{{ t.ink }}"><div style="width:14px;height:14px;border-radius:4px;background:#232A33;flex-shrink:0"></div>AWS Console</div></div>
+                <div style="border-radius:16px;overflow:hidden;background:{{ t.s1 }}"><div style="height:96px;background:#FFFFFF;display:flex;flex-direction:column;gap:6px;padding:10px"><div style="height:6px;width:60%;background:#C9CED4"></div><div style="height:6px;background:#E3E5E8"></div><div style="height:6px;background:#E3E5E8"></div></div><div style="height:40px;display:flex;align-items:center;gap:8px;padding:0 10px;font-size:13px;color:{{ t.ink }}"><div style="width:14px;height:14px;border-radius:4px;background:#2F6FDB;flex-shrink:0"></div>Trip budget</div></div>
+              </div>
+            </div>
+          </div>
+          <div style="height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:{{ t.bg }}"><div style="width:108px;height:4px;border-radius:2px;background:{{ t.ink }}"></div></div>
+        </div>
+      </div>
+
+      <div data-screen-label="Tab tray" style="display:flex;flex-direction:column;gap:12px">
+        <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Tab tray</div>
+        <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+          <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ink }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ink }}"></div></div>
+          <div style="height:64px;flex-shrink:0;display:flex;align-items:center;gap:4px;padding:0 4px;color:{{ t.ink }}"><div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></div><div style="flex:1;font-size:22px;font-weight:500">4 tabs</div><div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5h.01M12 12h.01M12 19h.01"></path></svg></div></div>
+          <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:min-content;gap:12px;padding:4px 16px">
+            <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="4">
+              <div style="border-radius:18px;overflow:hidden;background:{{ t.s1 }};box-shadow:0 0 0 {{ tab.ringW }} {{ t.ac }}">
+                <div style="height:40px;display:flex;align-items:center;gap:8px;padding:0 4px 0 10px"><div style="width:16px;height:16px;border-radius:4px;background:{{ tab.fav }};flex-shrink:0"></div><div style="flex:1;font-size:13px;color:{{ t.ink }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ tab.title }}</div><div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:{{ t.mu }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></div></div>
+                <div style="height:170px;background:#F4F5F6;display:flex;flex-direction:column;gap:6px"><div style="height:14px;background:{{ tab.bar }}"></div><div style="margin:4px 8px 0;height:6px;width:50%;background:#C9CED4"></div><div style="margin:0 8px;height:40px;background:#FFFFFF;border:1px solid #E3E5E8"></div><div style="margin:0 8px;height:60px;background:#FFFFFF;border:1px solid #E3E5E8"></div></div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="position:absolute;right:16px;bottom:40px;height:56px;border-radius:16px;background:{{ t.ac2 }};color:{{ t.oc2 }};display:flex;align-items:center;gap:10px;padding:0 20px 0 16px;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.15)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>New tab</div>
+          <div style="height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center"><div style="width:108px;height:4px;border-radius:2px;background:{{ t.ink }}"></div></div>
+        </div>
+      </div>
+
+      <div data-screen-label="Tab tray · Selection" style="display:flex;flex-direction:column;gap:12px">
+        <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Tab tray · selecting</div>
+        <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+          <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.oc2 }};background:{{ t.ac2 }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.oc2 }}"></div></div>
+          <div style="height:64px;flex-shrink:0;display:flex;align-items:center;gap:4px;padding:0 4px;color:{{ t.oc2 }};background:{{ t.ac2 }}"><div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div><div style="flex:1;font-size:22px;font-weight:500">2 selected</div><div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v13M7 8l5-5 5 5M5 14v5h14v-5"></path></svg></div><div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg></div></div>
+          <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:min-content;gap:12px;padding:16px">
+            <sc-for list="{{ tabsSel }}" as="tab" hint-placeholder-count="4">
+              <div style="border-radius:18px;overflow:hidden;background:{{ t.s1 }};box-shadow:0 0 0 {{ tab.ringW }} {{ t.ac }};position:relative">
+                <div style="height:40px;display:flex;align-items:center;gap:8px;padding:0 10px"><div style="width:16px;height:16px;border-radius:4px;background:{{ tab.fav }};flex-shrink:0"></div><div style="flex:1;font-size:13px;color:{{ t.ink }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ tab.title }}</div></div>
+                <div style="height:170px;background:#F4F5F6;opacity:{{ tab.op }}"><div style="height:14px;background:{{ tab.bar }}"></div></div>
+                <div style="position:absolute;right:8px;bottom:8px;width:28px;height:28px;border-radius:14px;background:{{ tab.chk }};box-shadow:inset 0 0 0 2px {{ t.ac }};display:flex;align-items:center;justify-content:center;color:{{ t.oa }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12l5 5 9-10"></path></svg></div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center"><div style="width:108px;height:4px;border-radius:2px;background:{{ t.ink }}"></div></div>
+        </div>
+      </div>
+
+      <div data-screen-label="Tab tray · Empty" style="display:flex;flex-direction:column;gap:12px">
+        <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Tab tray · empty</div>
+        <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+          <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ink }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ink }}"></div></div>
+          <div style="height:64px;flex-shrink:0;display:flex;align-items:center;gap:4px;padding:0 4px;color:{{ t.ink }}"><div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></div><div style="flex:1;font-size:22px;font-weight:500">Tabs</div></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:0 40px 80px;text-align:center">
+            <div style="width:64px;height:64px;border-radius:20px;background:{{ t.s1 }};display:flex;align-items:center;justify-content:center"><div style="width:26px;height:26px;border:2.5px solid {{ t.mu }};border-radius:8px;box-sizing:border-box;font-size:13px;font-weight:700;color:{{ t.mu }};display:flex;align-items:center;justify-content:center">0</div></div>
+            <div style="font-size:20px;font-weight:600;color:{{ t.ink }}">No open tabs</div>
+            <div style="font-size:15px;color:{{ t.mu }}">Open one to get started.</div>
+          </div>
+          <div style="position:absolute;right:16px;bottom:40px;height:56px;border-radius:16px;background:{{ t.ac2 }};color:{{ t.oc2 }};display:flex;align-items:center;gap:10px;padding:0 20px 0 16px;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.15)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>New tab</div>
+          <div style="height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center"><div style="width:108px;height:4px;border-radius:2px;background:{{ t.ink }}"></div></div>
+        </div>
+      </div>
+
+      <div data-screen-label="Main menu" style="display:flex;flex-direction:column;gap:12px">
+        <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Main menu</div>
+        <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.tb }};display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+          <div style="height:88px;flex-shrink:0;background:{{ t.tb }}"></div>
+          <div style="flex:1;background:#F4F5F6"></div>
+          <div style="position:absolute;inset:0;background:rgba(0,0,0,.5)"></div>
+          <div style="position:absolute;left:0;right:0;bottom:0;background:{{ t.sh }};border-radius:28px 28px 0 0;display:flex;flex-direction:column;padding:10px 0 28px">
+            <div style="width:32px;height:4px;border-radius:2px;background:{{ t.ln2 }};align-self:center;margin-bottom:14px"></div>
+            <div style="margin:0 16px;display:flex;border-radius:16px;background:{{ t.s1 }};padding:4px;gap:4px">
+              <div style="flex:1;height:44px;border-radius:12px;background:{{ t.ac }};color:{{ t.oa }};display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M9 20h6M12 16v4"></path></svg>Desktop</div>
+              <div style="flex:1;height:44px;border-radius:12px;color:{{ t.mu }};display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:500"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="7" y="3" width="10" height="18" rx="2"></rect></svg>Phone</div>
+            </div>
+            <div style="margin:4px 16px 0;min-height:48px;display:flex;align-items:center;gap:8px;padding:0 4px"><div style="font-size:14px;color:{{ t.ink }};flex:1">Windows · Firefox <span style="color:{{ t.mu }}">· US East</span></div><div style="font-size:14px;font-weight:600;color:{{ t.acT }}">Change</div></div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);padding:10px 12px 4px;border-top:1px solid {{ t.ln }}">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:{{ t.ink }};font-size:12px"><div style="width:48px;height:48px;border-radius:24px;background:{{ t.s1 }};display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div>Back</div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:{{ t.mu }};font-size:12px;opacity:.5"><div style="width:48px;height:48px;border-radius:24px;background:{{ t.s1 }};display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></div>Forward</div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:{{ t.ink }};font-size:12px"><div style="width:48px;height:48px;border-radius:24px;background:{{ t.s1 }};display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v13M7 8l5-5 5 5M5 14v5h14v-5"></path></svg></div>Share</div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:{{ t.ink }};font-size:12px"><div style="width:48px;height:48px;border-radius:24px;background:{{ t.s1 }};display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"></path></svg></div>Reload</div>
+            </div>
+            <div style="display:flex;flex-direction:column;color:{{ t.ink }};font-size:15px;margin-top:6px">
+              <sc-for list="{{ menu }}" as="mi" hint-placeholder-count="8">
+                <div style="height:48px;display:flex;align-items:center;gap:16px;padding:0 24px;border-top:{{ mi.div }} solid {{ t.ln }}"><div style="color:{{ t.mu }};display:flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ mi.d }}"></path></svg></div>{{ mi.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="padding:0 80px 120px;display:flex;flex-direction:column;gap:24px">
+  <div style="display:flex;align-items:baseline;gap:16px"><div style="font:600 14px 'Geist Mono',monospace;color:#5E6266">03</div><div style="font-size:30px;font-weight:600;letter-spacing:-.01em">Persona &amp; site info</div></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div data-screen-label="Persona sheet" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Persona sheet · region changed</div>
+      <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.tb }};display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+        <div style="height:88px;flex-shrink:0;background:{{ t.tb }}"></div>
+        <div style="flex:1;background:#F4F5F6"></div>
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,.5)"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:{{ t.sh }};border-radius:28px 28px 0 0;display:flex;flex-direction:column;gap:18px;padding:10px 20px 32px">
+          <div style="width:32px;height:4px;border-radius:2px;background:{{ t.ln2 }};align-self:center"></div>
+          <div style="font-size:22px;font-weight:500;color:{{ t.ink }}">Persona</div>
+          <div style="display:flex;align-items:center;gap:12px"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="font-size:15px;font-weight:500;color:{{ t.ink }}">Force desktop</div><div style="font-size:13px;color:{{ t.mu }}">Desktop identity, touch events off</div></div><div style="width:52px;height:32px;border-radius:16px;background:{{ t.ac }};display:flex;align-items:center;justify-content:flex-end;padding:0 4px;box-sizing:border-box;flex-shrink:0"><div style="width:24px;height:24px;border-radius:12px;background:{{ t.oa }}"></div></div></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:13px;font-weight:600;color:{{ t.mu }}">Identity</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <sc-for list="{{ idChips }}" as="c" hint-placeholder-count="6"><div style="height:36px;border-radius:10px;padding:0 12px;display:flex;align-items:center;font-size:14px;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.ring }};font-weight:{{ c.w }}">{{ c.label }}</div></sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:13px;font-weight:600;color:{{ t.mu }}">Region</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <sc-for list="{{ rgChips }}" as="c" hint-placeholder-count="6"><div style="height:36px;border-radius:10px;padding:0 12px;display:flex;align-items:center;font-size:14px;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.ring }};font-weight:{{ c.w }}">{{ c.label }}</div></sc-for>
+            </div>
+          </div>
+          <div style="border-radius:14px;background:{{ t.s1 }};padding:12px 14px;display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.45;color:{{ t.mu }}"><div style="color:{{ t.mu }};display:flex;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg></div>Time zone changes to Europe/London. Open tabs reload once.</div>
+          <div style="display:flex;justify-content:flex-end;gap:8px"><div style="height:44px;border-radius:22px;padding:0 18px;display:flex;align-items:center;font-size:14px;font-weight:600;color:{{ t.acT }}">Cancel</div><div style="height:44px;border-radius:22px;background:{{ t.ac }};padding:0 22px;display:flex;align-items:center;font-size:14px;font-weight:600;color:{{ t.oa }}">Apply (restart)</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div data-screen-label="Persona editor" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Persona editor · identities</div>
+      <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+        <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ink }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ink }}"></div></div>
+        <div style="height:64px;flex-shrink:0;display:flex;align-items:center;gap:4px;padding:0 4px;color:{{ t.ink }}"><div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div><div style="flex:1;font-size:22px;font-weight:500">Personas</div></div>
+        <div style="margin:0 16px 12px;display:flex;border-radius:16px;background:{{ t.s1 }};padding:4px;gap:4px"><div style="flex:1;height:40px;border-radius:12px;background:{{ t.bg }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:{{ t.ink }}">Identities</div><div style="flex:1;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;color:{{ t.mu }}">Regions</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px;padding:0 16px">
+          <div style="font-size:13px;font-weight:600;color:{{ t.mu }};padding:8px 8px">Presets</div>
+          <div style="border-radius:20px;background:{{ t.s1 }};display:flex;flex-direction:column;overflow:hidden">
+            <sc-for list="{{ presets }}" as="r" hint-placeholder-count="4">
+              <div style="min-height:60px;display:flex;align-items:center;gap:12px;padding:8px 8px 8px 16px;border-top:{{ r.div }} solid {{ t.ln }}"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="font-size:15px;color:{{ t.ink }}">{{ r.name }}</div><div style="font:500 12px 'Geist Mono',monospace;color:{{ t.mu }}">{{ r.sub }}</div></div><div style="height:36px;border-radius:18px;padding:0 12px;display:flex;align-items:center;font-size:13px;font-weight:600;color:{{ t.acT }}">Duplicate</div></div>
+            </sc-for>
+          </div>
+          <div style="font-size:13px;font-weight:600;color:{{ t.mu }};padding:16px 8px 8px">Custom</div>
+          <div style="border-radius:20px;background:{{ t.s1 }};min-height:60px;display:flex;align-items:center;gap:12px;padding:8px 16px"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="font-size:15px;color:{{ t.ink }}">Windows · Edge-like</div><div style="font:500 12px 'Geist Mono',monospace;color:{{ t.mu }}">Win32 · 1920×1080 · DPR 1.25</div></div><div style="color:{{ t.mu }};display:flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"></path></svg></div></div>
+        </div>
+        <div style="position:absolute;right:16px;bottom:40px;height:56px;border-radius:16px;background:{{ t.ac2 }};color:{{ t.oc2 }};display:flex;align-items:center;gap:10px;padding:0 20px 0 16px;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.15)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>New identity</div>
+        <div style="height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center"><div style="width:108px;height:4px;border-radius:2px;background:{{ t.ink }}"></div></div>
+      </div>
+    </div>
+
+    <div data-screen-label="Persona editor · Custom form" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Custom identity · validation</div>
+      <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+        <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ink }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ink }}"></div></div>
+        <div style="height:64px;flex-shrink:0;display:flex;align-items:center;gap:4px;padding:0 12px 0 4px;color:{{ t.ink }}"><div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></div><div style="flex:1;font-size:22px;font-weight:500">Edit identity</div><div style="height:40px;border-radius:20px;background:{{ t.ac }};color:{{ t.oa }};padding:0 18px;display:flex;align-items:center;font-size:14px;font-weight:600;opacity:.4">Save</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:14px;padding:8px 16px">
+          <div style="border-radius:12px;box-shadow:inset 0 0 0 1px {{ t.ln2 }};padding:8px 14px;display:flex;flex-direction:column;gap:2px"><div style="font-size:12px;color:{{ t.mu }}">Name</div><div style="font-size:15px;color:{{ t.ink }}">Windows · Edge-like</div></div>
+          <div style="border-radius:12px;box-shadow:inset 0 0 0 1px {{ t.ln2 }};padding:8px 14px;display:flex;flex-direction:column;gap:4px"><div style="font-size:12px;color:{{ t.mu }}">User agent</div><div style="font:500 12px/1.5 'Geist Mono',monospace;color:{{ t.ink }};word-break:break-all">Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="border-radius:12px;box-shadow:inset 0 0 0 1px {{ t.ln2 }};padding:8px 14px;display:flex;flex-direction:column;gap:2px"><div style="font-size:12px;color:{{ t.mu }}">Platform</div><div style="font:500 14px 'Geist Mono',monospace;color:{{ t.ink }}">Win32</div></div>
+            <div style="border-radius:12px;box-shadow:inset 0 0 0 1px {{ t.ln2 }};padding:8px 14px;display:flex;flex-direction:column;gap:2px"><div style="font-size:12px;color:{{ t.mu }}">Screen</div><div style="font:500 14px 'Geist Mono',monospace;color:{{ t.ink }}">1920×1080</div></div>
+            <div style="border-radius:12px;box-shadow:inset 0 0 0 1px {{ t.ln2 }};padding:8px 14px;display:flex;flex-direction:column;gap:2px"><div style="font-size:12px;color:{{ t.mu }}">Pixel ratio</div><div style="font:500 14px 'Geist Mono',monospace;color:{{ t.ink }}">1.25</div></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><div style="border-radius:12px;box-shadow:inset 0 0 0 2px {{ t.dg }};padding:8px 14px;display:flex;flex-direction:column;gap:2px"><div style="font-size:12px;color:{{ t.dg }}">CPU cores</div><div style="font:500 14px 'Geist Mono',monospace;color:{{ t.ink }}">128</div></div><div style="font-size:12px;color:{{ t.dg }};padding:0 4px">Use 1–64</div></div>
+          </div>
+          <div style="border-radius:12px;box-shadow:inset 0 0 0 1px {{ t.ln2 }};padding:8px 14px;display:flex;flex-direction:column;gap:2px"><div style="font-size:12px;color:{{ t.mu }}">WebGL vendor</div><div style="font:500 13px 'Geist Mono',monospace;color:{{ t.ink }}">Google Inc. (Intel)</div></div>
+          <div style="border-radius:12px;box-shadow:inset 0 0 0 1px {{ t.ln2 }};padding:8px 14px;display:flex;flex-direction:column;gap:2px"><div style="font-size:12px;color:{{ t.mu }}">WebGL renderer</div><div style="font:500 13px 'Geist Mono',monospace;color:{{ t.ink }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">ANGLE (Intel, Iris Xe Direct3D11)</div></div>
+        </div>
+        <div style="height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center"><div style="width:108px;height:4px;border-radius:2px;background:{{ t.ink }}"></div></div>
+      </div>
+    </div>
+
+    <div data-screen-label="Site info" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Site info · from persona chip</div>
+      <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.tb }};display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+        <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ti }};background:{{ t.tb }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ti }}"></div></div>
+        <div style="height:56px;flex-shrink:0;display:flex;align-items:center;gap:2px;padding:0 4px 0 8px;background:{{ t.tb }}">
+          <div style="flex:1;height:44px;border-radius:22px;background:{{ t.pl }};display:flex;align-items:center;gap:8px;padding:0 14px 0 4px;min-width:0"><div style="height:36px;border-radius:18px;background:{{ t.ac }};color:{{ t.oa }};display:flex;align-items:center;gap:6px;padding:0 10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg><div style="width:1px;height:14px;background:{{ t.sep }}"></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M9 20h6M12 16v4"></path></svg></div><div style="flex:1;font-size:15px;color:{{ t.ti }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">secure.chase.com</div></div>
+          <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><div style="width:20px;height:20px;border:2px solid {{ t.ti }};border-radius:6px;box-sizing:border-box;font-size:11px;font-weight:700;color:{{ t.ti }};display:flex;align-items:center;justify-content:center">4</div></div>
+          <div style="width:36px;height:44px;display:flex;align-items:center;justify-content:center;color:{{ t.ti }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5h.01M12 12h.01M12 19h.01"></path></svg></div>
+        </div>
+        <div style="flex:1;background:#F4F5F6"></div>
+        <div style="position:absolute;top:88px;left:0;right:0;bottom:0;background:rgba(0,0,0,.45)"></div>
+        <div style="position:absolute;top:96px;left:8px;right:8px;background:{{ t.sh }};border-radius:28px;padding:20px;display:flex;flex-direction:column;gap:16px;box-shadow:0 12px 40px rgba(0,0,0,.3)">
+          <div style="display:flex;flex-direction:column;gap:4px"><div style="font-size:20px;font-weight:600;color:{{ t.ink }}">secure.chase.com</div><div style="display:flex;align-items:center;gap:6px;font-size:14px;color:{{ t.ink }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>Connection is secure</div></div>
+          <div style="border-radius:18px;background:{{ t.ac2 }};color:{{ t.oc2 }};padding:14px;display:flex;align-items:center;gap:12px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M9 20h6M12 16v4"></path></svg><div style="flex:1;display:flex;flex-direction:column"><div style="font-size:12px">This site sees</div><div style="font-size:15px;font-weight:600">Windows · Firefox · US East</div></div><div style="font-size:14px;font-weight:600">Change</div></div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;gap:12px"><div style="font-size:13px;color:{{ t.mu }}">Issued by</div><div style="font:500 12px 'Geist Mono',monospace;color:{{ t.ink }};text-align:right">DigiCert EV RSA CA G2</div></div>
+            <div style="display:flex;justify-content:space-between;gap:12px"><div style="font-size:13px;color:{{ t.mu }}">Issued to</div><div style="font:500 12px 'Geist Mono',monospace;color:{{ t.ink }};text-align:right">JPMorgan Chase and Co.</div></div>
+            <div style="display:flex;justify-content:space-between;gap:12px"><div style="font-size:13px;color:{{ t.mu }}">Expires</div><div style="font:500 12px 'Geist Mono',monospace;color:{{ t.ink }}">2027-03-14</div></div>
+          </div>
+          <div style="height:1px;background:{{ t.ln }}"></div>
+          <div style="height:48px;display:flex;align-items:center;gap:14px;color:{{ t.ink }};font-size:15px"><div style="color:{{ t.mu }};display:flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"></path></svg></div><div style="flex:1">Site permissions</div><div style="color:{{ t.mu }};display:flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"></path></svg></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="padding:0 80px 120px;display:flex;flex-direction:column;gap:24px">
+  <div style="display:flex;align-items:baseline;gap:16px"><div style="font:600 14px 'Geist Mono',monospace;color:#5E6266">04</div><div style="font-size:30px;font-weight:600;letter-spacing:-.01em">Settings, reorganised</div></div>
+  <div style="font-size:16px;line-height:1.5;color:#4A4E52;max-width:820px;text-wrap:pretty">The one long column is split into four groups, each opening its own page. The persona section sits near the top, and diagnostics move into Developer, so they're off the everyday path.</div>
+  <div id="settings-row" style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div data-screen-label="Settings" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Settings · root</div>
+      <div style="width:360px;height:1320px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+        <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ink }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ink }}"></div></div>
+        <div style="height:64px;flex-shrink:0;display:flex;align-items:center;gap:4px;padding:0 4px;color:{{ t.ink }}"><div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div><div style="flex:1;font-size:22px;font-weight:500">Settings</div><div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg></div></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:6px;padding:0 16px">
+          <sc-for list="{{ sgroups }}" as="g" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="font-size:13px;font-weight:600;color:{{ t.mu }};padding:10px 8px 2px">{{ g.title }}</div>
+              <div style="border-radius:20px;background:{{ t.s1 }};overflow:hidden;display:flex;flex-direction:column">
+                <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+                  <div style="min-height:60px;display:flex;align-items:center;gap:14px;padding:8px 16px;border-top:{{ it.div }} solid {{ t.ln }}"><div style="color:{{ t.mu }};display:flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ it.d }}"></path></svg></div><div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><div style="font-size:15px;color:{{ t.ink }}">{{ it.l }}</div><div style="font-size:13px;color:{{ t.mu }}">{{ it.s }}</div></div></div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+          <div style="font:500 12px 'Geist Mono',monospace;color:{{ t.mu }};text-align:center;padding:16px 0">Hatch · v0.1.0 (build 22)</div>
+        </div>
+      </div>
+    </div>
+
+    <div data-screen-label="Settings · Developer" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Settings › Developer</div>
+      <div style="width:360px;height:1320px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+        <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ink }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ink }}"></div></div>
+        <div style="height:64px;flex-shrink:0;display:flex;align-items:center;gap:4px;padding:0 4px;color:{{ t.ink }}"><div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div><div style="flex:1;font-size:22px;font-weight:500">Developer</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:12px;padding:0 16px">
+          <div style="font-size:14px;line-height:1.5;color:{{ t.mu }};padding:0 8px;text-wrap:pretty">For troubleshooting. Nothing here changes everyday browsing.</div>
+          <div style="border-radius:20px;background:{{ t.s1 }};display:flex;flex-direction:column">
+            <div style="min-height:64px;display:flex;align-items:center;gap:12px;padding:8px 16px"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="font-size:15px;color:{{ t.ink }}">Remote debugging</div><div style="font-size:13px;color:{{ t.mu }}">USB · about:debugging</div></div><div style="width:52px;height:32px;border-radius:16px;box-shadow:inset 0 0 0 2px {{ t.mu }};display:flex;align-items:center;padding:0 6px;box-sizing:border-box"><div style="width:16px;height:16px;border-radius:8px;background:{{ t.mu }}"></div></div></div>
+            <div style="min-height:64px;display:flex;align-items:center;gap:12px;padding:8px 16px;border-top:1px solid {{ t.ln }}"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="font-size:15px;color:{{ t.ink }}">Eruda devtools</div><div style="font-size:13px;color:{{ t.mu }}">Adds a console to the menu</div></div><div style="width:52px;height:32px;border-radius:16px;background:{{ t.ac }};display:flex;align-items:center;justify-content:flex-end;padding:0 4px;box-sizing:border-box"><div style="width:24px;height:24px;border-radius:12px;background:{{ t.oa }}"></div></div></div>
+            <div style="min-height:64px;display:flex;align-items:center;gap:12px;padding:8px 16px;border-top:1px solid {{ t.ln }}"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="font-size:15px;color:{{ t.ink }}">Self-check</div><div style="font-size:13px;color:{{ t.mu }}">Test what sites see on this tab</div></div><div style="height:36px;border-radius:18px;background:{{ t.s2 }};padding:0 16px;display:flex;align-items:center;font-size:14px;font-weight:600;color:{{ t.ink }}">Run</div></div>
+          </div>
+          <div style="border-radius:20px;background:{{ t.s1 }};padding:14px 16px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;gap:10px"><div style="width:8px;height:8px;border-radius:4px;background:{{ t.ok }}"></div><div style="flex:1;font-size:15px;color:{{ t.ink }}">Bridge extension</div><div style="font-size:14px;font-weight:600;color:{{ t.acT }}">View log</div></div>
+            <div style="font:500 12px 'Geist Mono',monospace;color:{{ t.mu }}">Connected · v0.3 · 0 errors</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font-size:13px;font-weight:600;color:{{ t.mu }};padding:6px 8px 0">Engine prefs (read back from Gecko)</div>
+            <div style="border-radius:20px;background:{{ t.s1 }};padding:6px 16px;display:flex;flex-direction:column">
+              <sc-for list="{{ prefs }}" as="pr" hint-placeholder-count="5">
+                <div style="min-height:40px;display:flex;align-items:center;gap:12px;font:500 11.5px 'Geist Mono',monospace"><div style="flex:1;color:{{ t.ink }};min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ pr.k }}</div><div style="color:{{ t.mu }}">{{ pr.v }}</div></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="padding:0 80px 120px;display:flex;flex-direction:column;gap:24px">
+  <div style="display:flex;align-items:baseline;gap:16px"><div style="font:600 14px 'Geist Mono',monospace;color:#5E6266">05</div><div style="font-size:30px;font-weight:600;letter-spacing:-.01em">Site rules &amp; permissions</div></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div data-screen-label="Site rules" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Site rules</div>
+      <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+        <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ink }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ink }}"></div></div>
+        <div style="height:64px;flex-shrink:0;display:flex;align-items:center;gap:4px;padding:0 12px 0 4px;color:{{ t.ink }}"><div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div><div style="flex:1;font-size:22px;font-weight:500">Site rules</div><div style="font-size:14px;font-weight:600;color:{{ t.acT }}">Import</div></div>
+        <div style="flex:1;padding:0 16px">
+          <div style="border-radius:20px;background:{{ t.s1 }};overflow:hidden;display:flex;flex-direction:column">
+            <sc-for list="{{ rules }}" as="r" hint-placeholder-count="4">
+              <div style="min-height:72px;display:flex;align-items:center;gap:12px;padding:10px 16px;border-top:{{ r.div }} solid {{ t.ln }}">
+                <div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><div style="font-size:15px;color:{{ t.ink }}">{{ r.name }}</div><div style="font:500 12px 'Geist Mono',monospace;color:{{ t.mu }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.pat }}</div><div style="font-size:12px;color:{{ t.mu }}">{{ r.kind }}</div></div>
+                <sc-if value="{{ r.on }}" hint-placeholder-val="{{ true }}"><div style="width:52px;height:32px;border-radius:16px;background:{{ t.ac }};display:flex;align-items:center;justify-content:flex-end;padding:0 4px;box-sizing:border-box;flex-shrink:0"><div style="width:24px;height:24px;border-radius:12px;background:{{ t.oa }}"></div></div></sc-if>
+                <sc-if value="{{ r.off }}" hint-placeholder-val="{{ false }}"><div style="width:52px;height:32px;border-radius:16px;box-shadow:inset 0 0 0 2px {{ t.mu }};display:flex;align-items:center;padding:0 6px;box-sizing:border-box;flex-shrink:0"><div style="width:16px;height:16px;border-radius:8px;background:{{ t.mu }}"></div></div></sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="position:absolute;right:16px;bottom:40px;height:56px;border-radius:16px;background:{{ t.ac2 }};color:{{ t.oc2 }};display:flex;align-items:center;gap:10px;padding:0 20px 0 16px;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.15)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>New rule</div>
+        <div style="height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center"><div style="width:108px;height:4px;border-radius:2px;background:{{ t.ink }}"></div></div>
+      </div>
+    </div>
+
+    <div data-screen-label="Site rule editor" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Rule editor</div>
+      <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+        <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ink }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ink }}"></div></div>
+        <div style="height:64px;flex-shrink:0;display:flex;align-items:center;gap:4px;padding:0 12px 0 4px;color:{{ t.ink }}"><div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></div><div style="flex:1;font-size:22px;font-weight:500">Edit rule</div><div style="height:40px;border-radius:20px;background:{{ t.ac }};color:{{ t.oa }};padding:0 18px;display:flex;align-items:center;font-size:14px;font-weight:600">Save</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:14px;padding:8px 16px">
+          <div style="border-radius:12px;box-shadow:inset 0 0 0 1px {{ t.ln2 }};padding:8px 14px;display:flex;flex-direction:column;gap:2px"><div style="font-size:12px;color:{{ t.mu }}">Name</div><div style="font-size:15px;color:{{ t.ink }}">Docs: desktop editor</div></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:{{ t.mu }};padding:0 4px">Match</div><div style="display:flex;flex-wrap:wrap;gap:6px"><div style="height:32px;border-radius:8px;background:{{ t.s1 }};padding:0 10px;display:flex;align-items:center;font:500 12px 'Geist Mono',monospace;color:{{ t.ink }}">*://docs.google.com/*</div><div style="height:32px;border-radius:8px;box-shadow:inset 0 0 0 1px {{ t.ln2 }};padding:0 10px;display:flex;align-items:center;font-size:13px;color:{{ t.mu }}">+ Add</div></div></div>
+          <div style="display:flex;border-radius:12px;background:{{ t.s1 }};padding:3px;gap:3px"><div style="flex:1;height:36px;border-radius:9px;background:{{ t.bg }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:{{ t.ink }}">JavaScript</div><div style="flex:1;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;color:{{ t.mu }}">CSS</div></div>
+          <div style="flex:1;min-height:180px;border-radius:14px;background:#16171A;padding:12px 14px;font:500 11.5px/1.65 'Geist Mono',monospace;color:#D6D8DC;white-space:pre">// run-at document-start
+Object.defineProperty(navigator,
+  'maxTouchPoints', { get: () => 0 });
+document.documentElement
+  .classList.add('desktop');</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="border-radius:12px;box-shadow:inset 0 0 0 1px {{ t.ln2 }};padding:8px 14px;display:flex;flex-direction:column;gap:2px"><div style="font-size:12px;color:{{ t.mu }}">World</div><div style="font-size:14px;color:{{ t.ink }}">Page</div></div>
+            <div style="border-radius:12px;box-shadow:inset 0 0 0 1px {{ t.ln2 }};padding:8px 14px;display:flex;flex-direction:column;gap:2px"><div style="font-size:12px;color:{{ t.mu }}">Run at</div><div style="font:500 13px 'Geist Mono',monospace;color:{{ t.ink }}">document-start</div></div>
+          </div>
+          <div style="height:44px;border-radius:22px;background:{{ t.s1 }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:{{ t.ink }}">Test on current site</div>
+        </div>
+        <div style="height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center"><div style="width:108px;height:4px;border-radius:2px;background:{{ t.ink }}"></div></div>
+      </div>
+    </div>
+
+    <div data-screen-label="Site permissions" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Site permissions</div>
+      <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+        <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ink }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ink }}"></div></div>
+        <div style="height:64px;flex-shrink:0;display:flex;align-items:center;gap:4px;padding:0 12px 0 4px;color:{{ t.ink }}"><div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div><div style="flex:1;font-size:22px;font-weight:500">Site permissions</div><div style="font-size:14px;font-weight:600;color:{{ t.dg }}">Clear all</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px;padding:0 16px">
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 8px"><div style="width:20px;height:20px;border-radius:5px;background:#00897B"></div><div style="flex:1;font-size:15px;font-weight:600;color:{{ t.ink }}">meet.google.com</div><div style="font-size:14px;font-weight:600;color:{{ t.acT }}">Clear</div></div>
+          <div style="border-radius:20px;background:{{ t.s1 }};overflow:hidden;display:flex;flex-direction:column">
+            <sc-for list="{{ perms }}" as="pm" hint-placeholder-count="5">
+              <div style="min-height:56px;display:flex;align-items:center;gap:14px;padding:0 12px 0 16px;border-top:{{ pm.div }} solid {{ t.ln }}"><div style="color:{{ t.mu }};display:flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ pm.d }}"></path></svg></div><div style="flex:1;font-size:15px;color:{{ t.ink }}">{{ pm.n }}</div><div style="height:32px;border-radius:16px;background:{{ pm.bg }};color:{{ pm.fg }};padding:0 12px;display:flex;align-items:center;gap:4px;font-size:13px;font-weight:600">{{ pm.txt }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg></div></div>
+            </sc-for>
+          </div>
+          <div style="border-radius:20px;background:{{ t.s1 }};min-height:60px;display:flex;align-items:center;gap:12px;padding:8px 16px;margin-top:8px"><div style="width:20px;height:20px;border-radius:5px;background:#34A853"></div><div style="flex:1;display:flex;flex-direction:column"><div style="font-size:15px;color:{{ t.ink }}">maps.google.com</div><div style="font-size:13px;color:{{ t.mu }}">Location allowed</div></div><div style="color:{{ t.mu }};display:flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg></div></div>
+          <div style="border-radius:20px;background:{{ t.s1 }};min-height:60px;display:flex;align-items:center;gap:12px;padding:8px 16px"><div style="width:20px;height:20px;border-radius:5px;background:#1A4C8C"></div><div style="flex:1;display:flex;flex-direction:column"><div style="font-size:15px;color:{{ t.ink }}">secure.chase.com</div><div style="font-size:13px;color:{{ t.mu }}">Notifications blocked</div></div><div style="color:{{ t.mu }};display:flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg></div></div>
+        </div>
+        <div style="height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center"><div style="width:108px;height:4px;border-radius:2px;background:{{ t.ink }}"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="padding:0 80px 160px;display:flex;flex-direction:column;gap:24px">
+  <div style="display:flex;align-items:baseline;gap:16px"><div style="font:600 14px 'Geist Mono',monospace;color:#5E6266">06</div><div style="font-size:30px;font-weight:600;letter-spacing:-.01em">Saved logins &amp; crash recovery</div></div>
+  <div style="font-size:16px;line-height:1.5;color:#4A4E52;max-width:820px;text-wrap:pretty">Logins open behind the system biometric prompt (not drawn by Hatch). The crash screen stays deliberately plain: static layout, no theming dependencies.</div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div data-screen-label="Saved logins" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Saved logins</div>
+      <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+        <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ink }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ink }}"></div></div>
+        <div style="height:64px;flex-shrink:0;display:flex;align-items:center;gap:4px;padding:0 4px;color:{{ t.ink }}"><div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div><div style="flex:1;font-size:22px;font-weight:500">Saved logins</div></div>
+        <div style="margin:0 16px 12px;height:48px;border-radius:24px;background:{{ t.s1 }};display:flex;align-items:center;gap:10px;padding:0 16px;color:{{ t.mu }};font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>Search 23 logins</div>
+        <div style="flex:1;padding:0 16px">
+          <div style="border-radius:20px;background:{{ t.s1 }};overflow:hidden;display:flex;flex-direction:column">
+            <sc-for list="{{ logins }}" as="lg" hint-placeholder-count="5">
+              <div style="min-height:64px;display:flex;align-items:center;gap:14px;padding:8px 16px;border-top:{{ lg.div }} solid {{ t.ln }}"><div style="width:36px;height:36px;border-radius:10px;background:{{ lg.c }};color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0">{{ lg.l }}</div><div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><div style="font-size:15px;color:{{ t.ink }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ lg.site }}</div><div style="font-size:13px;color:{{ t.mu }}">{{ lg.user }}</div></div></div>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:12px 8px;font-size:12px;color:{{ t.mu }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM4 4l16 16"></path></svg>Hidden from screenshots and recents</div>
+        </div>
+        <div style="position:absolute;right:16px;bottom:40px;width:56px;height:56px;border-radius:16px;background:{{ t.ac2 }};color:{{ t.oc2 }};display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.15)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></div>
+        <div style="height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center"><div style="width:108px;height:4px;border-radius:2px;background:{{ t.ink }}"></div></div>
+      </div>
+    </div>
+
+    <div data-screen-label="Saved login detail" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Login detail · password revealed</div>
+      <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+        <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ink }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ink }}"></div></div>
+        <div style="height:64px;flex-shrink:0;display:flex;align-items:center;gap:4px;padding:0 12px 0 4px;color:{{ t.ink }}"><div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div><div style="flex:1"></div><div style="font-size:14px;font-weight:600;color:{{ t.acT }}">Edit</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:16px;padding:0 16px">
+          <div style="display:flex;align-items:center;gap:14px;padding:0 8px 8px"><div style="width:48px;height:48px;border-radius:14px;background:#1A4C8C;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700">C</div><div style="display:flex;flex-direction:column"><div style="font-size:22px;font-weight:600;color:{{ t.ink }}">chase.com</div><div style="font:500 12px 'Geist Mono',monospace;color:{{ t.mu }}">https://secure.chase.com</div></div></div>
+          <div style="border-radius:20px;background:{{ t.s1 }};display:flex;flex-direction:column">
+            <div style="min-height:64px;display:flex;align-items:center;gap:8px;padding:8px 8px 8px 16px"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="font-size:12px;color:{{ t.mu }}">Username</div><div style="font-size:15px;color:{{ t.ink }}">alex.r</div></div><div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:{{ t.mu }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"></path></svg></div></div>
+            <div style="min-height:64px;display:flex;align-items:center;gap:4px;padding:8px 8px 8px 16px;border-top:1px solid {{ t.ln }}"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="font-size:12px;color:{{ t.mu }}">Password</div><div style="font:500 15px 'Geist Mono',monospace;color:{{ t.ink }}">sample-Passw0rd</div></div><div style="width:44px;height:44px;border-radius:22px;background:{{ t.ac2 }};display:flex;align-items:center;justify-content:center;color:{{ t.oc2 }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg></div><div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:{{ t.mu }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"></path></svg></div></div>
+          </div>
+          <div style="font-size:13px;color:{{ t.mu }};padding:0 8px">Last used 3 days ago · saved Aug 2026</div>
+          <div style="height:48px;border-radius:24px;box-shadow:inset 0 0 0 1px {{ t.ln2 }};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:{{ t.dg }};margin-top:8px">Delete login</div>
+        </div>
+        <div style="height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center"><div style="width:108px;height:4px;border-radius:2px;background:{{ t.ink }}"></div></div>
+      </div>
+    </div>
+
+    <div data-screen-label="Crash recovery" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#5E6266">Crash recovery</div>
+      <div style="width:360px;height:760px;border-radius:40px;overflow:hidden;background:{{ t.bg }};display:flex;flex-direction:column;box-shadow:0 0 0 8px #1B1D1F,0 30px 60px rgba(0,0,0,.18)">
+        <div style="height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;color:{{ t.ink }}"><div>9:41</div><div style="width:34px;height:10px;border-radius:3px;background:{{ t.ink }}"></div></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:14px;padding:48px 20px 0">
+          <img src="assets/hatch-icon-gray.svg" style="width:48px;height:48px;border-radius:14px" alt="Hatch">
+          <div style="font-size:24px;font-weight:600;letter-spacing:-.01em;color:{{ t.ink }}">Hatch did not start last time</div>
+          <div style="font-size:15px;line-height:1.5;color:{{ t.mu }};text-wrap:pretty">Something failed during startup. You can try again, or share the report below so it can be fixed.</div>
+          <div style="height:48px;border-radius:24px;background:{{ t.ac }};color:{{ t.oa }};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;margin-top:4px">Try again</div>
+          <div style="display:flex;gap:8px"><div style="flex:1;height:44px;border-radius:22px;background:{{ t.s1 }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:{{ t.ink }}">Share</div><div style="flex:1;height:44px;border-radius:22px;background:{{ t.s1 }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:{{ t.ink }}">Copy</div></div>
+          <div style="border-radius:14px;background:{{ t.s1 }};padding:12px;display:flex;flex-direction:column;gap:2px;overflow:hidden">
+            <sc-for list="{{ trace }}" as="ln" hint-placeholder-count="5"><div style="font:500 10.5px/1.6 'Geist Mono',monospace;color:{{ t.ink }};white-space:pre;overflow:hidden;text-overflow:ellipsis">{{ ln }}</div></sc-for>
+          </div>
+          <div style="height:44px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:{{ t.dg }}">Clear Hatch data…</div>
+        </div>
+        <div style="height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center"><div style="width:108px;height:4px;border-radius:2px;background:{{ t.ink }}"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;palette&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Graphite&quot;,&quot;Phosphor&quot;,&quot;Indigo&quot;,&quot;Cobalt&quot;,&quot;Amber&quot;,&quot;Raspberry&quot;],&quot;default&quot;:&quot;Graphite&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;dark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const P = {
+      Graphite: { L: { tb: '#E3E3E7', ink: '#1F1F23', acc: '#2B2B30', onAcc: '#FFFFFF' }, D: { tb: '#313136', pill: '#1A1A1E', ink: '#ECECEF', acc: '#D9D9DE', onAcc: '#1A1A1E' } },
+      Phosphor: { L: { tb: '#D8EEE5', ink: '#123A33', acc: '#0F6E57', onAcc: '#FFFFFF' }, D: { tb: '#1F3D3A', pill: '#11211E', ink: '#E2F1EA', acc: '#5DF27A', onAcc: '#0D1A12' } },
+      Indigo: { L: { tb: '#E5E5FB', ink: '#25226B', acc: '#4F46E5', onAcc: '#FFFFFF' }, D: { tb: '#26245A', pill: '#16152E', ink: '#ECEBFA', acc: '#A5A8FF', onAcc: '#16152E' } },
+      Cobalt: { L: { tb: '#DCEAFE', ink: '#0F2E5C', acc: '#1A63D8', onAcc: '#FFFFFF' }, D: { tb: '#14305A', pill: '#0B1930', ink: '#E6EEFB', acc: '#8AB8FF', onAcc: '#0B1930' } },
+      Amber: { L: { tb: '#FDE6D8', ink: '#5A2510', acc: '#C2410C', onAcc: '#FFFFFF' }, D: { tb: '#45240F', pill: '#231309', ink: '#FBECE2', acc: '#FFA25E', onAcc: '#231309' } },
+      Raspberry: { L: { tb: '#FAE0EB', ink: '#5C0F33', acc: '#B0175A', onAcc: '#FFFFFF' }, D: { tb: '#481330', pill: '#230818', ink: '#FBE6EF', acc: '#FF8DBE', onAcc: '#230818' } }
+    };
+    const name = this.state.pal ?? this.props.palette ?? 'Graphite';
+    const dark = this.state.dark ?? this.props.dark ?? false;
+    const p = P[name] || P.Graphite, m = dark ? p.D : p.L, o = dark ? p.L : p.D;
+    const N = dark
+      ? { bg: '#121214', s1: '#1F1F23', s2: '#2A2A2F', ink: '#ECECEF', mu: '#A2A2AD', ln: '#2C2C32', ln2: '#45454D', sh: '#1B1B1F', dg: '#F2B8B5', inv: '#E6E6EA', oinv: '#1B1B1F' }
+      : { bg: '#FFFFFF', s1: '#F1F1F4', s2: '#E4E4E9', ink: '#1B1B1F', mu: '#5F5F69', ln: '#E6E6EA', ln2: '#C9C9D1', sh: '#F7F7F9', dg: '#B3261E', inv: '#2F2F34', oinv: '#F2F2F5' };
+    const t = {
+      ...N, tb: m.tb, pl: dark ? m.pill : '#FFFFFF', ti: m.ink, ac: m.acc, oa: m.onAcc,
+      ac2: m.tb, oc2: m.ink, acT: dark ? m.acc : (name === 'Graphite' ? '#1B1B1F' : m.acc), invAc: o.acc === '#2B2B30' ? '#FFFFFF' : o.acc,
+      sep: dark ? 'rgba(0,0,0,.3)' : 'rgba(255,255,255,.4)'
+    };
+    t.invAc = dark ? (name === 'Graphite' ? '#1B1B1F' : p.L.acc) : (name === 'Graphite' ? '#FFFFFF' : p.D.acc);
+    const choices = Object.keys(P).map(k => ({ name: k, color: P[k].L.acc, bg: k === name ? '#1B1D1F' : '#F1F1F4', fg: k === name ? '#FFFFFF' : '#1B1D1F', pick: () => this.setState({ pal: k }) }));
+    const modes = [['Light', false], ['Dark', true]].map(([n, d]) => ({ name: n, bg: d === dark ? '#1B1D1F' : '#F1F1F4', fg: d === dark ? '#FFFFFF' : '#1B1D1F', pick: () => this.setState({ dark: d }) }));
+    const roles = [
+      ['primary', 'Persona chip, filled buttons, switches, progress', t.ac],
+      ['onPrimary', 'Content on primary', t.oa],
+      ['primaryContainer · toolbarDesktop', 'Toolbar + status bar in desktop mode, FAB, selection', t.ac2],
+      ['onPrimaryContainer', 'Toolbar icons/text in desktop mode', t.oc2],
+      ['surface', 'Screens, toolbar in phone mode', t.bg],
+      ['surfaceContainer', 'Pill (phone mode), grouped cards, chips', t.s1],
+      ['surfaceContainerHigh', 'Keyboard-adjacent, sheets', t.sh],
+      ['onSurface', 'Primary text', t.ink],
+      ['onSurfaceVariant', 'Secondary text, icons', t.mu],
+      ['outlineVariant', 'Dividers, chip outlines', t.ln2],
+      ['error', 'Destructive actions, validation', t.dg]
+    ].map(([k, use, c]) => ({ k, use, c }));
+    const keys = 'q w e r t y u i o p a s d f g h j k l ⇧ z x c v b n m ⌫ ?123 ↵'.split(' ');
+    const tabsBase = [
+      { title: 'AWS Console', fav: '#232A33', bar: '#232A33' },
+      { title: 'Trip budget – Google Docs', fav: '#2F6FDB', bar: '#2F6FDB' },
+      { title: 'Chase – Accounts', fav: '#1A4C8C', bar: '#1A4C8C' },
+      { title: 'Maps', fav: '#34A853', bar: '#E3E5E8' }
+    ];
+    const tabs = tabsBase.map((x, i) => ({ ...x, ringW: i === 0 ? '2px' : '0px' }));
+    const tabsSel = tabsBase.map((x, i) => { const s = i === 1 || i === 2; return { ...x, ringW: s ? '2px' : '0px', chk: s ? t.ac : 'transparent', op: s ? '1' : '.6' }; });
+    const D = {
+      plus: 'M12 5v14M5 12h14', find: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4', ext: 'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',
+      code: 'M8 6l-6 6 6 6M16 6l6 6-6 6', shield: 'M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z', key: 'M8 11a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM11 12l9-9M17 6l3 3',
+      puzzle: 'M4 8h4a2 2 0 1 1 4 0h4v4a2 2 0 1 1 0 4v4H4z', gear: 'M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2'
+    };
+    const menu = [['New tab', 'plus'], ['Find in page', 'find'], ['Open in another browser', 'ext'], ['Site rules', 'code', 1], ['Site permissions', 'shield'], ['Saved logins', 'key'], ['Add-ons', 'puzzle', 1], ['Settings', 'gear']]
+      .map(([label, ic, dv]) => ({ label, d: D[ic], div: dv ? '1px' : '0px' }));
+    const chip = (label, on, alt) => ({ label, bg: on ? t.ac : 'transparent', fg: on ? t.oa : t.ink, ring: on ? 'transparent' : t.ln2, w: on ? '600' : '400' });
+    const idChips = ['Windows · Firefox', 'macOS · Firefox', 'Linux · Firefox', 'Windows · Chrome', 'Real device', 'Windows · Edge-like'].map((l, i) => chip(l, i === 0));
+    const rgChips = ['Device', 'US East', 'UK', 'Germany', 'Japan'].map((l, i) => chip(l, i === 2));
+    const presets = [['Windows · Firefox', 'Win32 · 1920×1080 · 8 cores'], ['macOS · Firefox', 'MacIntel · 1512×982 · DPR 2'], ['Linux · Firefox', 'Linux x86_64 · 1920×1080'], ['Windows · Chrome', 'Win32 · 1920×1080 · 8 cores']]
+      .map(([name, sub], i) => ({ name, sub, div: i ? '1px' : '0px' }));
+    const ok = dark ? '#7FD69A' : '#1E7A3E';
+    const pill = (txt, kind) => kind === 'allow' ? { txt, bg: t.ac2, fg: t.oc2 } : kind === 'block' ? { txt, bg: dark ? '#4A1F1D' : '#FBE3E1', fg: t.dg } : { txt, bg: t.s2, fg: t.ink };
+    const perms = [
+      ['Camera', 'M2 7h14v11H2zM16 11l6-3v9l-6-3', 'Allow', 'allow'], ['Microphone', 'M9 3h6v11H9zM5 11a7 7 0 0 0 14 0M12 18v3', 'Allow', 'allow'],
+      ['Location', 'M12 21s-7-6-7-12a7 7 0 0 1 14 0c0 6-7 12-7 12z', 'Ask', 'ask'], ['Notifications', 'M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4', 'Block', 'block'],
+      ['Storage', 'M4 6c0-2 16-2 16 0v12c0 2-16 2-16 0zM4 6c0 2 16 2 16 0M4 12c0 2 16 2 16 0', 'Allow', 'allow']
+    ].map(([n, d, v, k], i) => ({ n, d, div: i ? '1px' : '0px', ...pill(v, k) }));
+    const rules = [
+      ['Docs: desktop editor', '*://docs.google.com/*', true, 'JS'], ['Hide app-install banners', '*://*/*', true, 'CSS'],
+      ['Maps: keep satellite toggle', '*://maps.google.com/*', false, 'JS'], ['Example: dark reader lite', '*://*.wikipedia.org/*', false, 'CSS · Example']
+    ].map(([name, pat, on, kind], i) => ({ name, pat, kind, div: i ? '1px' : '0px', on, off: !on }));
+    const logins = [['chase.com', 'alex.r', '#1A4C8C', 'C'], ['console.aws.amazon.com', 'cory@…', '#232A33', 'A'], ['booking.com', 'travel-acct', '#003B95', 'B'], ['github.com', 'corydouthat', '#24292F', 'G'], ['united.com', 'MP·••4471', '#1C2E6E', 'U']]
+      .map(([site, user, c, l], i) => ({ site, user, c, l, div: i ? '1px' : '0px' }));
+    const SI = {
+      home: 'M4 11l8-7 8 7v9H4z', pal: 'M12 3a9 9 0 1 0 0 18c1 0 1.5-.8 1.2-1.7-.4-1 .3-2.3 1.6-2.3H17a4 4 0 0 0 4-4c0-5-4-10-9-10z', bar: 'M3 4h18v16H3zM3 9h18',
+      mon: 'M3 4h18v12H3zM9 20h6M12 16v4', swap: 'M4 8h14l-3-3M20 16H6l3 3', tune: 'M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12', key: D.key, shield: D.shield, code: D.code,
+      link: 'M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1M14 10a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1', puzzle: D.puzzle, term: 'M3 4h18v16H3zM7 9l3 3-3 3M13 15h4'
+    };
+    const sgroups = [
+      ['General', [['Home page', 'about:home', 'home'], ['Appearance', name + ' · System theme', 'pal'], ['Toolbar', 'Hide when scrolling: off', 'bar']]],
+      ['Desktop persona', [['Default persona', 'Windows · Firefox · US East', 'mon'], ['Identities & regions', '4 presets · 1 custom', 'tune'], ['Host rewrites', 'Mobile → desktop for 6 hosts', 'swap'], ['Compatibility', 'Touch events, time-zone shim', 'tune']]],
+      ['Privacy & sites', [['Logins & passkeys', 'Autofill on · 23 saved', 'key'], ['Site permissions', '8 sites', 'shield'], ['Site rules', '2 of 4 on', 'code'], ['App links', 'Stay in Hatch', 'link']]],
+      ['More', [['Add-ons', '2 installed', 'puzzle'], ['Developer', 'Debugging, engine, diagnostics', 'term']]]
+    ].map(([title, items]) => ({ title, items: items.map(([l, s, ic], i) => ({ l, s, d: SI[ic], div: i ? '1px' : '0px' })) }));
+    const prefs = [['general.useragent.override', 'set'], ['privacy.resistFingerprinting', 'false'], ['dom.w3c_touch_events.enabled', '0'], ['intl.accept_languages', 'en-GB, en'], ['javascript.options.wasm', 'true']].map(([k, v]) => ({ k, v }));
+    const trace = ['java.lang.IllegalStateException: Gecko runtime', '  at app.hatch.engine.Engine.start(Engine.kt:88)', '  at app.hatch.HatchApp.onCreate(HatchApp.kt:41)', '  at android.app.Instrumentation.callApp…', 'Caused by: o.m.geckoview.GeckoRuntime…'];
+    Object.assign(t, { ok });
+    return { idChips, rgChips, presets, perms, rules, logins, sgroups, prefs, trace, t, choices, modes, roles, keys, tabs, tabsSel, menu, D, palName: name, modeName: dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

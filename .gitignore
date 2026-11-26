@@ -22,3 +22,6 @@ tool/headless/.cache/
 
 # Remote build host (user@host), machine-specific
 .buildhost
+
+# Paparazzi goldens (recordPaparazziDebug writes here; renders are review artefacts, not sources)
+app/src/test/snapshots/

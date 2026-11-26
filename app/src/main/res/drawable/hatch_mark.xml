@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The Hatch mark for in-app use (home screen, crash recovery): docs/design/hatch-icon-gray.svg as a vector, i.e. the
+  launcher artwork (ic_launcher_foreground.xml, same geometry) on the graphite #3A3A3F background, with the
+  background rounded to the design's r14 at 44 dp (14 / 44 × 108 = 34.36 viewport units).
+  CRT body from Openclipart #354586 "Retro CRT monitor screen icon" (CC0, https://openclipart.org/detail/354586);
+  screen recolored and prompt lines added by hand. Not AI-generated. See docs/icon.md.
+  Fixed colours on purpose: the mark looks the same in every palette and in dark mode.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="44dp" android:height="44dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#3A3A3F" android:pathData="M34.36,0H73.64A34.36,34.36 0,0 1,108 34.36V73.64A34.36,34.36 0,0 1,73.64 108H34.36A34.36,34.36 0,0 1,0 73.64V34.36A34.36,34.36 0,0 1,34.36 0Z" />
+    <group android:translateX="24.5" android:translateY="26" android:scaleX="3.3" android:scaleY="3.3">
+        <path android:fillColor="#F7E7BF" android:pathData="m16.351 13.309-5.588 3.278L.542 14.102l2.87-.688 1.03.346 8.7.21.158-1.765 1.027-.06zm.37-9.525 1.098.86-.555 4.881-1.032.251-.314-3.068zm-13.427 9.14L0 12.819.965 0 13.48.556l.377 6.127-1.475 6.506-5.578.432z" />
+        <path android:fillColor="#ECDCB6" android:pathData="m13.48.555 3.36 1.892-.119 1.337-.49 5.992-.132 1.403-1.772.965-.807.437-.159 1.64-9.83-.304-.118-.503-.12-.49 6.271.173.199-.767 1.706.119-.013.714.926.027zm2.87 12.753-.462 1.243-5 2.342-9.989-1.601-.357-1.19 10.253 2.076z" />
+        <path android:fillColor="#0D1A12" android:pathData="m11.469 11.972-10.133-.49.727-10.133 10.253.238z" />
+        <path android:fillColor="#5DF27A" android:pathData="m2.6 3.2 5.6.13-.05 1-5.6-.13z" />
+        <path android:fillColor="#5DF27A" android:pathData="m2.5 5.3 3.4.08-.05 1-3.4-.08z" />
+        <path android:fillColor="#5DF27A" android:pathData="m2.4 7.4 4.6.1-.05 1-4.6-.1z" />
+        <path android:fillColor="#5DF27A" android:pathData="m2.3 9.5 1.6.04-.05 1.1-1.6-.04z" />
+    </group>
+</vector>

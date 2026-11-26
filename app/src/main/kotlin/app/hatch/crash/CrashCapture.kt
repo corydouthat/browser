@@ -22,8 +22,9 @@ import java.util.Locale
  *    shows its own crash dialog and kills the process as usual.
  *
  * [startupCompleted] is called by `MainActivity` a few seconds after its first resume; a crash before that
- * trips safe mode on the next start, a crash after it only writes `last.txt` (visible in Settings → footer in a
- * later milestone; shareable from the recovery screen if the next start trips too).
+ * trips safe mode on the next start. A crash after it only writes `last.txt`; the next normal start offers it once
+ * ([unseenReport], a "Hatch closed unexpectedly" snackbar opening [CrashRecoveryActivity] in report mode) and
+ * [acknowledge] then moves it to `previous.txt`. Native (Gecko) crashes write nothing, so no snackbar follows them.
  */
 object CrashCapture {
     @Volatile var safeMode: Boolean = false
@@ -33,12 +34,17 @@ object CrashCapture {
     @Volatile var lastReport: String? = null
         private set
 
+    /** A crash report from the previous session that the user has not been offered yet (normal starts only). */
+    @Volatile var unseenReport: String? = null
+        private set
+
     fun install(app: Application) {
         val dir = dir(app)
         val marker = marker(app)
         val markerExisted = marker.exists()
         safeMode = CrashReport.decide(markerExisted) == CrashReport.StartMode.SAFE
         lastReport = if (safeMode) runCatching { lastFile(app).takeIf { it.exists() }?.readText() }.getOrNull() else null
+        unseenReport = pendingReport(dir, safeMode)
         runCatching {
             dir.mkdirs()
             marker.writeText(BuildConfig.VERSION_CODE.toString())
@@ -74,6 +80,26 @@ object CrashCapture {
         lastReport = null
     }
 
+    /** The [unseenReport] was offered (viewed or dismissed): keep it as `previous.txt`, never offer it again. */
+    fun acknowledge(context: Context) {
+        acknowledge(dir(context))
+        unseenReport = null
+    }
+
+    /** `last.txt` of a crash after startup; null in safe mode (the recovery screen shows it instead). */
+    internal fun pendingReport(dir: File, safeMode: Boolean): String? =
+        if (safeMode) null else runCatching { File(dir, LAST).takeIf { it.exists() }?.readText() }.getOrNull()
+
+    internal fun acknowledge(dir: File) {
+        runCatching {
+            val last = File(dir, LAST)
+            if (!last.exists()) return
+            val previous = File(dir, PREVIOUS)
+            previous.delete()
+            if (!last.renameTo(previous)) last.delete()
+        }
+    }
+
     fun appLine(): String =
         "${BuildConfig.APPLICATION_ID} ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) ${BuildConfig.GIT_SHA}" +
             (if (BuildConfig.DEBUG) " debug" else " release")
@@ -85,5 +111,8 @@ object CrashCapture {
 
     private fun dir(context: Context) = File(context.filesDir, "crashes")
     private fun marker(context: Context) = File(dir(context), "startup.marker")
-    private fun lastFile(context: Context) = File(dir(context), "last.txt")
+    private fun lastFile(context: Context) = File(dir(context), LAST)
+
+    private const val LAST = "last.txt"
+    private const val PREVIOUS = "previous.txt"
 }

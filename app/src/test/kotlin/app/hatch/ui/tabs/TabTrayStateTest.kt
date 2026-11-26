@@ -49,13 +49,13 @@ class TabTrayStateTest {
     /** PERF-08: the thumbnail request follows the card width, not a fixed 240 dp. */
     @Test
     fun `thumbnail size follows the grid geometry`() {
-        // 360 dp phone, 2 columns: (360 - 24 - 12) / 2 = 162 dp
-        assertEquals(162f, TabTrayState.cardWidthDp(360f, 2))
-        assertEquals(446, TabTrayState.thumbnailSizePx(360f, 2, 2.75f))
-        assertEquals(425, TabTrayState.thumbnailSizePx(360f, 2, 2.625f))
-        // 600 dp, 3 columns: (600 - 24 - 24) / 3 = 184 dp; 840 dp, 4 columns: (840 - 24 - 36) / 4 = 195 dp
-        assertEquals(184f, TabTrayState.cardWidthDp(600f, 3))
-        assertEquals(195f, TabTrayState.cardWidthDp(840f, 4))
+        // 360 dp phone, 2 columns, 16 dp padding ("Tab tray" mockup): (360 - 32 - 12) / 2 = 158 dp
+        assertEquals(158f, TabTrayState.cardWidthDp(360f, 2))
+        assertEquals(435, TabTrayState.thumbnailSizePx(360f, 2, 2.75f))
+        assertEquals(415, TabTrayState.thumbnailSizePx(360f, 2, 2.625f))
+        // 608 dp, 3 columns: (608 - 32 - 24) / 3 = 184 dp; 840 dp, 4 columns: (840 - 32 - 36) / 4 = 193 dp
+        assertEquals(184f, TabTrayState.cardWidthDp(608f, 3))
+        assertEquals(193f, TabTrayState.cardWidthDp(840f, 4))
         assertEquals(1, TabTrayState.thumbnailSizePx(10f, 2, 1f), "never below 1 px")
         assertEquals(0f, TabTrayState.cardWidthDp(360f, 0))
     }

@@ -1,0 +1,2461 @@
+{
+  "schema": 1,
+  "harnessVersion": "1.1.0",
+  "persona": "win-firefox__de",
+  "env": "headless",
+  "url": "http://127.0.0.1:37851/index.html?persona=win-firefox__de&env=headless",
+  "crossOrigin": "http://127.0.0.1:35801",
+  "startedAt": "2026-10-21T13:33:59.112Z",
+  "finishedAt": "2026-10-21T13:33:59.804Z",
+  "durationMs": 692,
+  "harness": {
+    "version": "1.1.0",
+    "probes": [
+      "ua",
+      "touch",
+      "media",
+      "screen",
+      "intl",
+      "geo",
+      "webgl",
+      "misc",
+      "contexts",
+      "server",
+      "interactive",
+      "libraries"
+    ],
+    "libraryManifest": {
+      "ua-parser-js": "2.0.10",
+      "mobile-detect": "1.4.5",
+      "ismobilejs": "1.1.1",
+      "is-mobile": "5.0.0",
+      "detect-it": "4.0.1",
+      "bowser": "2.14.1",
+      "platform": "1.3.6",
+      "react-device-detect": "2.2.3",
+      "device-detector-js": "3.0.3",
+      "modernizr": "3.13.1",
+      "react": "18.3.1",
+      "react-dom": "18.3.1"
+    }
+  },
+  "expected": {
+    "id": "win-firefox__de",
+    "identity": "win-firefox",
+    "region": "de",
+    "name": "Windows · Firefox 158 / Germany (Berlin)",
+    "desktop": true,
+    "touch": false,
+    "chromeLike": false,
+    "tzShim": false,
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+    "platform": "Win32",
+    "oscpu": "Windows NT 10.0; Win64; x64",
+    "appVersion": "5.0 (Windows)",
+    "maxTouchPoints": 0,
+    "hasTouchEvent": false,
+    "pointerFine": true,
+    "hoverHover": true,
+    "minLayoutWidth": 1366,
+    "screen": {
+      "width": 1920,
+      "height": 1080,
+      "availWidth": 1920,
+      "availHeight": 1040,
+      "colorDepth": 24,
+      "dpr": 1
+    },
+    "dpr": 1,
+    "hardwareConcurrency": 8,
+    "languages": [
+      "de-DE",
+      "de",
+      "en"
+    ],
+    "acceptLanguage": "de-DE,de;q=0.9,en;q=0.8",
+    "timeZone": "Europe/Berlin",
+    "geolocation": {
+      "latitude": 52.52,
+      "longitude": 13.405,
+      "accuracyMeters": 50
+    },
+    "webgl": {
+      "vendor": "Google Inc. (NVIDIA)",
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1660 SUPER Direct3D11 vs_5_0 ps_5_0, D3D11)"
+    },
+    "userAgentData": false,
+    "uaData": null,
+    "locale": "de-DE",
+    "librariesMobile": false
+  },
+  "observed": {
+    "ua": {
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+      "platform": "Win32",
+      "oscpu": "Windows NT 10.0; Win64; x64",
+      "appVersion": "5.0 (Windows)",
+      "appName": "Netscape",
+      "appCodeName": "Mozilla",
+      "product": "Gecko",
+      "productSub": "20100101",
+      "vendor": "",
+      "vendorSub": "",
+      "buildID": "20181001000000",
+      "webdriver": true,
+      "userAgentData": null
+    },
+    "touch": {
+      "maxTouchPoints": 0,
+      "msMaxTouchPoints": null,
+      "ontouchstartWindow": false,
+      "ontouchstartElement": false,
+      "ontouchstartDocument": false,
+      "touchEventDefined": false,
+      "touchDefined": false,
+      "touchListDefined": false,
+      "documentTouch": false,
+      "createTouch": false,
+      "createEventTouch": false,
+      "createEventError": "NotSupportedError",
+      "orientationInWindow": false,
+      "onorientationchange": false,
+      "pointerEventDefined": true,
+      "onpointerdown": true
+    },
+    "media": {
+      "pointerFine": true,
+      "pointerCoarse": false,
+      "pointerNone": false,
+      "hoverHover": true,
+      "hoverNone": false,
+      "anyPointerCoarse": false,
+      "anyPointerFine": true,
+      "anyHoverHover": true,
+      "anyHoverNone": false,
+      "orientationPortrait": false,
+      "minWidth992": true,
+      "minWidth1024": true,
+      "minWidth1200": true,
+      "minWidth1280": true,
+      "minDeviceWidth1024": true,
+      "maxDeviceWidth480": false,
+      "minResolution2": false,
+      "device": {
+        "screenWidth": 1920,
+        "screenHeight": 1080,
+        "dpr": 1,
+        "deviceWidthMatches": true,
+        "deviceHeightMatches": true,
+        "deviceAspectRatioMatches": true,
+        "resolutionMatches": true,
+        "webkitDprMatches": true,
+        "jsDeviceWidth": 1920
+      },
+      "serialization": {
+        "js": [
+          {
+            "query": "(pointer:fine)",
+            "media": "(pointer: fine)"
+          },
+          {
+            "query": "(POINTER: FINE)",
+            "media": "(pointer: fine)"
+          },
+          {
+            "query": "(  any-pointer : coarse )",
+            "media": "(any-pointer: coarse)"
+          },
+          {
+            "query": "(hover:hover) and (min-width:100px)",
+            "media": "(hover: hover) and (min-width: 100px)"
+          },
+          {
+            "query": "(pointer: fine)",
+            "media": "(pointer: fine)"
+          }
+        ],
+        "cssom": {
+          "(pointer:fine)": "(pointer: fine)",
+          "(POINTER: FINE)": "(pointer: fine)",
+          "(  any-pointer : coarse )": "(any-pointer: coarse)",
+          "(hover:hover) and (min-width:100px)": "(hover: hover) and (min-width: 100px)",
+          "(pointer: fine)": "(pointer: fine)"
+        }
+      }
+    },
+    "css": {
+      "pointerFine": true,
+      "hoverHover": true,
+      "anyPointerCoarse": false,
+      "anyHoverHover": true,
+      "bp992": true,
+      "bp1024": true,
+      "bp1200": true,
+      "bp1280": true,
+      "minDeviceWidth1024": true,
+      "maxDeviceWidth480": false,
+      "minResolution2": false,
+      "orientationPortrait": false,
+      "stylesheetLoaded": true
+    },
+    "screen": {
+      "width": 1920,
+      "height": 1080,
+      "availWidth": 1920,
+      "availHeight": 1040,
+      "availLeft": 0,
+      "availTop": 0,
+      "colorDepth": 24,
+      "pixelDepth": 24,
+      "dpr": 1,
+      "orientationType": "landscape-primary",
+      "orientationAngle": 0,
+      "mozOrientation": "landscape-primary"
+    },
+    "layout": {
+      "clientWidth": 1920,
+      "clientHeight": 994,
+      "innerWidth": 1920,
+      "innerHeight": 994,
+      "outerWidth": 1920,
+      "outerHeight": 1080,
+      "screenX": 0,
+      "screenY": 0,
+      "mozInnerScreenX": 0,
+      "mozInnerScreenY": 86,
+      "visualViewportWidth": 1920,
+      "visualViewportScale": 1,
+      "bodyScrollWidth": 1920
+    },
+    "intl": {
+      "languages": [
+        "de-DE",
+        "de",
+        "en"
+      ],
+      "language": "de-DE",
+      "timeZone": "Europe/Berlin",
+      "locale": "en-US",
+      "numberLocale": "en-US",
+      "dateOffsetMinutes": 120,
+      "intlOffsetMinutes": 120,
+      "dateString": "Wed Oct 21 2026 15:33:59 GMT+0200 (Central European Summer Time)",
+      "dateTzName": "Central European Summer Time",
+      "toLocaleString": "10/21/2026, 3:33:59 PM",
+      "error": null
+    },
+    "geo": {
+      "status": "ok",
+      "latitude": 52.51999198358658,
+      "longitude": 13.40499998538223,
+      "accuracy": 50,
+      "altitude": null,
+      "heading": null,
+      "speed": null,
+      "timestamp": 1792589639160,
+      "positionCtor": "[object GeolocationPosition]",
+      "coordsCtor": "[object GeolocationCoordinates]",
+      "permission": "granted",
+      "elapsedMs": 47,
+      "watchPositionType": "function"
+    },
+    "webgl": {
+      "available": false,
+      "webgl2": false
+    },
+    "misc": {
+      "pluginsLength": 5,
+      "pluginNames": [
+        "PDF Viewer",
+        "Chrome PDF Viewer",
+        "Chromium PDF Viewer",
+        "Microsoft Edge PDF Viewer",
+        "WebKit built-in PDF"
+      ],
+      "mimeTypesLength": 2,
+      "pdfViewerEnabled": true,
+      "deviceMemory": null,
+      "connection": null,
+      "doNotTrack": "unspecified",
+      "cookieEnabled": true,
+      "toString": {
+        "reference": {
+          "text": "function onLine() {\n    [native code]\n}",
+          "name": "onLine"
+        },
+        "checks": [
+          {
+            "name": "get Navigator.prototype.userAgent",
+            "native": true,
+            "text": "function userAgent() {\n    [native code]\n}",
+            "expected": "function userAgent() {\n    [native code]\n}",
+            "fnName": "get userAgent",
+            "fnLength": 0
+          },
+          {
+            "name": "get Navigator.prototype.platform",
+            "native": true,
+            "text": "function platform() {\n    [native code]\n}",
+            "expected": "function platform() {\n    [native code]\n}",
+            "fnName": "get platform",
+            "fnLength": 0
+          },
+          {
+            "name": "get Navigator.prototype.oscpu",
+            "native": true,
+            "text": "function oscpu() {\n    [native code]\n}",
+            "expected": "function oscpu() {\n    [native code]\n}",
+            "fnName": "get oscpu",
+            "fnLength": 0
+          },
+          {
+            "name": "get Navigator.prototype.appVersion",
+            "native": true,
+            "text": "function appVersion() {\n    [native code]\n}",
+            "expected": "function appVersion() {\n    [native code]\n}",
+            "fnName": "get appVersion",
+            "fnLength": 0
+          },
+          {
+            "name": "get Navigator.prototype.maxTouchPoints",
+            "native": true,
+            "text": "function maxTouchPoints() {\n    [native code]\n}",
+            "expected": "function maxTouchPoints() {\n    [native code]\n}",
+            "fnName": "get maxTouchPoints",
+            "fnLength": 0
+          },
+          {
+            "name": "get Navigator.prototype.hardwareConcurrency",
+            "native": true,
+            "text": "function hardwareConcurrency() {\n    [native code]\n}",
+            "expected": "function hardwareConcurrency() {\n    [native code]\n}",
+            "fnName": "get hardwareConcurrency",
+            "fnLength": 0
+          },
+          {
+            "name": "get Navigator.prototype.languages",
+            "native": true,
+            "text": "function languages() {\n    [native code]\n}",
+            "expected": "function languages() {\n    [native code]\n}",
+            "fnName": "get languages",
+            "fnLength": 0
+          },
+          {
+            "name": "get Navigator.prototype.language",
+            "native": true,
+            "text": "function language() {\n    [native code]\n}",
+            "expected": "function language() {\n    [native code]\n}",
+            "fnName": "get language",
+            "fnLength": 0
+          },
+          {
+            "name": "get Navigator.prototype.plugins",
+            "native": true,
+            "text": "function plugins() {\n    [native code]\n}",
+            "expected": "function plugins() {\n    [native code]\n}",
+            "fnName": "get plugins",
+            "fnLength": 0
+          },
+          {
+            "name": "get Navigator.prototype.mimeTypes",
+            "native": true,
+            "text": "function mimeTypes() {\n    [native code]\n}",
+            "expected": "function mimeTypes() {\n    [native code]\n}",
+            "fnName": "get mimeTypes",
+            "fnLength": 0
+          },
+          {
+            "name": "get Navigator.prototype.pdfViewerEnabled",
+            "native": true,
+            "text": "function pdfViewerEnabled() {\n    [native code]\n}",
+            "expected": "function pdfViewerEnabled() {\n    [native code]\n}",
+            "fnName": "get pdfViewerEnabled",
+            "fnLength": 0
+          },
+          {
+            "name": "get Navigator.prototype.vendor",
+            "native": true,
+            "text": "function vendor() {\n    [native code]\n}",
+            "expected": "function vendor() {\n    [native code]\n}",
+            "fnName": "get vendor",
+            "fnLength": 0
+          },
+          {
+            "name": "get Navigator.prototype.geolocation",
+            "native": true,
+            "text": "function geolocation() {\n    [native code]\n}",
+            "expected": "function geolocation() {\n    [native code]\n}",
+            "fnName": "get geolocation",
+            "fnLength": 0
+          },
+          {
+            "name": "get Navigator.prototype.webdriver",
+            "native": true,
+            "text": "function webdriver() {\n    [native code]\n}",
+            "expected": "function webdriver() {\n    [native code]\n}",
+            "fnName": "get webdriver",
+            "fnLength": 0
+          },
+          {
+            "name": "get Screen.prototype.width",
+            "native": true,
+            "text": "function width() {\n    [native code]\n}",
+            "expected": "function width() {\n    [native code]\n}",
+            "fnName": "get width",
+            "fnLength": 0
+          },
+          {
+            "name": "get Screen.prototype.height",
+            "native": true,
+            "text": "function height() {\n    [native code]\n}",
+            "expected": "function height() {\n    [native code]\n}",
+            "fnName": "get height",
+            "fnLength": 0
+          },
+          {
+            "name": "get Screen.prototype.availWidth",
+            "native": true,
+            "text": "function availWidth() {\n    [native code]\n}",
+            "expected": "function availWidth() {\n    [native code]\n}",
+            "fnName": "get availWidth",
+            "fnLength": 0
+          },
+          {
+            "name": "get Screen.prototype.availHeight",
+            "native": true,
+            "text": "function availHeight() {\n    [native code]\n}",
+            "expected": "function availHeight() {\n    [native code]\n}",
+            "fnName": "get availHeight",
+            "fnLength": 0
+          },
+          {
+            "name": "get Screen.prototype.colorDepth",
+            "native": true,
+            "text": "function colorDepth() {\n    [native code]\n}",
+            "expected": "function colorDepth() {\n    [native code]\n}",
+            "fnName": "get colorDepth",
+            "fnLength": 0
+          },
+          {
+            "name": "get Screen.prototype.pixelDepth",
+            "native": true,
+            "text": "function pixelDepth() {\n    [native code]\n}",
+            "expected": "function pixelDepth() {\n    [native code]\n}",
+            "fnName": "get pixelDepth",
+            "fnLength": 0
+          },
+          {
+            "name": "get Screen.prototype.orientation",
+            "native": true,
+            "text": "function orientation() {\n    [native code]\n}",
+            "expected": "function orientation() {\n    [native code]\n}",
+            "fnName": "get orientation",
+            "fnLength": 0
+          },
+          {
+            "name": "get MediaQueryList.prototype.media",
+            "native": true,
+            "text": "function media() {\n    [native code]\n}",
+            "expected": "function media() {\n    [native code]\n}",
+            "fnName": "get media",
+            "fnLength": 0
+          },
+          {
+            "name": "get MediaQueryList.prototype.matches",
+            "native": true,
+            "text": "function matches() {\n    [native code]\n}",
+            "expected": "function matches() {\n    [native code]\n}",
+            "fnName": "get matches",
+            "fnLength": 0
+          },
+          {
+            "name": "get ScreenOrientation.prototype.type",
+            "native": true,
+            "text": "function type() {\n    [native code]\n}",
+            "expected": "function type() {\n    [native code]\n}",
+            "fnName": "get type",
+            "fnLength": 0
+          },
+          {
+            "name": "get ScreenOrientation.prototype.angle",
+            "native": true,
+            "text": "function angle() {\n    [native code]\n}",
+            "expected": "function angle() {\n    [native code]\n}",
+            "fnName": "get angle",
+            "fnLength": 0
+          },
+          {
+            "name": "get GeolocationCoordinates.prototype.latitude",
+            "native": true,
+            "text": "function latitude() {\n    [native code]\n}",
+            "expected": "function latitude() {\n    [native code]\n}",
+            "fnName": "get latitude",
+            "fnLength": 0
+          },
+          {
+            "name": "get GeolocationCoordinates.prototype.longitude",
+            "native": true,
+            "text": "function longitude() {\n    [native code]\n}",
+            "expected": "function longitude() {\n    [native code]\n}",
+            "fnName": "get longitude",
+            "fnLength": 0
+          },
+          {
+            "name": "get GeolocationCoordinates.prototype.accuracy",
+            "native": true,
+            "text": "function accuracy() {\n    [native code]\n}",
+            "expected": "function accuracy() {\n    [native code]\n}",
+            "fnName": "get accuracy",
+            "fnLength": 0
+          },
+          {
+            "name": "get GeolocationPosition.prototype.coords",
+            "native": true,
+            "text": "function coords() {\n    [native code]\n}",
+            "expected": "function coords() {\n    [native code]\n}",
+            "fnName": "get coords",
+            "fnLength": 0
+          },
+          {
+            "name": "get GeolocationPosition.prototype.timestamp",
+            "native": true,
+            "text": "function timestamp() {\n    [native code]\n}",
+            "expected": "function timestamp() {\n    [native code]\n}",
+            "fnName": "get timestamp",
+            "fnLength": 0
+          },
+          {
+            "name": "get PointerEvent.prototype.pointerType",
+            "native": true,
+            "text": "function pointerType() {\n    [native code]\n}",
+            "expected": "function pointerType() {\n    [native code]\n}",
+            "fnName": "get pointerType",
+            "fnLength": 0
+          },
+          {
+            "name": "get PointerEvent.prototype.width",
+            "native": true,
+            "text": "function width() {\n    [native code]\n}",
+            "expected": "function width() {\n    [native code]\n}",
+            "fnName": "get width",
+            "fnLength": 0
+          },
+          {
+            "name": "get PointerEvent.prototype.height",
+            "native": true,
+            "text": "function height() {\n    [native code]\n}",
+            "expected": "function height() {\n    [native code]\n}",
+            "fnName": "get height",
+            "fnLength": 0
+          },
+          {
+            "name": "get PointerEvent.prototype.pressure",
+            "native": true,
+            "text": "function pressure() {\n    [native code]\n}",
+            "expected": "function pressure() {\n    [native code]\n}",
+            "fnName": "get pressure",
+            "fnLength": 0
+          },
+          {
+            "name": "get MouseEvent.prototype.mozInputSource",
+            "native": true,
+            "text": "function mozInputSource() {\n    [native code]\n}",
+            "expected": "function mozInputSource() {\n    [native code]\n}",
+            "fnName": "get mozInputSource",
+            "fnLength": 0
+          },
+          {
+            "name": "get window.devicePixelRatio",
+            "native": true,
+            "text": "function devicePixelRatio() {\n    [native code]\n}",
+            "expected": "function devicePixelRatio() {\n    [native code]\n}",
+            "fnName": "get devicePixelRatio",
+            "fnLength": 0
+          },
+          {
+            "name": "get window.outerWidth",
+            "native": true,
+            "text": "function outerWidth() {\n    [native code]\n}",
+            "expected": "function outerWidth() {\n    [native code]\n}",
+            "fnName": "get outerWidth",
+            "fnLength": 0
+          },
+          {
+            "name": "get window.outerHeight",
+            "native": true,
+            "text": "function outerHeight() {\n    [native code]\n}",
+            "expected": "function outerHeight() {\n    [native code]\n}",
+            "fnName": "get outerHeight",
+            "fnLength": 0
+          },
+          {
+            "name": "window.matchMedia",
+            "native": true,
+            "text": "function matchMedia() {\n    [native code]\n}",
+            "expected": "function matchMedia() {\n    [native code]\n}",
+            "fnName": "matchMedia",
+            "fnLength": 1
+          },
+          {
+            "name": "Geolocation.prototype.getCurrentPosition",
+            "native": true,
+            "text": "function getCurrentPosition() {\n    [native code]\n}",
+            "expected": "function getCurrentPosition() {\n    [native code]\n}",
+            "fnName": "getCurrentPosition",
+            "fnLength": 1
+          },
+          {
+            "name": "Geolocation.prototype.watchPosition",
+            "native": true,
+            "text": "function watchPosition() {\n    [native code]\n}",
+            "expected": "function watchPosition() {\n    [native code]\n}",
+            "fnName": "watchPosition",
+            "fnLength": 1
+          },
+          {
+            "name": "Geolocation.prototype.clearWatch",
+            "native": true,
+            "text": "function clearWatch() {\n    [native code]\n}",
+            "expected": "function clearWatch() {\n    [native code]\n}",
+            "fnName": "clearWatch",
+            "fnLength": 1
+          },
+          {
+            "name": "WebGLRenderingContext.prototype.getParameter",
+            "native": true,
+            "text": "function getParameter() {\n    [native code]\n}",
+            "expected": "function getParameter() {\n    [native code]\n}",
+            "fnName": "getParameter",
+            "fnLength": 1
+          },
+          {
+            "name": "WebGLRenderingContext.prototype.getExtension",
+            "native": true,
+            "text": "function getExtension() {\n    [native code]\n}",
+            "expected": "function getExtension() {\n    [native code]\n}",
+            "fnName": "getExtension",
+            "fnLength": 1
+          },
+          {
+            "name": "WebGL2RenderingContext.prototype.getParameter",
+            "native": true,
+            "text": "function getParameter() {\n    [native code]\n}",
+            "expected": "function getParameter() {\n    [native code]\n}",
+            "fnName": "getParameter",
+            "fnLength": 1
+          },
+          {
+            "name": "Permissions.prototype.query",
+            "native": true,
+            "text": "function query() {\n    [native code]\n}",
+            "expected": "function query() {\n    [native code]\n}",
+            "fnName": "query",
+            "fnLength": 1
+          },
+          {
+            "name": "Document.prototype.createEvent",
+            "native": true,
+            "text": "function createEvent() {\n    [native code]\n}",
+            "expected": "function createEvent() {\n    [native code]\n}",
+            "fnName": "createEvent",
+            "fnLength": 1
+          },
+          {
+            "name": "Date",
+            "native": true,
+            "text": "function Date() {\n    [native code]\n}",
+            "expected": "function Date() {\n    [native code]\n}",
+            "fnName": "Date",
+            "fnLength": 7
+          },
+          {
+            "name": "Date.now",
+            "native": true,
+            "text": "function now() {\n    [native code]\n}",
+            "expected": "function now() {\n    [native code]\n}",
+            "fnName": "now",
+            "fnLength": 0
+          },
+          {
+            "name": "Date.prototype.getTimezoneOffset",
+            "native": true,
+            "text": "function getTimezoneOffset() {\n    [native code]\n}",
+            "expected": "function getTimezoneOffset() {\n    [native code]\n}",
+            "fnName": "getTimezoneOffset",
+            "fnLength": 0
+          },
+          {
+            "name": "Date.prototype.toString",
+            "native": true,
+            "text": "function toString() {\n    [native code]\n}",
+            "expected": "function toString() {\n    [native code]\n}",
+            "fnName": "toString",
+            "fnLength": 0
+          },
+          {
+            "name": "Date.prototype.getHours",
+            "native": true,
+            "text": "function getHours() {\n    [native code]\n}",
+            "expected": "function getHours() {\n    [native code]\n}",
+            "fnName": "getHours",
+            "fnLength": 0
+          },
+          {
+            "name": "Intl.DateTimeFormat",
+            "native": true,
+            "text": "function DateTimeFormat() {\n    [native code]\n}",
+            "expected": "function DateTimeFormat() {\n    [native code]\n}",
+            "fnName": "DateTimeFormat",
+            "fnLength": 0
+          },
+          {
+            "name": "Function.prototype.toString",
+            "native": true,
+            "text": "function toString() {\n    [native code]\n}",
+            "expected": "function toString() {\n    [native code]\n}",
+            "fnName": "toString",
+            "fnLength": 0
+          },
+          {
+            "name": "Object.getOwnPropertyDescriptor",
+            "native": true,
+            "text": "function getOwnPropertyDescriptor() {\n    [native code]\n}",
+            "expected": "function getOwnPropertyDescriptor() {\n    [native code]\n}",
+            "fnName": "getOwnPropertyDescriptor",
+            "fnLength": 2
+          }
+        ],
+        "prototypeOfToString": "function toString() {\n    [native code]\n}",
+        "allNative": true
+      },
+      "descriptors": {
+        "navigatorOwnProps": [],
+        "screenOwnProps": [],
+        "navigatorProtoKeys": 47,
+        "missingAccessors": [],
+        "getterOwnShape": [
+          "length",
+          "name"
+        ],
+        "navigatorSymbolProps": [],
+        "windowSymbolProps": [],
+        "windowHatchMarker": false
+      }
+    },
+    "contexts": {
+      "top": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+        "platform": "Win32",
+        "oscpu": "Windows NT 10.0; Win64; x64",
+        "appVersion": "5.0 (Windows)",
+        "languages": [
+          "de-DE",
+          "de",
+          "en"
+        ],
+        "hardwareConcurrency": 8,
+        "maxTouchPoints": 0,
+        "timeZone": "Europe/Berlin",
+        "locale": "en-US",
+        "screenWidth": 1920,
+        "screenHeight": 1080,
+        "dpr": 1,
+        "ontouchstart": false,
+        "touchEvent": false,
+        "dateOffset": -120,
+        "pointerFine": true
+      },
+      "sameOrigin": {
+        "snapshot": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+          "platform": "Win32",
+          "oscpu": "Windows NT 10.0; Win64; x64",
+          "appVersion": "5.0 (Windows)",
+          "languages": [
+            "de-DE",
+            "de",
+            "en"
+          ],
+          "hardwareConcurrency": 8,
+          "maxTouchPoints": 0,
+          "timeZone": "Europe/Berlin",
+          "locale": "en-US",
+          "screenWidth": 1920,
+          "screenHeight": 1080,
+          "dpr": 1,
+          "ontouchstart": false,
+          "touchEvent": false,
+          "dateOffset": -120,
+          "pointerFine": true
+        },
+        "origin": "http://127.0.0.1:37851"
+      },
+      "crossOrigin": {
+        "snapshot": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+          "platform": "Win32",
+          "oscpu": "Windows NT 10.0; Win64; x64",
+          "appVersion": "5.0 (Windows)",
+          "languages": [
+            "de-DE",
+            "de",
+            "en"
+          ],
+          "hardwareConcurrency": 8,
+          "maxTouchPoints": 0,
+          "timeZone": "Europe/Berlin",
+          "locale": "en-US",
+          "screenWidth": 1920,
+          "screenHeight": 1080,
+          "dpr": 1,
+          "ontouchstart": false,
+          "touchEvent": false,
+          "dateOffset": -120,
+          "pointerFine": true
+        },
+        "origin": "http://127.0.0.1:35801"
+      },
+      "srcdoc": {
+        "snapshot": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+          "platform": "Win32",
+          "oscpu": "Windows NT 10.0; Win64; x64",
+          "appVersion": "5.0 (Windows)",
+          "languages": [
+            "de-DE",
+            "de",
+            "en"
+          ],
+          "hardwareConcurrency": 8,
+          "maxTouchPoints": 0,
+          "timeZone": "Europe/Berlin",
+          "locale": "en-US",
+          "screenWidth": 1920,
+          "screenHeight": 1080,
+          "dpr": 1,
+          "ontouchstart": false,
+          "touchEvent": false,
+          "dateOffset": -120,
+          "pointerFine": true
+        },
+        "origin": "http://127.0.0.1:37851"
+      },
+      "data": {
+        "snapshot": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+          "platform": "Win32",
+          "oscpu": "Windows NT 10.0; Win64; x64",
+          "appVersion": "5.0 (Windows)",
+          "languages": [
+            "de-DE",
+            "de",
+            "en"
+          ],
+          "hardwareConcurrency": 8,
+          "maxTouchPoints": 0,
+          "timeZone": "Europe/Berlin",
+          "locale": "en-US",
+          "screenWidth": 1920,
+          "screenHeight": 1080,
+          "dpr": 1,
+          "ontouchstart": false,
+          "touchEvent": false,
+          "dateOffset": -120,
+          "pointerFine": true
+        },
+        "origin": "null"
+      },
+      "blob": {
+        "snapshot": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+          "platform": "Win32",
+          "oscpu": "Windows NT 10.0; Win64; x64",
+          "appVersion": "5.0 (Windows)",
+          "languages": [
+            "de-DE",
+            "de",
+            "en"
+          ],
+          "hardwareConcurrency": 8,
+          "maxTouchPoints": 0,
+          "timeZone": "Europe/Berlin",
+          "locale": "en-US",
+          "screenWidth": 1920,
+          "screenHeight": 1080,
+          "dpr": 1,
+          "ontouchstart": false,
+          "touchEvent": false,
+          "dateOffset": -120,
+          "pointerFine": true
+        },
+        "origin": "http://127.0.0.1:37851"
+      },
+      "sandbox": {
+        "snapshot": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+          "platform": "Win32",
+          "oscpu": "Windows NT 10.0; Win64; x64",
+          "appVersion": "5.0 (Windows)",
+          "languages": [
+            "de-DE",
+            "de",
+            "en"
+          ],
+          "hardwareConcurrency": 8,
+          "maxTouchPoints": 0,
+          "timeZone": "Europe/Berlin",
+          "locale": "en-US",
+          "screenWidth": 1920,
+          "screenHeight": 1080,
+          "dpr": 1,
+          "ontouchstart": false,
+          "touchEvent": false,
+          "dateOffset": -120,
+          "pointerFine": true
+        },
+        "origin": "null"
+      },
+      "aboutBlank": {
+        "snapshot": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+          "platform": "Win32",
+          "oscpu": "Windows NT 10.0; Win64; x64",
+          "appVersion": "5.0 (Windows)",
+          "languages": [
+            "de-DE",
+            "de",
+            "en"
+          ],
+          "hardwareConcurrency": 8,
+          "maxTouchPoints": 0,
+          "timeZone": "Europe/Berlin",
+          "locale": "en-US",
+          "screenWidth": 1920,
+          "screenHeight": 1080,
+          "dpr": 1,
+          "ontouchstart": false,
+          "touchEvent": false,
+          "dateOffset": -120,
+          "pointerFine": true
+        },
+        "later": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+          "platform": "Win32",
+          "oscpu": "Windows NT 10.0; Win64; x64",
+          "appVersion": "5.0 (Windows)",
+          "languages": [
+            "de-DE",
+            "de",
+            "en"
+          ],
+          "hardwareConcurrency": 8,
+          "maxTouchPoints": 0,
+          "timeZone": "Europe/Berlin",
+          "locale": "en-US",
+          "screenWidth": 1920,
+          "screenHeight": 1080,
+          "dpr": 1,
+          "ontouchstart": false,
+          "touchEvent": false,
+          "dateOffset": -120,
+          "pointerFine": true
+        },
+        "url": "about:blank"
+      },
+      "worker": {
+        "snapshot": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+          "platform": "Win32",
+          "oscpu": null,
+          "appVersion": "5.0 (Windows)",
+          "languages": [
+            "de-DE",
+            "de",
+            "en"
+          ],
+          "hardwareConcurrency": 2,
+          "timeZone": "Europe/Berlin",
+          "locale": "en-US",
+          "dateOffset": -120,
+          "touchEvent": false
+        },
+        "kind": "file"
+      },
+      "sharedWorker": {
+        "snapshot": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+          "platform": "Win32",
+          "oscpu": null,
+          "appVersion": "5.0 (Windows)",
+          "languages": [
+            "de-DE",
+            "de",
+            "en"
+          ],
+          "hardwareConcurrency": 2,
+          "timeZone": "Europe/Berlin",
+          "locale": "en-US",
+          "screenWidth": "error: can't access property \"width\", w.screen is undefined",
+          "screenHeight": "error: can't access property \"height\", w.screen is undefined",
+          "ontouchstart": false,
+          "touchEvent": false,
+          "dateOffset": -120,
+          "pointerFine": "error: w.matchMedia is not a function"
+        },
+        "kind": "blob"
+      },
+      "crossRealm": {
+        "referenceText": "function onLine() {\n    [native code]\n}",
+        "frameReferenceText": "function onLine() {\n    [native code]\n}",
+        "checks": [
+          {
+            "name": "frame toString on top Navigator.hardwareConcurrency",
+            "text": "function hardwareConcurrency() {\n    [native code]\n}",
+            "expected": "function hardwareConcurrency() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "top toString on frame Navigator.hardwareConcurrency",
+            "text": "function hardwareConcurrency() {\n    [native code]\n}",
+            "expected": "function hardwareConcurrency() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "frame toString on top Navigator.maxTouchPoints",
+            "text": "function maxTouchPoints() {\n    [native code]\n}",
+            "expected": "function maxTouchPoints() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "top toString on frame Navigator.maxTouchPoints",
+            "text": "function maxTouchPoints() {\n    [native code]\n}",
+            "expected": "function maxTouchPoints() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "frame toString on top Navigator.userAgent",
+            "text": "function userAgent() {\n    [native code]\n}",
+            "expected": "function userAgent() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "top toString on frame Navigator.userAgent",
+            "text": "function userAgent() {\n    [native code]\n}",
+            "expected": "function userAgent() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "frame toString on top Navigator.platform",
+            "text": "function platform() {\n    [native code]\n}",
+            "expected": "function platform() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "top toString on frame Navigator.platform",
+            "text": "function platform() {\n    [native code]\n}",
+            "expected": "function platform() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "frame toString on top Navigator.languages",
+            "text": "function languages() {\n    [native code]\n}",
+            "expected": "function languages() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "top toString on frame Navigator.languages",
+            "text": "function languages() {\n    [native code]\n}",
+            "expected": "function languages() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "frame toString on top Screen.width",
+            "text": "function width() {\n    [native code]\n}",
+            "expected": "function width() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "top toString on frame Screen.width",
+            "text": "function width() {\n    [native code]\n}",
+            "expected": "function width() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "frame toString on top Screen.height",
+            "text": "function height() {\n    [native code]\n}",
+            "expected": "function height() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "top toString on frame Screen.height",
+            "text": "function height() {\n    [native code]\n}",
+            "expected": "function height() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "frame toString on top Screen.availHeight",
+            "text": "function availHeight() {\n    [native code]\n}",
+            "expected": "function availHeight() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "top toString on frame Screen.availHeight",
+            "text": "function availHeight() {\n    [native code]\n}",
+            "expected": "function availHeight() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "frame toString on top window.devicePixelRatio",
+            "text": "function devicePixelRatio() {\n    [native code]\n}",
+            "expected": "function devicePixelRatio() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "frame toString on top matchMedia",
+            "text": "function matchMedia() {\n    [native code]\n}",
+            "expected": "function matchMedia() {\n    [native code]\n}",
+            "native": true
+          },
+          {
+            "name": "top toString on frame Function.prototype.toString",
+            "text": "function toString() {\n    [native code]\n}",
+            "expected": "function toString() {\n    [native code]\n}",
+            "native": true
+          }
+        ]
+      }
+    },
+    "server": {
+      "first": {
+        "headers": {
+          "host": "127.0.0.1:37851",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+          "accept": "*/*",
+          "accept-language": "de-DE,de;q=0.9,en;q=0.8",
+          "accept-encoding": "gzip, deflate, br, zstd",
+          "referer": "http://127.0.0.1:37851/index.html?persona=win-firefox__de&env=headless",
+          "x-hatch-probe": "1",
+          "connection": "keep-alive",
+          "sec-fetch-dest": "empty",
+          "sec-fetch-mode": "cors",
+          "sec-fetch-site": "same-origin",
+          "priority": "u=4",
+          "pragma": "no-cache",
+          "cache-control": "no-cache"
+        },
+        "acceptCH": "Sec-CH-UA-Mobile, Sec-CH-UA-Platform, Viewport-Width, DPR",
+        "status": 200
+      },
+      "second": {
+        "headers": {
+          "host": "127.0.0.1:37851",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+          "accept": "*/*",
+          "accept-language": "de-DE,de;q=0.9,en;q=0.8",
+          "accept-encoding": "gzip, deflate, br, zstd",
+          "referer": "http://127.0.0.1:37851/index.html?persona=win-firefox__de&env=headless",
+          "x-hatch-probe": "1",
+          "connection": "keep-alive",
+          "sec-fetch-dest": "empty",
+          "sec-fetch-mode": "cors",
+          "sec-fetch-site": "same-origin",
+          "priority": "u=4",
+          "pragma": "no-cache",
+          "cache-control": "no-cache"
+        },
+        "acceptCH": "Sec-CH-UA-Mobile, Sec-CH-UA-Platform, Viewport-Width, DPR",
+        "status": 200
+      }
+    },
+    "interactive": {
+      "pointerType": null,
+      "mozInputSource": null,
+      "trusted": null,
+      "events": []
+    },
+    "libraries": [
+      {
+        "name": "ua-parser-js",
+        "version": "2.0.10",
+        "mobile": false,
+        "detail": {
+          "browser": "Firefox 158.0",
+          "os": "Windows 10",
+          "deviceType": "desktop(undefined)",
+          "withClientHintsDeviceType": "desktop(undefined)",
+          "withClientHintsOs": "Windows 10",
+          "engine": "Gecko"
+        }
+      },
+      {
+        "name": "mobile-detect",
+        "version": "1.4.5",
+        "mobile": false,
+        "detail": {
+          "mobile": null,
+          "phone": null,
+          "tablet": null,
+          "os": null
+        }
+      },
+      {
+        "name": "ismobilejs",
+        "version": "1.1.1",
+        "mobile": false,
+        "detail": {
+          "any": false,
+          "phone": false,
+          "tablet": false,
+          "apple": false,
+          "android": false
+        }
+      },
+      {
+        "name": "is-mobile",
+        "version": "5.0.0",
+        "mobile": false,
+        "detail": {
+          "phoneOnly": false
+        }
+      },
+      {
+        "name": "detect-it",
+        "version": "4.0.1",
+        "mobile": false,
+        "detail": {
+          "deviceType": "mouseOnly",
+          "primaryInput": "mouse",
+          "supportsTouchEvents": false,
+          "supportsPointerEvents": true,
+          "supportsPassiveEvents": true
+        }
+      },
+      {
+        "name": "bowser",
+        "version": "2.14.1",
+        "mobile": false,
+        "detail": {
+          "platformType": "desktop",
+          "browser": "Firefox",
+          "os": "Windows",
+          "engine": "Gecko"
+        }
+      },
+      {
+        "name": "platform",
+        "version": "1.3.6",
+        "mobile": false,
+        "detail": {
+          "name": "Firefox",
+          "version": "158.0",
+          "os": "Windows 10 64-bit",
+          "product": null,
+          "manufacturer": null,
+          "layout": "Gecko"
+        }
+      },
+      {
+        "name": "react-device-detect",
+        "version": "2.2.3",
+        "mobile": false,
+        "detail": {
+          "isMobile": false,
+          "isMobileOnly": false,
+          "isTablet": false,
+          "isDesktop": true,
+          "deviceType": "browser",
+          "osName": "Windows",
+          "browserName": "Firefox",
+          "isAndroid": false,
+          "isIOS": false
+        }
+      },
+      {
+        "name": "device-detector-js",
+        "version": "3.0.3",
+        "mobile": false,
+        "detail": {
+          "deviceType": "desktop",
+          "os": "Windows 10.0",
+          "client": "Firefox 158.0",
+          "bot": null
+        }
+      },
+      {
+        "name": "modernizr",
+        "version": "3.13.1",
+        "mobile": false,
+        "detail": {
+          "touchevents": false,
+          "pointerevents": true,
+          "version": "3.13.1"
+        }
+      }
+    ],
+    "librariesManifest": {
+      "ua-parser-js": "2.0.10",
+      "mobile-detect": "1.4.5",
+      "ismobilejs": "1.1.1",
+      "is-mobile": "5.0.0",
+      "detect-it": "4.0.1",
+      "bowser": "2.14.1",
+      "platform": "1.3.6",
+      "react-device-detect": "2.2.3",
+      "device-detector-js": "3.0.3",
+      "modernizr": "3.13.1",
+      "react": "18.3.1",
+      "react-dom": "18.3.1"
+    }
+  },
+  "signals": [
+    {
+      "id": "ua.userAgent",
+      "group": "ua",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "navigator.userAgent",
+      "status": "PASS",
+      "expected": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+      "actual": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0"
+    },
+    {
+      "id": "ua.platform",
+      "group": "ua",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "navigator.platform",
+      "status": "PASS",
+      "expected": "Win32",
+      "actual": "Win32"
+    },
+    {
+      "id": "ua.oscpu",
+      "group": "ua",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "navigator.oscpu",
+      "status": "PASS",
+      "expected": "Windows NT 10.0; Win64; x64",
+      "actual": "Windows NT 10.0; Win64; x64"
+    },
+    {
+      "id": "ua.appVersion",
+      "group": "ua",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "navigator.appVersion",
+      "status": "PASS",
+      "expected": "5.0 (Windows)",
+      "actual": "5.0 (Windows)"
+    },
+    {
+      "id": "ua.userAgentData",
+      "group": "ua",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "navigator.userAgentData present iff chromeLike",
+      "status": "PASS",
+      "expected": false,
+      "actual": false
+    },
+    {
+      "id": "ua.uaDataBrands",
+      "group": "ua",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "userAgentData.brands match the persona",
+      "status": "INFO",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "id": "ua.uaDataMobile",
+      "group": "ua",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "userAgentData.mobile === false and platform matches",
+      "status": "INFO",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "id": "ua.vendor",
+      "group": "ua",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "navigator.vendor (\"\" on Gecko, \"Google Inc.\" on Chrome)",
+      "status": "PASS",
+      "expected": "",
+      "actual": ""
+    },
+    {
+      "id": "ua.webdriver",
+      "group": "ua",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "navigator.webdriver (true under selenium, false on device)",
+      "status": "INFO",
+      "expected": null,
+      "actual": true
+    },
+    {
+      "id": "touch.maxTouchPoints",
+      "group": "touch",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "navigator.maxTouchPoints",
+      "status": "PASS",
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "id": "touch.ontouchstart",
+      "group": "touch",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "\"ontouchstart\" in window",
+      "status": "PASS",
+      "expected": false,
+      "actual": false
+    },
+    {
+      "id": "touch.ontouchstartElement",
+      "group": "touch",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "\"ontouchstart\" in document.documentElement",
+      "status": "PASS",
+      "expected": false,
+      "actual": false
+    },
+    {
+      "id": "touch.TouchEvent",
+      "group": "touch",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "typeof TouchEvent !== \"undefined\"",
+      "status": "PASS",
+      "expected": false,
+      "actual": false
+    },
+    {
+      "id": "touch.createEvent",
+      "group": "touch",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "document.createEvent(\"TouchEvent\") succeeds (engine-level, not shimmable)",
+      "status": "PASS",
+      "expected": false,
+      "actual": false
+    },
+    {
+      "id": "touch.orientation",
+      "group": "touch",
+      "tier": "hard",
+      "scope": "device",
+      "desc": "\"orientation\" in window (mobile-only property)",
+      "status": "SKIPPED",
+      "expected": false,
+      "actual": false,
+      "note": "device-scoped signal (not evaluated in headless)"
+    },
+    {
+      "id": "touch.pointerEvents",
+      "group": "touch",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "PointerEvent supported",
+      "status": "INFO",
+      "expected": null,
+      "actual": true
+    },
+    {
+      "id": "media.pointerFine",
+      "group": "media",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "matchMedia(\"(pointer: fine)\")",
+      "status": "PASS",
+      "expected": true,
+      "actual": true
+    },
+    {
+      "id": "media.hoverHover",
+      "group": "media",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "matchMedia(\"(hover: hover)\")",
+      "status": "PASS",
+      "expected": true,
+      "actual": true
+    },
+    {
+      "id": "media.anyPointerCoarse",
+      "group": "media",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "matchMedia(\"(any-pointer: coarse)\")",
+      "status": "PASS",
+      "expected": false,
+      "actual": false
+    },
+    {
+      "id": "media.anyHoverHover",
+      "group": "media",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "matchMedia(\"(any-hover: hover)\")",
+      "status": "PASS",
+      "expected": true,
+      "actual": true
+    },
+    {
+      "id": "media.orientation",
+      "group": "media",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "matchMedia(\"(orientation: portrait)\") — known limitation on a phone held upright",
+      "status": "INFO",
+      "expected": null,
+      "actual": "landscape"
+    },
+    {
+      "id": "media.deviceWidthVsScreen",
+      "group": "media",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "matchMedia(\"(device-width: <screen.width>px)\") agrees with screen.width",
+      "status": "PASS",
+      "expected": "device-width == screen.width",
+      "actual": true
+    },
+    {
+      "id": "media.deviceHeightVsScreen",
+      "group": "media",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "matchMedia(\"(device-height: <screen.height>px)\") agrees with screen.height",
+      "status": "PASS",
+      "expected": "device-height == screen.height",
+      "actual": true
+    },
+    {
+      "id": "media.deviceAspectRatio",
+      "group": "media",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "matchMedia(\"(device-aspect-ratio: w/h)\") agrees with screen.width/height",
+      "status": "PASS",
+      "expected": "device-aspect-ratio == screen aspect",
+      "actual": true
+    },
+    {
+      "id": "media.resolutionVsDpr",
+      "group": "media",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "matchMedia(\"(resolution: <dpr>dppx)\") agrees with devicePixelRatio",
+      "status": "PASS",
+      "expected": "resolution == devicePixelRatio",
+      "actual": true
+    },
+    {
+      "id": "media.serialization",
+      "group": "media",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "MediaQueryList.media is the CSSOM-normalised serialisation for every spelling",
+      "status": "PASS",
+      "expected": "normalised",
+      "actual": "5 spellings agree"
+    },
+    {
+      "id": "css.pointerFine",
+      "group": "css",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "@media (pointer: fine) applies",
+      "status": "PASS",
+      "expected": true,
+      "actual": true
+    },
+    {
+      "id": "css.hoverHover",
+      "group": "css",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "@media (hover: hover) applies",
+      "status": "PASS",
+      "expected": true,
+      "actual": true
+    },
+    {
+      "id": "css.anyPointerCoarse",
+      "group": "css",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "@media (any-pointer: coarse) applies",
+      "status": "PASS",
+      "expected": false,
+      "actual": false
+    },
+    {
+      "id": "css.anyHoverHover",
+      "group": "css",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "@media (any-hover: hover) applies",
+      "status": "PASS",
+      "expected": true,
+      "actual": true
+    },
+    {
+      "id": "css.bp992",
+      "group": "css",
+      "tier": "hard",
+      "scope": "device",
+      "desc": "@media (min-width: 992px) applies",
+      "status": "SKIPPED",
+      "expected": true,
+      "actual": true,
+      "note": "device-scoped signal (not evaluated in headless)"
+    },
+    {
+      "id": "css.bp1024",
+      "group": "css",
+      "tier": "hard",
+      "scope": "device",
+      "desc": "@media (min-width: 1024px) applies",
+      "status": "SKIPPED",
+      "expected": true,
+      "actual": true,
+      "note": "device-scoped signal (not evaluated in headless)"
+    },
+    {
+      "id": "css.bp1200",
+      "group": "css",
+      "tier": "hard",
+      "scope": "device",
+      "desc": "@media (min-width: 1200px) applies",
+      "status": "SKIPPED",
+      "expected": true,
+      "actual": true,
+      "note": "device-scoped signal (not evaluated in headless)"
+    },
+    {
+      "id": "css.bp1280",
+      "group": "css",
+      "tier": "hard",
+      "scope": "device",
+      "desc": "@media (min-width: 1280px) applies",
+      "status": "SKIPPED",
+      "expected": true,
+      "actual": true,
+      "note": "device-scoped signal (not evaluated in headless)"
+    },
+    {
+      "id": "css.minDeviceWidth1024",
+      "group": "css",
+      "tier": "soft",
+      "scope": "device",
+      "desc": "@media (min-device-width: 1024px) applies",
+      "status": "SKIPPED",
+      "expected": true,
+      "actual": true,
+      "note": "device-scoped signal (not evaluated in headless)"
+    },
+    {
+      "id": "css.maxDeviceWidth480",
+      "group": "css",
+      "tier": "soft",
+      "scope": "device",
+      "desc": "stylesheet @media (max-device-width: 480px) does not apply (engine evaluates device-* from the real display: documented limitation)",
+      "status": "SKIPPED",
+      "expected": false,
+      "actual": false,
+      "note": "device-scoped signal (not evaluated in headless)"
+    },
+    {
+      "id": "css.minResolution2",
+      "group": "css",
+      "tier": "soft",
+      "scope": "device",
+      "desc": "stylesheet @media (min-resolution: 2dppx) follows the persona dpr (engine evaluates it from the real display: documented limitation)",
+      "status": "SKIPPED",
+      "expected": false,
+      "actual": false,
+      "note": "device-scoped signal (not evaluated in headless)"
+    },
+    {
+      "id": "css.orientation",
+      "group": "css",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "@media (orientation: portrait) applies",
+      "status": "INFO",
+      "expected": null,
+      "actual": "landscape"
+    },
+    {
+      "id": "layout.clientWidth",
+      "group": "layout",
+      "tier": "hard",
+      "scope": "device",
+      "desc": "documentElement.clientWidth >= persona layout width",
+      "status": "SKIPPED",
+      "expected": ">= 1366",
+      "actual": 1920,
+      "note": "device-scoped signal (not evaluated in headless)"
+    },
+    {
+      "id": "layout.innerWidth",
+      "group": "layout",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "window.innerWidth / innerHeight",
+      "status": "INFO",
+      "expected": null,
+      "actual": {
+        "innerWidth": 1920,
+        "innerHeight": 994
+      }
+    },
+    {
+      "id": "layout.outerVsScreen",
+      "group": "layout",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "outerWidth/outerHeight fit inside screen.width/height",
+      "status": "PASS",
+      "expected": "<= 1920x1080",
+      "actual": {
+        "outerWidth": 1920,
+        "outerHeight": 1080
+      }
+    },
+    {
+      "id": "layout.chromeGeometry",
+      "group": "layout",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "outer >= inner and the content offset inside the window (mozInnerScreen* - screen*) fits in outer - inner",
+      "status": "PASS",
+      "expected": "coherent",
+      "actual": {
+        "top": 86,
+        "left": 0,
+        "chromeH": 86,
+        "chromeW": 0
+      }
+    },
+    {
+      "id": "screen.width",
+      "group": "screen",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "screen.width",
+      "status": "PASS",
+      "expected": 1920,
+      "actual": 1920
+    },
+    {
+      "id": "screen.height",
+      "group": "screen",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "screen.height",
+      "status": "PASS",
+      "expected": 1080,
+      "actual": 1080
+    },
+    {
+      "id": "screen.availWidth",
+      "group": "screen",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "screen.availWidth",
+      "status": "PASS",
+      "expected": 1920,
+      "actual": 1920
+    },
+    {
+      "id": "screen.availHeight",
+      "group": "screen",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "screen.availHeight",
+      "status": "PASS",
+      "expected": 1040,
+      "actual": 1040
+    },
+    {
+      "id": "screen.colorDepth",
+      "group": "screen",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "screen.colorDepth",
+      "status": "PASS",
+      "expected": 24,
+      "actual": 24
+    },
+    {
+      "id": "screen.pixelDepth",
+      "group": "screen",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "screen.pixelDepth === colorDepth",
+      "status": "PASS",
+      "expected": 24,
+      "actual": 24
+    },
+    {
+      "id": "screen.dpr",
+      "group": "screen",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "window.devicePixelRatio",
+      "status": "PASS",
+      "expected": 1,
+      "actual": 1
+    },
+    {
+      "id": "screen.orientationType",
+      "group": "screen",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "screen.orientation.type agrees with screen aspect",
+      "status": "PASS",
+      "expected": "landscape-*",
+      "actual": "landscape-primary"
+    },
+    {
+      "id": "intl.languages",
+      "group": "intl",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "navigator.languages",
+      "status": "PASS",
+      "expected": [
+        "de-DE",
+        "de",
+        "en"
+      ],
+      "actual": [
+        "de-DE",
+        "de",
+        "en"
+      ]
+    },
+    {
+      "id": "intl.language",
+      "group": "intl",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "navigator.language === languages[0]",
+      "status": "PASS",
+      "expected": "de-DE",
+      "actual": "de-DE"
+    },
+    {
+      "id": "intl.timeZone",
+      "group": "intl",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "Intl.DateTimeFormat().resolvedOptions().timeZone",
+      "status": "PASS",
+      "expected": "Europe/Berlin",
+      "actual": "Europe/Berlin"
+    },
+    {
+      "id": "intl.locale",
+      "group": "intl",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "Intl default locale == persona locale (soft in the en-US-only headless build, hard on the phone)",
+      "status": "FAIL",
+      "expected": "de-DE",
+      "actual": "en-US"
+    },
+    {
+      "id": "intl.dateOffsetCoherence",
+      "group": "intl",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "Date.getTimezoneOffset() agrees with the Intl time zone",
+      "status": "PASS",
+      "expected": "equal",
+      "actual": {
+        "date": 120,
+        "intl": 120
+      }
+    },
+    {
+      "id": "geo.position",
+      "group": "geo",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "getCurrentPosition() returns the persona location",
+      "status": "PASS",
+      "expected": {
+        "latitude": 52.52,
+        "longitude": 13.405
+      },
+      "actual": {
+        "latitude": 52.51999198358658,
+        "longitude": 13.40499998538223,
+        "accuracy": 50
+      }
+    },
+    {
+      "id": "geo.accuracy",
+      "group": "geo",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "position accuracy is plausible",
+      "status": "PASS",
+      "expected": "~50",
+      "actual": 50
+    },
+    {
+      "id": "geo.permission",
+      "group": "geo",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "permissions.query({name:\"geolocation\"}) is \"granted\" when a location is spoofed",
+      "status": "PASS",
+      "expected": "granted",
+      "actual": "granted"
+    },
+    {
+      "id": "webgl.available",
+      "group": "webgl",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "a WebGL context could be created",
+      "status": "INFO",
+      "expected": null,
+      "actual": false
+    },
+    {
+      "id": "webgl.vendor",
+      "group": "webgl",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "UNMASKED_VENDOR_WEBGL",
+      "status": "SKIPPED",
+      "expected": "Google Inc. (NVIDIA)",
+      "actual": null,
+      "note": "no WebGL context in this environment"
+    },
+    {
+      "id": "webgl.renderer",
+      "group": "webgl",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "UNMASKED_RENDERER_WEBGL",
+      "status": "SKIPPED",
+      "expected": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1660 SUPER Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "actual": null,
+      "note": "no WebGL context in this environment"
+    },
+    {
+      "id": "misc.toStringNative",
+      "group": "misc",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "Function.prototype.toString of every shimmed getter/method prints [native code]",
+      "status": "PASS",
+      "expected": "all native",
+      "actual": "55 native"
+    },
+    {
+      "id": "misc.descriptorShape",
+      "group": "misc",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "no own data properties on navigator/screen; accessors live on the prototypes",
+      "status": "PASS",
+      "expected": "prototype accessors only",
+      "actual": "clean"
+    },
+    {
+      "id": "misc.plugins",
+      "group": "misc",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "navigator.plugins non-empty on a desktop persona (desktop Firefox lists its PDF viewer)",
+      "status": "PASS",
+      "expected": "> 0",
+      "actual": 5
+    },
+    {
+      "id": "misc.pdfViewerEnabled",
+      "group": "misc",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "navigator.pdfViewerEnabled true on a desktop persona",
+      "status": "PASS",
+      "expected": true,
+      "actual": true
+    },
+    {
+      "id": "misc.deviceMemory",
+      "group": "misc",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "navigator.deviceMemory (absent on Gecko)",
+      "status": "INFO",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "id": "misc.oscpuCoherence",
+      "group": "misc",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "navigator.oscpu is a substring of the UA (coherent spoof)",
+      "status": "PASS",
+      "expected": "oscpu in UA",
+      "actual": {
+        "oscpu": "Windows NT 10.0; Win64; x64"
+      }
+    },
+    {
+      "id": "contexts.sameOriginFrame",
+      "group": "contexts",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "same-origin iframe agrees with top",
+      "status": "PASS",
+      "expected": "agrees with top",
+      "actual": "agrees"
+    },
+    {
+      "id": "contexts.crossOriginFrame",
+      "group": "contexts",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "cross-origin iframe agrees with top",
+      "status": "PASS",
+      "expected": "agrees with top",
+      "actual": "agrees"
+    },
+    {
+      "id": "contexts.aboutBlankFrame",
+      "group": "contexts",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "about:blank iframe (read from the parent) agrees with top",
+      "status": "PASS",
+      "expected": "agrees with top",
+      "actual": "agrees"
+    },
+    {
+      "id": "contexts.srcdocFrame",
+      "group": "contexts",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "srcdoc iframe agrees with top",
+      "status": "PASS",
+      "expected": "agrees with top",
+      "actual": "agrees"
+    },
+    {
+      "id": "contexts.dataFrame",
+      "group": "contexts",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "data: URL iframe agrees with top (matchOriginAsFallback)",
+      "status": "PASS",
+      "expected": "agrees with top",
+      "actual": "agrees"
+    },
+    {
+      "id": "contexts.blobFrame",
+      "group": "contexts",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "blob: URL iframe agrees with top",
+      "status": "PASS",
+      "expected": "agrees with top",
+      "actual": "agrees"
+    },
+    {
+      "id": "contexts.sandboxFrame",
+      "group": "contexts",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "sandbox=\"allow-scripts\" srcdoc iframe (opaque origin) agrees with top",
+      "status": "PASS",
+      "expected": "agrees with top",
+      "actual": "agrees"
+    },
+    {
+      "id": "contexts.crossRealmToString",
+      "group": "contexts",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "a fresh realm's Function.prototype.toString prints native for the top document's shimmed functions and vice versa",
+      "status": "PASS",
+      "expected": "native text in both directions",
+      "actual": "19 native"
+    },
+    {
+      "id": "contexts.worker.userAgent",
+      "group": "contexts",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "worker navigator.userAgent agrees with top",
+      "status": "PASS",
+      "expected": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+      "actual": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0"
+    },
+    {
+      "id": "contexts.worker.platform",
+      "group": "contexts",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "worker navigator.platform agrees with top",
+      "status": "PASS",
+      "expected": "Win32",
+      "actual": "Win32"
+    },
+    {
+      "id": "contexts.worker.languages",
+      "group": "contexts",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "worker navigator.languages agrees with top",
+      "status": "PASS",
+      "expected": [
+        "de-DE",
+        "de",
+        "en"
+      ],
+      "actual": [
+        "de-DE",
+        "de",
+        "en"
+      ]
+    },
+    {
+      "id": "contexts.worker.hardwareConcurrency",
+      "group": "contexts",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "worker hardwareConcurrency agrees with top (worker-scope shim is M2)",
+      "status": "FAIL",
+      "expected": 8,
+      "actual": 2,
+      "note": "worker-scope shim is an M2 item"
+    },
+    {
+      "id": "contexts.worker.timeZone",
+      "group": "contexts",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "worker Intl time zone agrees with top",
+      "status": "PASS",
+      "expected": "Europe/Berlin",
+      "actual": "Europe/Berlin"
+    },
+    {
+      "id": "contexts.sharedWorker",
+      "group": "contexts",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "SharedWorker navigator UA/platform/languages and Intl time zone agree with top",
+      "status": "PASS",
+      "expected": "agrees with top",
+      "actual": "agrees"
+    },
+    {
+      "id": "contexts.sharedWorker.hardwareConcurrency",
+      "group": "contexts",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "SharedWorker hardwareConcurrency agrees with top (worker-scope shim is M2)",
+      "status": "FAIL",
+      "expected": 8,
+      "actual": 2,
+      "note": "worker-scope shim is an M2 item"
+    },
+    {
+      "id": "server.reachable",
+      "group": "server",
+      "tier": "soft",
+      "scope": "both",
+      "desc": "./echo responded",
+      "status": "INFO",
+      "expected": null,
+      "actual": "ok"
+    },
+    {
+      "id": "server.userAgent",
+      "group": "server",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "echoed user-agent request header",
+      "status": "PASS",
+      "expected": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+      "actual": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0"
+    },
+    {
+      "id": "server.acceptLanguage",
+      "group": "server",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "echoed accept-language header (Gecko q-value algorithm)",
+      "status": "PASS",
+      "expected": "de-DE,de;q=0.9,en;q=0.8",
+      "actual": "de-DE,de;q=0.9,en;q=0.8"
+    },
+    {
+      "id": "server.clientHintsFirst",
+      "group": "server",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "no Sec-CH-UA* headers on the first request (Gecko sends none)",
+      "status": "PASS",
+      "expected": "none",
+      "actual": "none"
+    },
+    {
+      "id": "server.clientHintsAfterAcceptCH",
+      "group": "server",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "still no Sec-CH-UA* headers after the server sent Accept-CH",
+      "status": "PASS",
+      "expected": "none",
+      "actual": "none"
+    },
+    {
+      "id": "server.viewportHints",
+      "group": "server",
+      "tier": "hard",
+      "scope": "both",
+      "desc": "no Viewport-Width / DPR / Device-Memory / Save-Data headers after Accept-CH",
+      "status": "PASS",
+      "expected": "none",
+      "actual": "none"
+    },
+    {
+      "id": "interactive.pointerEvents",
+      "group": "interactive",
+      "tier": "hard",
+      "scope": "device",
+      "desc": "a trusted pointerdown reached the box (tap it)",
+      "status": "SKIPPED",
+      "expected": "trusted pointerdown",
+      "actual": null,
+      "note": "device-scoped signal (tap the box to measure)"
+    },
+    {
+      "id": "interactive.pointerType",
+      "group": "interactive",
+      "tier": "soft",
+      "scope": "device",
+      "desc": "pointerdown on the box reports pointerType \"mouse\" (shim masks trusted touch input; the engine itself says \"touch\")",
+      "status": "SKIPPED",
+      "expected": "mouse",
+      "actual": null,
+      "note": "device-scoped signal (tap the box to measure)"
+    }
+  ],
+  "libraries": [
+    {
+      "name": "ua-parser-js",
+      "version": "2.0.10",
+      "mobile": false,
+      "detail": {
+        "browser": "Firefox 158.0",
+        "os": "Windows 10",
+        "deviceType": "desktop(undefined)",
+        "withClientHintsDeviceType": "desktop(undefined)",
+        "withClientHintsOs": "Windows 10",
+        "engine": "Gecko"
+      },
+      "status": "PASS",
+      "expectedMobile": false
+    },
+    {
+      "name": "mobile-detect",
+      "version": "1.4.5",
+      "mobile": false,
+      "detail": {
+        "mobile": null,
+        "phone": null,
+        "tablet": null,
+        "os": null
+      },
+      "status": "PASS",
+      "expectedMobile": false
+    },
+    {
+      "name": "ismobilejs",
+      "version": "1.1.1",
+      "mobile": false,
+      "detail": {
+        "any": false,
+        "phone": false,
+        "tablet": false,
+        "apple": false,
+        "android": false
+      },
+      "status": "PASS",
+      "expectedMobile": false
+    },
+    {
+      "name": "is-mobile",
+      "version": "5.0.0",
+      "mobile": false,
+      "detail": {
+        "phoneOnly": false
+      },
+      "status": "PASS",
+      "expectedMobile": false
+    },
+    {
+      "name": "detect-it",
+      "version": "4.0.1",
+      "mobile": false,
+      "detail": {
+        "deviceType": "mouseOnly",
+        "primaryInput": "mouse",
+        "supportsTouchEvents": false,
+        "supportsPointerEvents": true,
+        "supportsPassiveEvents": true
+      },
+      "status": "PASS",
+      "expectedMobile": false
+    },
+    {
+      "name": "bowser",
+      "version": "2.14.1",
+      "mobile": false,
+      "detail": {
+        "platformType": "desktop",
+        "browser": "Firefox",
+        "os": "Windows",
+        "engine": "Gecko"
+      },
+      "status": "PASS",
+      "expectedMobile": false
+    },
+    {
+      "name": "platform",
+      "version": "1.3.6",
+      "mobile": false,
+      "detail": {
+        "name": "Firefox",
+        "version": "158.0",
+        "os": "Windows 10 64-bit",
+        "product": null,
+        "manufacturer": null,
+        "layout": "Gecko"
+      },
+      "status": "PASS",
+      "expectedMobile": false
+    },
+    {
+      "name": "react-device-detect",
+      "version": "2.2.3",
+      "mobile": false,
+      "detail": {
+        "isMobile": false,
+        "isMobileOnly": false,
+        "isTablet": false,
+        "isDesktop": true,
+        "deviceType": "browser",
+        "osName": "Windows",
+        "browserName": "Firefox",
+        "isAndroid": false,
+        "isIOS": false
+      },
+      "status": "PASS",
+      "expectedMobile": false
+    },
+    {
+      "name": "device-detector-js",
+      "version": "3.0.3",
+      "mobile": false,
+      "detail": {
+        "deviceType": "desktop",
+        "os": "Windows 10.0",
+        "client": "Firefox 158.0",
+        "bot": null
+      },
+      "status": "PASS",
+      "expectedMobile": false
+    },
+    {
+      "name": "modernizr",
+      "version": "3.13.1",
+      "mobile": false,
+      "detail": {
+        "touchevents": false,
+        "pointerevents": true,
+        "version": "3.13.1"
+      },
+      "status": "PASS",
+      "expectedMobile": false
+    }
+  ],
+  "summary": {
+    "overall": "PASS",
+    "pass": 64,
+    "fail": 3,
+    "skipped": 13,
+    "info": 10,
+    "hardFail": [],
+    "softFail": [
+      "intl.locale",
+      "contexts.worker.hardwareConcurrency",
+      "contexts.sharedWorker.hardwareConcurrency"
+    ],
+    "deviceSkipped": [
+      "touch.orientation",
+      "css.bp992",
+      "css.bp1024",
+      "css.bp1200",
+      "css.bp1280",
+      "css.minDeviceWidth1024",
+      "css.maxDeviceWidth480",
+      "css.minResolution2",
+      "layout.clientWidth",
+      "interactive.pointerEvents",
+      "interactive.pointerType"
+    ],
+    "libraryFail": [],
+    "libraryTotal": 10,
+    "libraryPass": 10
+  },
+  "runner": {
+    "runId": "win-firefox__de",
+    "control": null,
+    "ext": true,
+    "tz": "Europe/Berlin",
+    "browserVersion": "158.0",
+    "window": {
+      "width": 1920,
+      "height": 1080
+    },
+    "prefs": {
+      "browser.viewport.desktopWidth": 1366,
+      "dom.maxtouchpoints.testing.value": 0,
+      "dom.w3c_touch_events.enabled": 0,
+      "general.appversion.override": "5.0 (Windows)",
+      "general.oscpu.override": "Windows NT 10.0; Win64; x64",
+      "general.platform.override": "Win32",
+      "general.useragent.override": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
+      "intl.accept_languages": "de-DE, de, en",
+      "intl.locale.requested": "de-DE",
+      "layout.accessiblecaret.enabled": true,
+      "ui.allPointerCapabilities": 6,
+      "ui.primaryPointerCapabilities": 6
+    },
+    "clear": [],
+    "durationMs": 4591
+  }
+}

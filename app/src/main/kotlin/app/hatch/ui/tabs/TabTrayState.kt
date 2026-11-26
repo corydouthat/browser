@@ -39,8 +39,8 @@ data class TabTrayState(
             else -> 4
         }
 
-        /** Grid geometry of `TabTrayScreen`: 12 dp outer padding on both sides, 12 dp between columns. */
-        const val GRID_PADDING_DP = 12
+        /** Grid geometry of `TabTrayScreen` ("Tab tray" mockup): 16 dp outer padding on both sides, 12 dp between columns. */
+        const val GRID_PADDING_DP = 16
         const val GRID_SPACING_DP = 12
 
         /** Width of one card in dp for the tray's grid (PERF-08: the thumbnail request size follows the card). */

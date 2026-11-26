@@ -29,7 +29,7 @@ import java.util.WeakHashMap
 
 /**
  * Owns the active [Persona] (preset or user-defined), persists the selection and applies switches live:
- * Gecko prefs ([GeckoPrefs]) -> per-tab session settings (UA override + desktop mode) -> engine default UA ->
+ * Gecko prefs on the user branch ([GeckoPrefs]) -> per-tab session settings (UA override + desktop mode) -> engine default UA ->
  * runtime locales / auto-zoom -> extension push (shim config) -> yaml rewrite -> reload selected tab.
  * Only a `TZ` change needs a process restart ([PersonaToPrefs.needsRestart]).
  */
@@ -165,7 +165,7 @@ class PersonaManager(
                 c.runtime.settings.setInputAutoZoomEnabled(!new.desktop)
                 c.bridge.sendPersona(shimConfig(new))
             }
-            withContext(Dispatchers.IO) { GeckoRuntimeFactory.writeConfig(context, new, settings.keepTouchEvents) }
+            withContext(Dispatchers.IO) { GeckoRuntimeFactory.writeConfig(context, new) }
             persistSelection(new)
             if (new.identity.desktop && new.identity.id != Presets.REAL_DEVICE_ID) lastDesktopIdentityId = new.identity.id
             _current.value = new
@@ -182,11 +182,14 @@ class PersonaManager(
         withContext(Dispatchers.Main) { components().bridge.sendPersona(shimConfig()) }
     }
 
-    /** Re-applies the current persona's prefs (after the `keepTouchEvents` setting changes); live, no reload. */
+    /**
+     * Re-applies the current persona's prefs on the user branch; live, no reload. Called after the
+     * `keepTouchEvents` setting changes and once per process before the session restore
+     * (`Components.sessionRestore`), so the first load never depends on `prefs.js` having been flushed.
+     */
     suspend fun reapplyPrefs() {
         val result = GeckoPrefs.apply(prefs())
         result.filterValues { !it }.keys.takeIf { it.isNotEmpty() }?.let { Log.w(TAG, "prefs not set by Gecko: $it") }
-        withContext(Dispatchers.IO) { GeckoRuntimeFactory.writeConfig(context, _current.value, settings.keepTouchEvents) }
     }
 
     // ---- user-defined identities / regions ---------------------------------------------------

@@ -15,7 +15,8 @@ import org.mozilla.geckoview.GeckoPreferenceController.SetGeckoPreference
  * `setGeckoPrefs(List<SetGeckoPreference<?>>)`, `clearGeckoUserPref(String)`, `getGeckoPrefs(List<String>)`;
  * all `@HandlerThread` = Gecko UI thread, hence `withContext(Dispatchers.Main)`).
  *
- * If this API ever breaks, `geckoview-config.yaml` + restart ([GeckoRuntimeFactory]) is the full fallback.
+ * There is no yaml fallback: `geckoview-config.yaml` prefs land on the DEFAULT branch (`PersonaToPrefs.yaml`), so
+ * persona prefs must go through here, on the user branch (persisted in the profile's `prefs.js`).
  */
 // ExperimentalGeckoViewApi is an androidx RequiresOptIn marker (Java), so Android lint only honours the
 // androidx OptIn annotation here; Kotlin's own @OptIn does not satisfy UnsafeOptInUsageError.

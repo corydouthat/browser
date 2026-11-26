@@ -16,10 +16,11 @@ Self-check screen on the phone.
 
 ## What it does (M0 + M1)
 
-- **A real browser chrome (M1)**: Chrome-style top address bar (Android Components' `compose-browser-toolbar`:
-  inline autocomplete, security badge, progress, tab counter), Material You theme, a persona strip with a one-tap
-  desktop/phone switch, a grid tab tray with thumbnails and favicons (swipe to close, undo, multi-select, restore
-  after process death, crash recovery), find in page, a main menu, a home page for new tabs, a site-info dialog.
+- **A real browser chrome (M1, redesigned 2026-10-21)**: Chrome-style top address bar (Hatch's own toolbar
+  over Android Components' toolbar store: inline autocomplete, security badge, progress, tab counter) whose
+  persona chip and tint show desktop vs. phone at a glance, six brand palettes in light and dark (Geist type),
+  one-tap desktop/phone switches in the menu and on the home page, a grid tab tray with thumbnails and favicons (swipe to close, undo, multi-select, restore
+  after process death, crash recovery), find in page in the toolbar row, a main menu, a home page for new tabs, a site-info card.
 - **Saved logins (M1)**: Hatch's own password store fills sign-in forms (Google's two-step form included),
   offers to save after a submit, keeps a per-site "never save" list and shows the list behind your fingerprint /
   PIN. Google Password Manager cannot fill web forms in a third-party browser; passkeys are wired but wait for

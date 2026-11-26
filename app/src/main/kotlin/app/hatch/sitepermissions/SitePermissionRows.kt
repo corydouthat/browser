@@ -16,11 +16,14 @@ import mozilla.components.concept.engine.permission.SitePermissionsStorage.Permi
 object SitePermissionRows {
     data class Row(val permission: Permission, val label: String, val status: Status, val autoplay: Boolean)
 
-    /** Display order: what sites ask for most often first. */
+    /**
+     * Display order: the mockup's five rows first (Camera, Microphone, Location, Notifications, Storage; DF-10), then
+     * the rest of Gecko's permissions. The mockup's "Storage" row is `LOCAL_STORAGE`, labelled "Persistent storage"
+     * because that is what the permission grants (`navigator.storage.persist()`); a bare "Storage" reads like cookies.
+     */
     val ORDER: List<Permission> = listOf(
-        Permission.LOCATION, Permission.NOTIFICATION, Permission.CAMERA, Permission.MICROPHONE,
-        Permission.AUTOPLAY_AUDIBLE, Permission.AUTOPLAY_INAUDIBLE, Permission.LOCAL_STORAGE,
-        Permission.MEDIA_KEY_SYSTEM_ACCESS, Permission.STORAGE_ACCESS, Permission.LOCAL_DEVICE_ACCESS,
+        Permission.CAMERA, Permission.MICROPHONE, Permission.LOCATION, Permission.NOTIFICATION, Permission.LOCAL_STORAGE,
+        Permission.AUTOPLAY_AUDIBLE, Permission.AUTOPLAY_INAUDIBLE, Permission.MEDIA_KEY_SYSTEM_ACCESS, Permission.STORAGE_ACCESS, Permission.LOCAL_DEVICE_ACCESS,
         Permission.LOCAL_NETWORK_ACCESS, Permission.BLUETOOTH,
     )
 
@@ -46,6 +49,31 @@ object SitePermissionRows {
         Status.BLOCKED -> "Blocked"
         Status.NO_DECISION -> "Ask"
     }
+
+    /** The value pill of a permission row (mockup "Site permissions"): Allow / Ask / Block. */
+    fun pillLabel(s: Status): String = when (s) {
+        Status.ALLOWED -> "Allow"
+        Status.BLOCKED -> "Block"
+        Status.NO_DECISION -> "Ask"
+    }
+
+    /** The values a row's pill offers: autoplay has no "ask" state. */
+    fun options(row: Row): List<Status> =
+        if (row.autoplay) listOf(Status.ALLOWED, Status.BLOCKED) else listOf(Status.ALLOWED, Status.NO_DECISION, Status.BLOCKED)
+
+    /**
+     * The one-line summary of a collapsed origin ("Location allowed", "Notifications blocked · +2 more"): the first
+     * [decided] row with its status in words, then how many more decisions there are.
+     */
+    fun summary(sp: SitePermissions): String {
+        val decided = decided(sp)
+        val first = decided.firstOrNull() ?: return "Every permission set to Ask"
+        val head = "${first.label} ${statusLabel(first.status).lowercase()}"
+        return if (decided.size > 1) "$head · +${decided.size - 1} more" else head
+    }
+
+    /** The origin header's host: [displayOrigin] without `https://` (other schemes and ports stay visible). */
+    fun displayHost(origin: String): String = displayOrigin(origin).removePrefix("https://")
 
     /** The twelve rows, in [ORDER]. */
     fun rows(sp: SitePermissions): List<Row> = ORDER.map { Row(it, label(it), sp[it], isAutoplay(it)) }

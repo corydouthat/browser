@@ -3,15 +3,12 @@ package app.hatch.ui.toolbar
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import app.hatch.Components
 import app.hatch.R
-import app.hatch.persona.Persona
 import app.hatch.ui.normalizeInput
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,18 +20,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import mozilla.components.browser.state.selector.selectedTab
+import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.SecurityInfo
 import mozilla.components.browser.state.store.BrowserStore
-import mozilla.components.compose.base.theme.darkColorPalette
-import mozilla.components.compose.base.theme.lightColorPalette
-import mozilla.components.compose.base.theme.localAcornColors
-import mozilla.components.compose.browser.toolbar.BrowserToolbar
-import mozilla.components.compose.browser.toolbar.concept.Action
-import mozilla.components.compose.browser.toolbar.concept.Action.ActionButton
-import mozilla.components.compose.browser.toolbar.concept.Action.ActionButtonRes
-import mozilla.components.compose.browser.toolbar.concept.Action.TabCounterAction
-import mozilla.components.compose.browser.toolbar.concept.PageOrigin
-import mozilla.components.compose.browser.toolbar.concept.PageOrigin.Companion.ContextualMenuOption
 import mozilla.components.compose.browser.toolbar.concept.PageOrigin.Companion.PageOriginContextualMenuInteractions.CopyToClipboardClicked
 import mozilla.components.compose.browser.toolbar.concept.PageOrigin.Companion.PageOriginContextualMenuInteractions.LoadFromClipboardClicked
 import mozilla.components.compose.browser.toolbar.concept.PageOrigin.Companion.PageOriginContextualMenuInteractions.PasteFromClipboardClicked
@@ -42,8 +30,6 @@ import mozilla.components.compose.browser.toolbar.store.BrowserDisplayToolbarAct
 import mozilla.components.compose.browser.toolbar.store.BrowserEditToolbarAction
 import mozilla.components.compose.browser.toolbar.store.BrowserToolbarAction
 import mozilla.components.compose.browser.toolbar.store.BrowserToolbarInteraction.BrowserToolbarEvent
-import mozilla.components.compose.browser.toolbar.store.BrowserToolbarInteraction.BrowserToolbarMenu
-import mozilla.components.compose.browser.toolbar.store.BrowserToolbarMenuItem.BrowserToolbarMenuButton
 import mozilla.components.compose.browser.toolbar.store.BrowserToolbarState
 import mozilla.components.compose.browser.toolbar.store.BrowserToolbarStore
 import mozilla.components.compose.browser.toolbar.store.EditState
@@ -54,15 +40,12 @@ import mozilla.components.concept.toolbar.AutocompleteProvider
 import mozilla.components.lib.state.Middleware
 import mozilla.components.lib.state.Store
 import mozilla.components.lib.state.ext.flowScoped
-import mozilla.components.ui.icons.R as iconsR
+import mozilla.components.lib.state.ext.observeAsComposableState
 
 /** Events Hatch's toolbar elements dispatch on the [BrowserToolbarStore]; the middleware maps them to use cases. */
 sealed interface ToolbarEvents : BrowserToolbarEvent {
     data object OriginClicked : ToolbarEvents
     data object SiteInfoClicked : ToolbarEvents
-    data object DesktopToggleClicked : ToolbarEvents
-    data object ReloadClicked : ToolbarEvents
-    data object StopClicked : ToolbarEvents
     data object TabCounterClicked : ToolbarEvents
     data object MenuClicked : ToolbarEvents
     data object NewTabClicked : ToolbarEvents
@@ -77,17 +60,20 @@ class HatchToolbarCallbacks(
     val onOpenTabs: () -> Unit,
     val onOpenMenu: () -> Unit,
     val onSiteInfo: () -> Unit,
-    val onToggleDesktop: () -> Unit,
     val onNewTab: () -> Unit,
     val onCloseTab: () -> Unit,
+    /** Edit mode opened from the origin tap or "Paste" (the chrome closes the site-info card under it). */
+    val onEditStarted: () -> Unit = {},
 )
 
 /**
- * Owns the [BrowserToolbarStore] (compose-browser-toolbar 158, `ToolbarGravity.Top`) for the Activity's lifetime
- * and keeps it in sync with the [BrowserStore]: URL, progress, security badge, tab count and the persona's
- * desktop flag. The [HatchToolbarMiddleware] handles every [BrowserToolbarEvent] (Fenix's
- * `BrowserToolbarMiddleware` is the pattern); edit mode gets inline autocomplete from the open tabs and
- * `ShippedDomainsProvider`, and `CommitUrl` goes through the existing [normalizeInput].
+ * Owns the [BrowserToolbarStore] (compose-browser-toolbar 158, `ToolbarGravity.Top`) for the Activity's lifetime.
+ * The store holds the toolbar's mode, the edit state (query, suggestion, prefilled flag, end actions) and the
+ * progress bar; the display facts (host, security, tab count) are read from the [BrowserStore] by [HatchToolbar].
+ * The [HatchToolbarMiddleware] handles every [BrowserToolbarEvent] (Fenix's `BrowserToolbarMiddleware` is the
+ * pattern); edit mode gets inline autocomplete from the open tabs and `ShippedDomainsProvider`, and `CommitUrl` goes
+ * through the existing [normalizeInput]. The store's display actions (page origin, page/browser actions) are not used:
+ * the display toolbar is hand-rolled ([DisplayToolbar]) because AC's `BrowserToolbar` hard-codes its sizes.
  */
 class HatchToolbarController(
     private val components: Components,
@@ -103,6 +89,9 @@ class HatchToolbarController(
     )
 
     val isEditing: Boolean get() = store.state.isEditMode()
+
+    /** The browser state the display toolbar reads (selected tab URL / security, tab count). */
+    internal val browserStore: BrowserStore get() = components.store
 
     /** Ctrl+L / tap on the origin / Hatch home: edit mode with the current URL preselected. */
     fun enterEditMode(prefill: String? = null) {
@@ -133,7 +122,6 @@ internal class HatchToolbarMiddleware(
     private val browserStore: BrowserStore get() = components.store
     private var observers: CoroutineScope? = null
     private var autocompleteJob: Job? = null
-    private var lastUrl: String = ""
 
     override fun invoke(
         store: Store<BrowserToolbarState, BrowserToolbarAction>,
@@ -163,14 +151,12 @@ internal class HatchToolbarMiddleware(
                 store.dispatch(BrowserEditToolbarAction.SearchActionsEndUpdated(emptyList()))
             }
             is ToolbarEvents.OriginClicked -> {
+                callbacks.onEditStarted()
                 val url = browserStore.state.selectedTab?.content?.url?.takeUnless { it == ToolbarState.HOME_URL } ?: ""
                 store.dispatch(BrowserToolbarAction.EnterEditMode(isPrivate = false))
                 store.dispatch(BrowserEditToolbarAction.SearchQueryUpdated(BrowserToolbarQuery(url), isQueryPrefilled = true))
             }
             is ToolbarEvents.SiteInfoClicked -> callbacks.onSiteInfo()
-            is ToolbarEvents.DesktopToggleClicked -> callbacks.onToggleDesktop()
-            is ToolbarEvents.ReloadClicked -> components.sessionUseCases.reload()
-            is ToolbarEvents.StopClicked -> components.sessionUseCases.stopLoading()
             is ToolbarEvents.TabCounterClicked -> callbacks.onOpenTabs()
             is ToolbarEvents.MenuClicked -> callbacks.onOpenMenu()
             is ToolbarEvents.NewTabClicked -> callbacks.onNewTab()
@@ -180,6 +166,7 @@ internal class HatchToolbarMiddleware(
                 clipboard()?.setPrimaryClip(ClipData.newPlainText("URL", url))
             }
             is PasteFromClipboardClicked -> {
+                callbacks.onEditStarted()
                 val text = clipboardText()
                 store.dispatch(BrowserToolbarAction.EnterEditMode(isPrivate = false))
                 store.dispatch(BrowserEditToolbarAction.SearchQueryUpdated(BrowserToolbarQuery(text), isQueryPrefilled = true))
@@ -224,26 +211,14 @@ internal class HatchToolbarMiddleware(
         }
     }
 
-    // ---- BrowserStore -> toolbar display state ----------------------------------------------------
+    // ---- BrowserStore -> toolbar store ------------------------------------------------------------------------------
 
     private fun startObservers(store: Store<BrowserToolbarState, BrowserToolbarAction>) {
         observers?.cancel()
-        // One scope owns every collector so stop() cancels them all together.
+        // One scope owns every collector so stop() cancels them all together. Only the progress bar goes through the
+        // toolbar store; reload / stop and the desktop toggle are no longer toolbar actions (menu, F5 / Ctrl+R).
         observers = browserStore.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             coroutineScope {
-                launch {
-                    flow.map { it.selectedTab?.content?.url }.distinctUntilChanged().collect { url ->
-                        lastUrl = url ?: ""
-                        store.dispatch(BrowserDisplayToolbarAction.PageOriginUpdated(pageOrigin(url)))
-                        store.dispatch(
-                            BrowserDisplayToolbarAction.PageActionsStartUpdated(
-                                startPageActions(browserStore.state.selectedTab?.content?.securityInfo, url),
-                            ),
-                        )
-                    }
-                }
-                // PERF-04: progress ticks (many per load) only move the progress bar; the reload/stop action list is
-                // rebuilt on loading flips (two per load), not per tick.
                 launch {
                     flow.map { it.selectedTab?.content?.let { c -> ToolbarState.progress(c.loading, c.progress) } }
                         .distinctUntilChanged()
@@ -251,116 +226,9 @@ internal class HatchToolbarMiddleware(
                             store.dispatch(BrowserDisplayToolbarAction.UpdateProgressBarConfig(progress?.let { ProgressBarConfig(it) }))
                         }
                 }
-                launch {
-                    flow.map { it.selectedTab?.content?.loading == true }
-                        .distinctUntilChanged()
-                        .collect { loading ->
-                            store.dispatch(
-                                BrowserDisplayToolbarAction.PageActionsEndUpdated(
-                                    endPageActions(loading, components.personaManager.current.value),
-                                ),
-                            )
-                        }
-                }
-                launch {
-                    flow.map { it.selectedTab?.content?.securityInfo }.distinctUntilChanged().collect { info ->
-                        store.dispatch(BrowserDisplayToolbarAction.PageActionsStartUpdated(startPageActions(info, lastUrl)))
-                    }
-                }
-                launch {
-                    flow.map { it.tabs.size }.distinctUntilChanged().collect { count ->
-                        store.dispatch(BrowserDisplayToolbarAction.BrowserActionsEndUpdated(endBrowserActions(count)))
-                    }
-                }
-                launch {
-                    components.personaManager.current.map { it.desktop }.distinctUntilChanged().collect {
-                        val loading = browserStore.state.selectedTab?.content?.loading == true
-                        store.dispatch(
-                            BrowserDisplayToolbarAction.PageActionsEndUpdated(
-                                endPageActions(loading, components.personaManager.current.value),
-                            ),
-                        )
-                    }
-                }
             }
         }
     }
-
-    private fun pageOrigin(url: String?) = PageOrigin(
-        hint = R.string.toolbar_search_hint,
-        title = null,
-        url = ToolbarState.displayUrl(url),
-        contextualMenuOptions = ContextualMenuOption.entries,
-        onClick = ToolbarEvents.OriginClicked,
-    )
-
-    private fun startPageActions(info: SecurityInfo?, url: String?): List<Action> {
-        if (ToolbarState.displayUrl(url).isEmpty()) return emptyList()
-        val icon = when (ToolbarState.securityBadge(info)) {
-            ToolbarState.SecurityBadge.Unknown -> iconsR.drawable.mozac_ic_globe_24
-            ToolbarState.SecurityBadge.Secure -> iconsR.drawable.mozac_ic_lock_24
-            ToolbarState.SecurityBadge.Insecure -> iconsR.drawable.mozac_ic_lock_slash_24
-        }
-        return listOf(
-            ActionButtonRes(
-                drawableResId = icon,
-                contentDescription = R.string.toolbar_site_info,
-                onClick = ToolbarEvents.SiteInfoClicked,
-            ),
-        )
-    }
-
-    private fun endPageActions(loading: Boolean, persona: Persona): List<Action> = listOf(
-        ActionButtonRes(
-            drawableResId = iconsR.drawable.mozac_ic_device_desktop_24,
-            contentDescription = if (persona.desktop) R.string.toolbar_desktop_on else R.string.toolbar_desktop_off,
-            state = if (persona.desktop) ActionButton.State.ACTIVE else ActionButton.State.DEFAULT,
-            onClick = ToolbarEvents.DesktopToggleClicked,
-        ),
-        if (loading) {
-            ActionButtonRes(
-                drawableResId = iconsR.drawable.mozac_ic_cross_24,
-                contentDescription = R.string.toolbar_stop,
-                onClick = ToolbarEvents.StopClicked,
-            )
-        } else {
-            ActionButtonRes(
-                drawableResId = iconsR.drawable.mozac_ic_arrow_clockwise_24,
-                contentDescription = R.string.toolbar_reload,
-                onClick = ToolbarEvents.ReloadClicked,
-            )
-        },
-    )
-
-    private fun endBrowserActions(tabCount: Int): List<Action> = listOf(
-        TabCounterAction(
-            count = tabCount,
-            contentDescription = components.appContext.getString(R.string.toolbar_tabs),
-            showPrivacyMask = false,
-            onClick = ToolbarEvents.TabCounterClicked,
-            onLongClick = BrowserToolbarMenu {
-                listOf(
-                    BrowserToolbarMenuButton(
-                        icon = BrowserToolbarMenuButton.Icon.DrawableResIcon(iconsR.drawable.mozac_ic_plus_24),
-                        text = BrowserToolbarMenuButton.Text.StringResText(R.string.toolbar_new_tab),
-                        contentDescription = BrowserToolbarMenuButton.ContentDescription.StringResContentDescription(R.string.toolbar_new_tab),
-                        onClick = ToolbarEvents.NewTabClicked,
-                    ),
-                    BrowserToolbarMenuButton(
-                        icon = BrowserToolbarMenuButton.Icon.DrawableResIcon(iconsR.drawable.mozac_ic_cross_24),
-                        text = BrowserToolbarMenuButton.Text.StringResText(R.string.toolbar_close_tab),
-                        contentDescription = BrowserToolbarMenuButton.ContentDescription.StringResContentDescription(R.string.toolbar_close_tab),
-                        onClick = ToolbarEvents.CloseTabClicked,
-                    ),
-                )
-            },
-        ),
-        ActionButtonRes(
-            drawableResId = iconsR.drawable.mozac_ic_ellipsis_vertical_24,
-            contentDescription = R.string.toolbar_menu,
-            onClick = ToolbarEvents.MenuClicked,
-        ),
-    )
 
     private fun clipboard(): ClipboardManager? =
         components.appContext.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
@@ -370,17 +238,58 @@ internal class HatchToolbarMiddleware(
 }
 
 /**
- * The compose toolbar themed by [app.hatch.ui.HatchTheme]'s Material 3 scheme. compose-browser-toolbar reads two
- * colours (`autofillText`, `selectedText`) from compose-base's `localAcornColors`, whose default is the light
- * palette, so the matching Acorn palette is provided here for dark mode; everything else comes from
- * `MaterialTheme.colorScheme`.
+ * The display facts the toolbar reads from the [BrowserStore], as a value (PERF-04: progress ticks and other
+ * `ContentState` copies do not recompose the toolbar unless one of these changes).
+ */
+internal data class ToolbarFacts(val url: String?, val security: SecurityInfo?, val tabCount: Int) {
+    companion object {
+        fun of(state: BrowserState): ToolbarFacts = ToolbarFacts(
+            url = state.selectedTab?.content?.url,
+            security = state.selectedTab?.content?.securityInfo,
+            tabCount = state.tabs.size,
+        )
+    }
+}
+
+/**
+ * Hatch's toolbar: the hand-rolled [DisplayToolbar] or [EditToolbar] over the [BrowserToolbarStore], switched on
+ * the store's mode. [colors] come from [rememberToolbarColors] (BrowserScreen shares them with the status-bar strip);
+ * [desktop] is the persona's flag (chip glyph). Every interaction is dispatched on the store, exactly as AC's
+ * `BrowserToolbar` does (BrowserToolbar.kt:105-107 at FIREFOX_158_0_RELEASE).
  */
 @Composable
-fun HatchToolbar(controller: HatchToolbarController, modifier: Modifier = Modifier) {
-    val dark = isSystemInDarkTheme()
-    CompositionLocalProvider(localAcornColors provides if (dark) darkColorPalette else lightColorPalette) {
-        Box(modifier.fillMaxWidth()) {
-            BrowserToolbar(store = controller.store)
-        }
+fun HatchToolbar(controller: HatchToolbarController, colors: ToolbarColors, desktop: Boolean, modifier: Modifier = Modifier) {
+    val store = controller.store
+    val state by store.observeAsComposableState { it }
+    val facts by controller.browserStore.observeAsComposableState { ToolbarFacts.of(it) }
+    val onEvent: (BrowserToolbarEvent) -> Unit = { store.dispatch(it) }
+    if (state.isEditMode()) {
+        val edit = state.editState
+        EditToolbar(
+            query = edit.query.current,
+            hint = stringResource(edit.hint),
+            suggestion = edit.suggestion,
+            isQueryPrefilled = edit.isQueryPrefilled,
+            endActions = edit.editActionsEnd,
+            tabCount = facts.tabCount,
+            colors = colors,
+            onUrlEdit = { query: BrowserToolbarQuery -> store.dispatch(BrowserEditToolbarAction.SearchQueryUpdated(query)) },
+            onUrlCommitted = { text -> store.dispatch(BrowserToolbarAction.CommitUrl(text)) },
+            onEvent = onEvent,
+            modifier = modifier,
+        )
+    } else {
+        DisplayToolbar(
+            model = DisplayToolbarModel(
+                host = ToolbarState.displayHost(facts.url),
+                security = ToolbarState.chipSecurity(facts.security, facts.url),
+                desktop = desktop,
+                progress = state.displayState.progressBarConfig?.progress,
+                tabCount = facts.tabCount,
+            ),
+            colors = colors,
+            onEvent = onEvent,
+            modifier = modifier,
+        )
     }
 }

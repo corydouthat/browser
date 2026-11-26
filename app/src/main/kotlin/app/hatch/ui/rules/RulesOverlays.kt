@@ -17,14 +17,12 @@ import kotlinx.coroutines.launch
  * site permissions, persona editor. Inserted into `HatchApp` by the rules module.
  *
  * @param onShowPage closes the chrome's overlays (Settings) so a reloaded page is visible
- * @param onOpenPersonaSheet the chooser (identity × region) owned by the chrome
  */
 @Composable
 fun RulesOverlays(
     components: Components,
     snackbar: SnackbarHostState,
     onApplyPersona: (Persona) -> Unit,
-    onOpenPersonaSheet: () -> Unit,
     onShowPage: () -> Unit,
 ) {
     val ui = components.rulesUi
@@ -68,7 +66,6 @@ fun RulesOverlays(
             components = components,
             onClose = { ui.onBack() },
             onApplyPersona = onApplyPersona,
-            onOpenPersonaSheet = { ui.closeAll(); onOpenPersonaSheet() },
         )
     }
 }
